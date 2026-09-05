@@ -3,6 +3,11 @@ dist
 .env
 *.log
 .agents
+.env
+*.log
+.agents
+.gitattributes
 skills
 settings.json
+image.png
 image.png

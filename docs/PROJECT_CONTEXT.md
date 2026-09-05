@@ -34,9 +34,9 @@ To ensure we build this effectively, we will construct the core features and the
 ### Phase 1: Foundation (DB & Auth)
 *   **Database:** Initialize PostgreSQL database. Create Prisma schema for `User` and `Company`.
 *   **Backend:** Set up Express server. Implement JWT-based authentication (Login, Register).
-*   **Frontend:** Scaffold React app with Elegant Olive design system & Manrope typography. Build Login/Register screens. Setup routing & global state for Auth (`AuthContext`), `ProtectedRoute` and `PublicRoute` guards, and 1-click demo access. *(Completed)*
+*   **Frontend:** Scaffold React app with an Elegant Olive design system (e.g., Tailwind/shadcn), Manrope typography, Login/Register screens, and routing & global state for Auth (`AuthContext`), `ProtectedRoute` / `PublicRoute` guards, plus 1-click demo access. *(Completed)*
 *   **Micro-Changes:**
-    *   *Frontend:* Auto-redirect to dashboard on login, sign-out in navigation, token persistence in localStorage. *(Completed)*
+    *   *Frontend:* Auto-redirect to dashboard on login, sign-out in navigation, and localStorage token persistence. *(Completed)*
     *   *Backend:* Global error handler middleware.
 
 ### Phase 2: Master Data Setup

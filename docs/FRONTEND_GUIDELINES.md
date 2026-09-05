@@ -1,5 +1,7 @@
 # Frontend Guidelines
 
+# Frontend Guidelines
+
 ## 1. Core Architecture
 - **Framework**: React (Vite + TypeScript/JavaScript), running locally on port `3000`.
 - **Styling**: Tailwind CSS configured with semantic design tokens and HSL CSS variables.
@@ -56,3 +58,9 @@
   - Never expose role selection on the frontend signup form (role defaults to `employee` on the server).
 - **Hackathon Demo Support**:
   - Quick demo credentials button on the login screen allows 1-click credential auto-fill for both Admin and Employee profiles.
+
+- Use React.
+- Build clean, dashboard-centric interfaces.
+- Emphasize readability of financial numbers.
+- Ensure that the "Accounting Impact" of every transaction is clearly communicated to the user.
+- Build interactive reports where aggregate numbers can be clicked to reveal underlying data ("Explain this number").
