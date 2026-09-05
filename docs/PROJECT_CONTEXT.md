@@ -57,7 +57,7 @@ To ensure we build this effectively, we will construct the core features and the
     *   *Backend:* Function to automatically calculate the "Balance" of an account.
     *   *Backend:* Function to auto-generate reversing entries (if needed).
 
-### Phase 4: Business Transactions (Sales & Purchases)
+### Phase 4: Business Transactions (Sales & Purchases) *(Completed)*
 *   **Database:** Create `Order` and `OrderLine` models (handling both Sales and Purchases).
 *   **Backend:** API to create Sales/Purchases.
 *   **Frontend:** Create forms for New Sale and New Purchase (Product select, quantity, price, tax).
@@ -66,7 +66,7 @@ To ensure we build this effectively, we will construct the core features and the
 *   **Micro-Changes:**
     *   *Backend:* Auto-calculate subtotal, tax, and total.
 
-### Phase 5: Financial Operations (Invoices & Payments)
+### Phase 5: Financial Operations (Invoices & Payments) *(Backend Completed)*
 *   **Database:** Create `Invoice`, `InvoiceLine`, and `Payment` models.
 *   **Backend:** 
     *   API to convert Order -> Invoice. (This triggers the `AccountingService` to debit Receivables and credit Revenue).
@@ -78,7 +78,7 @@ To ensure we build this effectively, we will construct the core features and the
 *   **Micro-Feature (Transaction -> Accounting Impact):**
     *   *Frontend:* When an invoice is created, visually render the exact Debit/Credit journal entry that was generated in the background. Do the same when payment is received.
 
-### Phase 6: Reporting & Analytics
+### Phase 6: Reporting & Analytics *(Backend Completed in Phase 5)*
 *   **Backend:** Endpoints for `/api/reports/profit-loss`, `/balance-sheet`, and `/budget`. These endpoints aggregate data directly from `JournalEntryLine`.
 *   **Frontend:** Dedicated reporting dashboards with charts (e.g., Chart.js or Recharts).
 *   **Micro-Feature (Budget vs Actual):** 

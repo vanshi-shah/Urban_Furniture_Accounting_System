@@ -13,8 +13,8 @@ The database must support a strict double-entry accounting system where business
 - **AnalyticAccount/Budget**: For budget tracking.
 
 ### Transactions
-- **SaleOrder / PurchaseOrder**: Initial business agreement.
-- **Invoice / Bill**: Financial demand.
+- **Order**: Handles both Sales (CUSTOMER_INVOICE) and Purchases (VENDOR_BILL).
+- **OrderLine**: Line items for orders.
 - **Payment**: Financial settlement.
 
 ### Accounting
