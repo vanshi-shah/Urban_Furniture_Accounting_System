@@ -15,6 +15,7 @@ import ChartOfAccounts from "./pages/ChartOfAccounts";
 import Journals from "./pages/Journals";
 import JournalEntries from "./pages/JournalEntries";
 import AnalyticAccounts from "./pages/AnalyticAccounts";
+import Budgets from "./pages/Budgets";
 
 export function App() {
   return (
@@ -137,6 +138,17 @@ export function App() {
 
         <Route
           path="/budgets"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Budgets />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/analytic-accounts"
           element={
             <ProtectedRoute>
               <DashboardLayout>

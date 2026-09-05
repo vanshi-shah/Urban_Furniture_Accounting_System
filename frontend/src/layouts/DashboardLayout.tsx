@@ -13,7 +13,8 @@ import {
   Box,
   FileText,
   BookOpen,
-  PieChart
+  PieChart,
+  Layers
 } from "lucide-react";
 import logo from "@/assets/logo.png";
 
@@ -35,6 +36,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
     { label: "Journals", path: "/journals", icon: BookOpen },
     { label: "Journal Entries", path: "/journal-entries", icon: FileText },
     { label: "Budgets", path: "/budgets", icon: PieChart },
+    { label: "Analytic Accounts", path: "/analytic-accounts", icon: Layers },
   ];
 
   const userInitial = user?.name ? user.name.charAt(0).toUpperCase() : "U";
