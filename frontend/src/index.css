@@ -1,0 +1,90 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root,
+  .theme-light {
+    --background: 45 29% 95.3%; /* Warm Ivory #F7F5EF */
+    --foreground: 105 5% 15%; /* Charcoal #252824 */
+
+    --card: 48 45% 97.8%; /* Soft Linen #FCFBF7 */
+    --card-foreground: 105 5% 15%; /* Charcoal #252824 */
+
+    --popover: 48 45% 97.8%;
+    --popover-foreground: 105 5% 15%;
+
+    --primary: 77 18% 35%; /* Deep Olive #5F6848 */
+    --primary-foreground: 48 45% 98%; /* Soft Linen */
+
+    --secondary: 60 12% 91%; /* Neutral Linen */
+    --secondary-foreground: 80 18% 25%; /* Forest Olive #454D35 */
+
+    --muted: 60 10% 92%;
+    --muted-foreground: 75 5% 44%; /* Muted Taupe #74776B */
+
+    --accent: 40 32% 56%; /* Brass Beige #B29A6A */
+    --accent-foreground: 105 5% 15%;
+
+    --destructive: 8 34% 49%; /* Muted Brick #A65D52 */
+    --destructive-foreground: 48 45% 98%;
+
+    --border: 66 12% 85%; /* Warm Gray #DCDDD3 */
+    --input: 66 12% 85%;
+    --ring: 77 18% 35%;
+
+    --radius: 0.75rem; /* 12px */
+  }
+
+  .dark,
+  .theme-dark {
+    --background: 105 10% 11%; /* Charcoal Forest #1C1F1B */
+    --foreground: 45 29% 95%; /* Warm Ivory */
+
+    --card: 105 7% 15%; /* Deep Charcoal #232722 */
+    --card-foreground: 45 29% 95%;
+
+    --popover: 105 7% 15%;
+    --popover-foreground: 45 29% 95%;
+
+    --primary: 77 22% 48%; /* Soft Olive */
+    --primary-foreground: 105 10% 11%;
+
+    --secondary: 105 8% 20%;
+    --secondary-foreground: 45 29% 95%;
+
+    --muted: 105 8% 19%;
+    --muted-foreground: 75 6% 65%; /* Muted Taupe Light */
+
+    --accent: 40 32% 56%; /* Brass */
+    --accent-foreground: 45 29% 95%;
+
+    --destructive: 8 42% 58%; /* Muted Brick Light */
+    --destructive-foreground: 45 29% 95%;
+
+    --border: 105 7% 24%;
+    --input: 105 7% 24%;
+    --ring: 77 22% 48%;
+  }
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    transition-property: color, background-color, border-color;
+    transition-duration: 200ms;
+  }
+}
+
+/* Scoped theme container utilities for side-by-side display */
+.theme-container {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  border-color: hsl(var(--border));
+  transition-property: all;
+  transition-duration: 200ms;
+}

@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum SubmissionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id           String       @id @default(cuid())
+  name         String
+  email        String       @unique
+  passwordHash String
+  role         Role         @default(USER)
+  createdAt    DateTime     @default(now())
+  submissions  Submission[]
+}
+
+// Rename "Submission" to your actual domain entity once the problem
+// statement drops (e.g. Complaint, Listing, Ticket, Request).
+// The shape — owner, status, moderation trail — is what repeats across
+// past Odoo Combat problem statements, so keep this structure either way.
+model Submission {
+  id          String            @id @default(cuid())
+  title       String
+  description String
+  status      SubmissionStatus  @default(PENDING)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  ownerId     String
+  owner       User              @relation(fields: [ownerId], references: [id])
+}
