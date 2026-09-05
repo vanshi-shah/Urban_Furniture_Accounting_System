@@ -72,7 +72,20 @@
 - Use React + Vite.
 - Build clean, dashboard-centric interfaces.
 - Emphasize readability of financial numbers.
-
 - Ensure that the "Accounting Impact" of every transaction is clearly communicated to the user.
 - Build interactive reports where aggregate numbers can be clicked to reveal underlying data ("Explain this number").
+
+## 7. Master Data Multi-View Pattern (List, Kanban, and Form Views)
+All Master Data screens (Contacts, Products, Analytics) follow a unified 3-view workflow:
+1. **List View (Default)**:
+   - Header action bar with `New` button, live `Search` input, `Back` navigation, and view mode toggle buttons (`List` vs `Kanban`).
+   - Density-optimized table with row selection, image avatars, key metadata columns, and status/type badges.
+   - Clicking any row navigates directly to the Master Form View populated with that record.
+2. **Kanban View**:
+   - Responsive grid of cards displaying the avatar thumbnail on the left, and entity title, email, phone, location, and role badges on the right.
+   - Clicking any Kanban card opens the Master Form View for that record.
+3. **Master Form View (Create & Edit)**:
+   - Header action bar containing `New` (blank form reset), `Confirm` (save/commit), and `Back` (return to List/Kanban).
+   - 2-Column form grid: Left column with entity attributes and address groups; Right column with drag-and-drop Image Upload preview.
+
 

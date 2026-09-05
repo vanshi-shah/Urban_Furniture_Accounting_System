@@ -32,6 +32,13 @@
    - **Sign Up Page (`/signup` & `/register`)**: Enforces strict criteria: Login Id (6-12 chars), valid email, password (>8 chars, uppercase, lowercase, special character), and password confirmation.
    - **Forgot Password (`/forgot-password`)**: Token-based recovery request flow with immediate dispatch confirmation and return navigation.
    - **Create User (`/users/create`)**: Admin/Accountant user provisioning with wireframe layout (`Name`, `Login Id`, `Email Id`, Role selection: `User`, `Accountant`, `Administrator`, and password validation).
+13. **Master Data Multi-View Pattern (List, Kanban & Master Form Views)**:
+   - Implemented standard Master Data architecture on **Contacts** (`/contacts`) supporting:
+     1. **Contact List View (Default)**: Table with multi-select checkboxes, avatar preview, Name, Email, Phone, City, and Customer/Vendor badge.
+     2. **Contact Kanban View**: Responsive grid cards with avatar on left, contact metadata, and role badges on right.
+     3. **Contact Master Form View**: Two-column layout with `New`, `Confirm`, and `Back` action bar, detailed address fields (Street, City, State, Country, Pincode), and drag-and-drop Image Upload preview.
+     4. Seamless navigation: Clicking `New` opens blank form view; clicking any existing row or Kanban card opens form view with populated details for editing.
+
 
 
 
