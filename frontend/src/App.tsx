@@ -7,6 +7,8 @@ import Dashboard from "./pages/Dashboard";
 import Welcome from "./pages/Welcome";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
+import CreateUser from "./pages/CreateUser";
 import Contacts from "./pages/Contacts";
 import Products from "./pages/Products";
 import ChartOfAccounts from "./pages/ChartOfAccounts";
@@ -38,8 +40,34 @@ export function App() {
             </PublicRoute>
           }
         />
+        <Route
+          path="/signup"
+          element={
+            <PublicRoute>
+              <Register />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/forgot-password"
+          element={
+            <PublicRoute>
+              <ForgotPassword />
+            </PublicRoute>
+          }
+        />
 
         {/* Protected Application Routes */}
+        <Route
+          path="/users/create"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <CreateUser />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/dashboard"
           element={

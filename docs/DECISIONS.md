@@ -27,6 +27,12 @@
 11. **Modura Accounting Dashboard & Component Gallery Suppression**:
    - Fully rebuilt `Dashboard.tsx` from the legacy hackathon starter to the official Modura financial intelligence architecture: Financial Health Score Radar (94/100), core financial KPIs (Revenue, COGS, Net Profit, Liquidity, AR/AP), Smart Alerts feed with action CTAs, monthly trajectory charts in Olive & Brass tokens, and interactive "Explain This Number" drilldown modal.
    - Removed and suppressed the Component Gallery route and navigation item from `DashboardLayout.tsx` and `App.tsx` for focused presentation of core accounting workflows.
+12. **Auth & User Creation Wireframe Alignment**:
+   - **Login Page (`/login`)**: Built matching wireframe layout with centered logo, `Login Id -`, `Password -`, `SIGN IN`, and bottom `Forgot Password | Sign Up` links. Returns standardized `"Invalid Login Id or Password"` error.
+   - **Sign Up Page (`/signup` & `/register`)**: Enforces strict criteria: Login Id (6-12 chars), valid email, password (>8 chars, uppercase, lowercase, special character), and password confirmation.
+   - **Forgot Password (`/forgot-password`)**: Token-based recovery request flow with immediate dispatch confirmation and return navigation.
+   - **Create User (`/users/create`)**: Admin/Accountant user provisioning with wireframe layout (`Name`, `Login Id`, `Email Id`, Role selection: `User`, `Accountant`, `Administrator`, and password validation).
+
 
 
 

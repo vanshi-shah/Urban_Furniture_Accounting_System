@@ -52,20 +52,27 @@
 - **Welcome Portal (`/` and `/welcome`)**:
   - Unauthenticated visitors land on the dedicated animated Modura Welcome Page.
   - Features dynamic greeting ("Welcome to Modura" / "Welcome back to Modura"), animated breathing brand emblem, and direct paths to Sign In, Register, or 1-Click Quick Demo access.
+- **Login Page (`/login`)**:
+  - Centered App Logo, `Login Id -`, `Password -`, `SIGN IN` button, and `Forgot Password | Sign Up` links.
+  - Returns friendly `"Invalid Login Id or Password"` error on mismatch.
+- **Sign Up Page (`/signup` & `/register`)**:
+  - Centered App Logo, `Enter Login Id -` (6-12 chars), `Enter Email Id -`, `Enter Password -` (>8 chars, uppercase, lowercase, special character), `Re-Enter Password -`, and `SIGN UP` button.
+- **Forgot Password Page (`/forgot-password`)**:
+  - Allows entering Login Id / Email with confirmation alert and return link.
+- **Create User (`/users/create`)**:
+  - Form layout for provisioning internal team accounts with `Name`, `Login Id`, `Email Id`, Role (`User`, `Accountant`, `Administrator`), and password requirements.
 - **Session Storage**: JWT stored securely in `localStorage` under key `token`, with user object cached under `user`.
 - **Axios Interceptor**: Automatically attaches `Authorization: Bearer <token>` to all requests dispatched via `api.ts`.
 - **Route Guards**:
-  - `ProtectedRoute`: Guards `/dashboard`, `/components`, and financial workflows. Redirects unauthenticated users to `/login` preserving intended destination state.
-  - `PublicRoute`: Prevents authenticated users from re-accessing `/login` or `/register`, routing them to `/dashboard`.
-- **Role Governance (Non-Negotiable)**:
-  - Registration form strictly contains `name`, `email`, `password`, `confirmPassword`.
-  - Never expose role selection on the frontend signup form (role defaults to `employee` on the server).
+  - `ProtectedRoute`: Guards `/dashboard`, `/users/create`, and financial workflows. Redirects unauthenticated users to `/login`.
+  - `PublicRoute`: Prevents authenticated users from accessing public auth routes, routing them to `/dashboard`.
 - **Hackathon Demo Support**:
   - Quick demo credentials buttons on both the Welcome screen and Login screen allow 1-click credential auto-fill and direct entry for Admin and Employee profiles.
 
 - Use React + Vite.
 - Build clean, dashboard-centric interfaces.
 - Emphasize readability of financial numbers.
+
 - Ensure that the "Accounting Impact" of every transaction is clearly communicated to the user.
 - Build interactive reports where aggregate numbers can be clicked to reveal underlying data ("Explain this number").
 

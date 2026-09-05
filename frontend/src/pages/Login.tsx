@@ -5,18 +5,16 @@ import { z } from "zod";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useLogin } from "@/hooks/useAuth";
 import {
-  Mail,
+  User,
   Lock,
   Eye,
   EyeOff,
   Loader2,
   AlertCircle,
-  Building2,
   Sparkles,
   ArrowRight,
   ShieldCheck,
@@ -24,8 +22,8 @@ import {
 import logo from "@/assets/logo.png";
 
 const loginSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  loginId: z.string().min(1, "Please enter your Login Id or Email"),
+  password: z.string().min(1, "Please enter your password"),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -47,31 +45,34 @@ export default function Login() {
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "",
+      loginId: "",
       password: "",
     },
   });
 
   const onSubmit = (data: LoginFormData) => {
     setServerError(null);
-    loginMutation.mutate(data, {
-      onSuccess: () => {
-        navigate(from, { replace: true });
-      },
-      onError: (err: any) => {
-        const message =
-          err.response?.data?.error ||
-          err.response?.data?.message ||
-          "Invalid email or password. Please try again.";
-        setServerError(message);
-      },
-    });
+    loginMutation.mutate(
+      { email: data.loginId, password: data.password },
+      {
+        onSuccess: () => {
+          navigate(from, { replace: true });
+        },
+        onError: (err: any) => {
+          const message =
+            err.response?.data?.error ||
+            err.response?.data?.message ||
+            "Invalid Login Id or Password";
+          setServerError(message.includes("database") ? message : "Invalid Login Id or Password");
+        },
+      }
+    );
   };
 
   const handleQuickDemo = (role: "admin" | "employee") => {
     setServerError(null);
     const email = role === "admin" ? "admin@urbanfurniture.com" : "designer@urbanfurniture.com";
-    setValue("email", email);
+    setValue("loginId", email);
     setValue("password", "password123");
   };
 
@@ -83,7 +84,7 @@ export default function Login() {
 
   return (
     <div className="relative min-h-screen flex flex-col justify-between bg-background text-foreground selection:bg-primary/20">
-      {/* Top Navigation Bar */}
+      {/* Top Header */}
       <header className="w-full flex items-center justify-between px-6 py-4 border-b border-border/50 backdrop-blur-sm z-10">
         <Link to="/welcome" className="flex items-center gap-3 group">
           <img src={logo} alt="Modura Logo" className="h-9 w-9 object-contain group-hover:scale-105 transition-transform" />
@@ -113,26 +114,29 @@ export default function Login() {
         </div>
       </header>
 
-      {/* Main Container */}
+      {/* Main Login Card Container */}
       <main className="flex-1 flex items-center justify-center px-4 py-8 sm:px-6 lg:px-8">
-        <div className="w-full max-w-md space-y-6">
-          {/* Card Wrapper */}
-          <div className="bg-card text-card-foreground border border-border/80 rounded-2xl p-6 sm:p-8 shadow-sm transition-all duration-200">
-            {/* Header / Brand Sub-mark */}
-            <div className="text-center space-y-2 mb-6">
-              <div className="inline-flex items-center justify-center p-2.5 rounded-xl bg-secondary/80 text-secondary-foreground mb-2">
-                <Building2 className="h-6 w-6 text-primary" />
+        <div className="w-full max-w-md space-y-5">
+          {/* Card Wrapper matching the wireframe */}
+          <div className="bg-card text-card-foreground border border-border/80 rounded-2xl p-6 sm:p-8 shadow-sm">
+            
+            {/* Centered App Logo & Title */}
+            <div className="flex flex-col items-center text-center space-y-3 mb-6">
+              <div className="h-16 w-16 rounded-2xl bg-secondary/80 border border-border/80 flex items-center justify-center p-2.5 shadow-xs">
+                <img src={logo} alt="App Logo" className="h-11 w-11 object-contain" />
               </div>
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-                Sign in to your ledger
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                Financial clarity and real-time accounting for every piece.
-              </p>
+              <div>
+                <h1 className="text-2xl font-bold tracking-tight text-foreground">
+                  Login Page
+                </h1>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Sign in to access your double-entry accounting workspace
+                </p>
+              </div>
             </div>
 
-            {/* Quick Demo Pre-fill Pill */}
-            <div className="mb-6 p-3 rounded-xl border border-border/70 bg-secondary/40 space-y-2">
+            {/* Quick Demo Pre-fill Box */}
+            <div className="mb-5 p-3 rounded-xl border border-border/70 bg-secondary/40 space-y-2">
               <div className="flex items-center justify-between text-xs font-medium text-muted-foreground">
                 <span className="flex items-center gap-1.5 text-foreground font-semibold">
                   <Sparkles className="h-3.5 w-3.5 text-accent" />
@@ -145,7 +149,7 @@ export default function Login() {
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="text-xs h-8 justify-center bg-card hover:bg-secondary/80"
+                  className="text-xs h-8 justify-center bg-card hover:bg-secondary/80 font-medium"
                   onClick={() => handleQuickDemo("admin")}
                 >
                   Admin Account
@@ -154,7 +158,7 @@ export default function Login() {
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="text-xs h-8 justify-center bg-card hover:bg-secondary/80"
+                  className="text-xs h-8 justify-center bg-card hover:bg-secondary/80 font-medium"
                   onClick={() => handleQuickDemo("employee")}
                 >
                   Employee Account
@@ -162,7 +166,7 @@ export default function Login() {
               </div>
             </div>
 
-            {/* Server Error Alert */}
+            {/* Error Alert */}
             {serverError && (
               <Alert variant="destructive" className="mb-5 bg-destructive/10 border-destructive/30 text-destructive">
                 <AlertCircle className="h-4 w-4" />
@@ -174,39 +178,34 @@ export default function Login() {
 
             {/* Form */}
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              {/* Email Input */}
+              {/* Login Id Input */}
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-muted-foreground" htmlFor="email">
-                  Business Email
+                <label className="text-xs font-semibold text-foreground" htmlFor="loginId">
+                  Login Id -
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <User className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
-                    id="email"
-                    type="email"
-                    placeholder="name@urbanfurniture.com"
+                    id="loginId"
+                    type="text"
+                    placeholder="Enter your Login Id or Email"
                     className={`pl-9 bg-background/50 border-border/80 h-10 ${
-                      errors.email ? "border-destructive focus-visible:ring-destructive" : ""
+                      errors.loginId ? "border-destructive focus-visible:ring-destructive" : ""
                     }`}
-                    autoComplete="email"
-                    {...register("email")}
+                    autoComplete="username"
+                    {...register("loginId")}
                   />
                 </div>
-                {errors.email && (
-                  <p className="text-xs text-destructive mt-1">{errors.email.message}</p>
+                {errors.loginId && (
+                  <p className="text-xs text-destructive mt-1">{errors.loginId.message}</p>
                 )}
               </div>
 
               {/* Password Input */}
               <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-medium text-muted-foreground" htmlFor="password">
-                    Password
-                  </label>
-                  <span className="text-xs text-muted-foreground hover:text-foreground cursor-pointer transition-colors">
-                    Forgot password?
-                  </span>
-                </div>
+                <label className="text-xs font-semibold text-foreground" htmlFor="password">
+                  Password -
+                </label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -233,62 +232,55 @@ export default function Login() {
                 )}
               </div>
 
-              {/* Remember Me */}
-              <div className="flex items-center space-x-2 pt-1">
-                <Checkbox id="remember" defaultChecked />
-                <label
-                  htmlFor="remember"
-                  className="text-xs font-medium text-muted-foreground leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                >
-                  Remember this workstation
-                </label>
-              </div>
-
-              {/* Submit Button */}
+              {/* SIGN IN Button */}
               <Button
                 type="submit"
-                className="w-full h-11 text-sm font-semibold tracking-wide bg-primary text-primary-foreground hover:opacity-95 shadow-sm transition-all mt-2"
+                className="w-full h-11 text-sm font-bold tracking-wider uppercase bg-primary text-primary-foreground hover:opacity-95 shadow-sm transition-all mt-3"
                 disabled={loginMutation.isPending}
               >
                 {loginMutation.isPending ? (
                   <span className="flex items-center gap-2">
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Authenticating...
+                    Signing In...
                   </span>
                 ) : (
                   <span className="flex items-center gap-2">
-                    Sign In to Ledger
+                    SIGN IN
                     <ArrowRight className="h-4 w-4" />
                   </span>
                 )}
               </Button>
             </form>
 
-            {/* Bottom Redirect */}
-            <div className="mt-6 pt-5 border-t border-border/60 text-center">
-              <p className="text-xs text-muted-foreground">
-                Don&apos;t have an account yet?{" "}
-                <Link
-                  to="/register"
-                  className="font-semibold text-primary hover:underline underline-offset-4 ml-1"
-                >
-                  Create company account
-                </Link>
-              </p>
+            {/* Bottom Links: Forgot Password | Sign Up */}
+            <div className="mt-6 pt-4 border-t border-border/60 flex items-center justify-center gap-3 text-xs">
+              <Link
+                to="/forgot-password"
+                className="font-medium text-muted-foreground hover:text-primary transition-colors underline-offset-4 hover:underline"
+              >
+                Forgot Password
+              </Link>
+              <span className="text-border">|</span>
+              <Link
+                to="/signup"
+                className="font-semibold text-primary hover:underline underline-offset-4"
+              >
+                Sign Up
+              </Link>
             </div>
           </div>
 
-          {/* Security Assurance Badge */}
+          {/* Security Assurance */}
           <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
             <ShieldCheck className="h-4 w-4 text-accent" />
-            <span>Double-entry ledger with encrypted session token</span>
+            <span>Encrypted Double-Entry Authentication</span>
           </div>
         </div>
       </main>
 
       {/* Footer */}
       <footer className="w-full py-4 px-6 border-t border-border/50 text-center text-xs text-muted-foreground">
-        © 2026 Urban Furniture Accounting System • Quiet Luxury &amp; Financial Precision
+        © 2026 Modura Accounting System • Quiet Luxury &amp; Financial Precision
       </footer>
     </div>
   );
