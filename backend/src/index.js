@@ -21,6 +21,7 @@ app.use("/api/submissions", submissionRoutes);
 app.use("/api/master", masterDataRoutes);
 app.use("/api/accounting", accountingRoutes);
 app.use("/api/orders", require("./routes/order.routes"));
+app.use("/api/reports", require("./routes/report.routes"));
 
 // Use the error handler from Jaini's branch if possible, otherwise fallback
 if (typeof errorHandler === "function") {
