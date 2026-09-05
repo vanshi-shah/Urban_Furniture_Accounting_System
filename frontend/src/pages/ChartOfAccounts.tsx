@@ -30,6 +30,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { apiFetch } from "@/lib/api";
+import { usePaginatedFetch } from "@/hooks/usePaginatedFetch";
+import { PaginationControls } from "@/components/PaginationControls";
 
 type Account = {
   id: string;
@@ -43,25 +45,26 @@ export default function ChartOfAccounts() {
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<"list" | "form">("list");
   
-  const [accounts, setAccounts] = useState<Account[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const {
+    data: accounts,
+    total,
+    page,
+    totalPages,
+    setPage,
+    refresh: refreshAccounts,
+  } = usePaginatedFetch<Account>('/master/accounts', 20);
 
+  const fetchAccounts = refreshAccounts;
+
+  // Form state (kept local — not part of pagination hook)
   const [newAccountCode, setNewAccountCode] = useState("");
   const [newAccountName, setNewAccountName] = useState("");
   const [newAccountType, setNewAccountType] = useState("");
-
-  const fetchAccounts = async () => {
-    try {
-      const data = await apiFetch('/master/accounts');
-      setAccounts(data || []);
-    } catch (err: any) {
-      console.error(err);
-    }
-  };
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    fetchAccounts();
+    // initial load handled by hook
   }, []);
 
   const filteredAccounts = accounts.filter(acc =>
@@ -268,24 +271,14 @@ export default function ChartOfAccounts() {
                 </Table>
               </div>
 
-              {/* Pagination */}
-              <div className="p-4 border-t border-border/80 flex items-center justify-between">
-                <div className="text-sm text-muted-foreground">
-                  Showing <span className="font-medium">{filteredAccounts.length}</span> accounts
-                </div>
-                <Pagination className="justify-end">
-                  <PaginationContent>
-                    <PaginationItem>
-                      <PaginationPrevious href="#" />
-                    </PaginationItem>
-                    <PaginationItem>
-                      <PaginationLink href="#" isActive>1</PaginationLink>
-                    </PaginationItem>
-                    <PaginationItem>
-                      <PaginationNext href="#" />
-                    </PaginationItem>
-                  </PaginationContent>
-                </Pagination>
+              <div className="p-4 border-t border-border/80">
+                <PaginationControls
+                  page={page}
+                  totalPages={totalPages}
+                  total={total}
+                  limit={20}
+                  onPageChange={setPage}
+                />
               </div>
             </>
           )}

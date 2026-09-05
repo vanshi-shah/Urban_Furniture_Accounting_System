@@ -31,14 +31,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { apiFetch } from "@/lib/api";
+import { usePaginatedFetch } from "@/hooks/usePaginatedFetch";
+import { PaginationControls } from "@/components/PaginationControls";
 
 export default function JournalEntries() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<"list" | "form">("list");
   
-  // Data State
-  const [entries, setEntries] = useState<any[]>([]);
+  // Data State — entries come from usePaginatedFetch below
   const [journals, setJournals] = useState<any[]>([]);
   const [accounts, setAccounts] = useState<any[]>([]);
   const [contacts, setContacts] = useState<any[]>([]);
@@ -56,21 +57,30 @@ export default function JournalEntries() {
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState("");
 
+  // Paginated entries from server
+  const {
+    data: entries,
+    total: entriesTotal,
+    page: entriesPage,
+    totalPages: entriesTotalPages,
+    loading: entriesLoading,
+    setPage: setEntriesPage,
+    refresh: refreshEntries,
+  } = usePaginatedFetch<any>('/accounting/entries', 20);
+
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [entriesData, journalsData, accountsData, contactsData, analyticData] = await Promise.all([
-        apiFetch('/accounting/entries'),
-        apiFetch('/master/journals'),
-        apiFetch('/master/accounts'),
-        apiFetch('/master/contacts'),
-        apiFetch('/master/analytic-accounts')
+      const [journalsData, accountsData, contactsData, analyticData] = await Promise.all([
+        apiFetch('/master/journals?limit=100'),
+        apiFetch('/master/accounts?limit=100'),
+        apiFetch('/master/contacts?limit=200'),
+        apiFetch('/master/analytic-accounts?limit=100')
       ]);
-      setEntries(entriesData || []);
-      setJournals(journalsData || []);
-      setAccounts(accountsData || []);
-      setContacts(contactsData || []);
-      setAnalyticAccounts(analyticData || []);
+      setJournals(journalsData?.data || journalsData || []);
+      setAccounts(accountsData?.data || accountsData || []);
+      setContacts(contactsData?.data || contactsData || []);
+      setAnalyticAccounts(analyticData?.data || analyticData || []);
     } catch (error: any) {
       console.error(error);
     } finally {
@@ -486,11 +496,14 @@ export default function JournalEntries() {
                 </Table>
               </div>
 
-              {/* Pagination Placeholder */}
-              <div className="p-4 border-t border-border/80 flex items-center justify-between">
-                <div className="text-sm text-muted-foreground">
-                  Showing <span className="font-medium">{filteredEntries.length}</span> entries
-                </div>
+              <div className="p-4 border-t border-border/80">
+                <PaginationControls
+                  page={entriesPage}
+                  totalPages={entriesTotalPages}
+                  total={entriesTotal}
+                  limit={20}
+                  onPageChange={setEntriesPage}
+                />
               </div>
             </>
           )}

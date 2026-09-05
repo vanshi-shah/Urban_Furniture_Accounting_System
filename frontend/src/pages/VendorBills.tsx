@@ -21,13 +21,25 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ExcelGrid, ExcelColumn } from "@/components/ExcelGrid";
 import { BillPaymentModal } from "@/components/BillPaymentModal";
 import { apiFetch } from "@/lib/api";
+import { usePaginatedFetch } from "@/hooks/usePaginatedFetch";
+import { PaginationControls } from "@/components/PaginationControls";
 
 export default function VendorBills() {
   const location = useLocation();
   const navigate = useNavigate();
 
   const [viewMode, setViewMode] = useState<"list" | "form">("form");
-  const [bills, setBills] = useState<any[]>([]);
+
+  // Paginated bills from server
+  const {
+    data: bills,
+    total: billsTotal,
+    page: billsPage,
+    totalPages: billsTotalPages,
+    setPage: setBillsPage,
+    refresh: refreshBills,
+  } = usePaginatedFetch<any>("/orders?type=VENDOR_BILL", 20);
+
   const [contacts, setContacts] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [accounts, setAccounts] = useState<any[]>([]);
@@ -73,20 +85,25 @@ export default function VendorBills() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [billList, contactList, productList, accountList, analyticList, seqRes] = await Promise.all([
-        apiFetch("/orders?type=VENDOR_BILL"),
-        apiFetch("/master/contacts"),
-        apiFetch("/master/products"),
-        apiFetch("/master/accounts"),
-        apiFetch("/master/analytic-accounts"),
+      // Fetch master/dropdown data — unwrap .data from paginated envelope
+      // Use large limit to get all options for form dropdowns
+      const [contactRes, productRes, accountRes, analyticRes, seqRes] = await Promise.all([
+        apiFetch("/master/contacts?limit=200"),
+        apiFetch("/master/products?limit=200"),
+        apiFetch("/master/accounts?limit=100"),
+        apiFetch("/master/analytic-accounts?limit=100"),
         apiFetch("/orders/next-sequence?type=VENDOR_BILL")
       ]);
 
-      setBills(billList || []);
-      setContacts(contactList?.filter((c: any) => c.type === "VENDOR") || contactList || []);
-      setProducts(productList || []);
-      setAccounts(accountList || []);
-      setAnalytics(analyticList || []);
+      const contactList = contactRes?.data ?? contactRes ?? [];
+      const productList = productRes?.data ?? productRes ?? [];
+      const accountList = accountRes?.data ?? accountRes ?? [];
+      const analyticList = analyticRes?.data ?? analyticRes ?? [];
+
+      setContacts(Array.isArray(contactList) ? contactList.filter((c: any) => c.type === "VENDOR") : []);
+      setProducts(Array.isArray(productList) ? productList : []);
+      setAccounts(Array.isArray(accountList) ? accountList : []);
+      setAnalytics(Array.isArray(analyticList) ? analyticList : []);
 
       // Default Purchase account (code 5000)
       const purchaseAcc = accountList?.find((a: any) => a.code === "5000") || accountList?.find((a: any) => a.type === "EXPENSE");
@@ -104,9 +121,6 @@ export default function VendorBills() {
       if (seqRes?.sequence) {
         setBillNumber(seqRes.sequence);
       }
-
-      const rahul = contactList?.find((c: any) => c.name?.toLowerCase().includes("rahul"));
-      if (rahul) setVendorId(rahul.id);
 
       const tableProd = productList?.find((p: any) => p.name?.toLowerCase().includes("table"));
       const proj1 = analyticList?.find((a: any) => a.name?.toLowerCase().includes("project 1"));
@@ -818,6 +832,15 @@ export default function VendorBills() {
                   )}
                 </tbody>
               </table>
+            </div>
+            <div className="p-3 border-t border-border/80">
+              <PaginationControls
+                page={billsPage}
+                totalPages={billsTotalPages}
+                total={billsTotal}
+                limit={20}
+                onPageChange={setBillsPage}
+              />
             </div>
           </CardContent>
         </Card>

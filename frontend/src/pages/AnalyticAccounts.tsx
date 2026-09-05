@@ -25,6 +25,8 @@ import {
 } from "@/components/ui/pagination";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { apiFetch } from "@/lib/api";
+import { usePaginatedFetch } from "@/hooks/usePaginatedFetch";
+import { PaginationControls } from "@/components/PaginationControls";
 
 type AnalyticAccount = {
   id: string;
@@ -36,24 +38,25 @@ export default function AnalyticAccounts() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isFormView, setIsFormView] = useState(false);
   
-  const [accounts, setAccounts] = useState<AnalyticAccount[]>([]);
+  const {
+    data: accounts,
+    total,
+    page,
+    totalPages,
+    setPage,
+    refresh: refreshAccounts,
+  } = usePaginatedFetch<AnalyticAccount>('/master/analytic-accounts', 20);
+
+  const fetchAccounts = refreshAccounts;
+
+  // Form state (kept local — not part of pagination hook)
+  const [newName, setNewName] = useState("");
+  const [newBudgetLimit, setNewBudgetLimit] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const [newName, setNewName] = useState("");
-  const [newBudgetLimit, setNewBudgetLimit] = useState("");
-
-  const fetchAccounts = async () => {
-    try {
-      const data = await apiFetch('/master/analytic-accounts');
-      setAccounts(data || []);
-    } catch (err: any) {
-      console.error(err);
-    }
-  };
-
   useEffect(() => {
-    fetchAccounts();
+    // initial load handled by hook
   }, []);
 
   const filteredAccounts = accounts.filter(a =>
@@ -221,24 +224,14 @@ export default function AnalyticAccounts() {
                 </Table>
               </div>
 
-              {/* Pagination */}
-              <div className="p-4 border-t border-border/80 flex items-center justify-between mt-auto">
-                <div className="text-sm text-muted-foreground">
-                  Showing <span className="font-medium">{filteredAccounts.length}</span> accounts
-                </div>
-                <Pagination className="justify-end">
-                  <PaginationContent>
-                    <PaginationItem>
-                      <PaginationPrevious href="#" />
-                    </PaginationItem>
-                    <PaginationItem>
-                      <PaginationLink href="#" isActive>1</PaginationLink>
-                    </PaginationItem>
-                    <PaginationItem>
-                      <PaginationNext href="#" />
-                    </PaginationItem>
-                  </PaginationContent>
-                </Pagination>
+              <div className="p-4 border-t border-border/80">
+                <PaginationControls
+                  page={page}
+                  totalPages={totalPages}
+                  total={total}
+                  limit={20}
+                  onPageChange={setPage}
+                />
               </div>
             </CardContent>
           </Card>

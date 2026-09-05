@@ -7,15 +7,21 @@ async function listSubmissions(req, res, next) {
     const ownerId = req.user.id || req.user.userId;
     const companyId = req.user.companyId;
     const isAdmin = req.user.role === "ADMIN";
-    const submissions = await prisma.submission.findMany({
-      where: {
-        companyId,
-        ...(isAdmin ? {} : { ownerId })
-      },
-      orderBy: { createdAt: "desc" },
-      include: { owner: { select: { name: true } } },
-    });
-    res.json(submissions);
+    const page  = Math.max(1, parseInt(req.query.page)  || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
+    const skip  = (page - 1) * limit;
+    const where = { companyId, ...(isAdmin ? {} : { ownerId }) };
+    const [submissions, total] = await Promise.all([
+      prisma.submission.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: "desc" },
+        include: { owner: { select: { name: true } } },
+      }),
+      prisma.submission.count({ where })
+    ]);
+    res.json({ data: submissions, total, page, totalPages: Math.ceil(total / limit) });
   } catch (error) {
     next(error);
   }

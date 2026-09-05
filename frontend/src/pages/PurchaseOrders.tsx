@@ -18,11 +18,23 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ExcelGrid, ExcelColumn } from "@/components/ExcelGrid";
 import { apiFetch } from "@/lib/api";
+import { usePaginatedFetch } from "@/hooks/usePaginatedFetch";
+import { PaginationControls } from "@/components/PaginationControls";
 
 export default function PurchaseOrders() {
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState<"list" | "form">("form");
-  const [orders, setOrders] = useState<any[]>([]);
+
+  // Paginated orders from server
+  const {
+    data: orders,
+    total: ordersTotal,
+    page: ordersPage,
+    totalPages: ordersTotalPages,
+    setPage: setOrdersPage,
+    refresh: refreshOrders,
+  } = usePaginatedFetch<any>("/orders?type=PURCHASE_ORDER", 20);
+
   const [contacts, setContacts] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [analytics, setAnalytics] = useState<any[]>([]);
@@ -47,26 +59,25 @@ export default function PurchaseOrders() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [orderList, contactList, productList, analyticList, seqRes] = await Promise.all([
-        apiFetch("/orders?type=PURCHASE_ORDER"),
-        apiFetch("/master/contacts"),
-        apiFetch("/master/products"),
-        apiFetch("/master/analytic-accounts"),
+      // Unwrap paginated envelope for dropdown data
+      const [contactRes, productRes, analyticRes, seqRes] = await Promise.all([
+        apiFetch("/master/contacts?limit=200"),
+        apiFetch("/master/products?limit=200"),
+        apiFetch("/master/analytic-accounts?limit=100"),
         apiFetch("/orders/next-sequence?type=PURCHASE_ORDER")
       ]);
 
-      setOrders(orderList || []);
-      setContacts(contactList?.filter((c: any) => c.type === "VENDOR") || contactList || []);
-      setProducts(productList || []);
-      setAnalytics(analyticList || []);
+      const contactList = contactRes?.data ?? contactRes ?? [];
+      const productList = productRes?.data ?? productRes ?? [];
+      const analyticList = analyticRes?.data ?? analyticRes ?? [];
+
+      setContacts(Array.isArray(contactList) ? contactList.filter((c: any) => c.type === "VENDOR") : []);
+      setProducts(Array.isArray(productList) ? productList : []);
+      setAnalytics(Array.isArray(analyticList) ? analyticList : []);
 
       if (seqRes?.sequence) {
         setPoNumber(seqRes.sequence);
       }
-
-      // Pre-select Mr. Rahul and Table if present for demo smoothness
-      const rahul = contactList?.find((c: any) => c.name?.toLowerCase().includes("rahul"));
-      if (rahul) setVendorId(rahul.id);
 
       const tableProd = productList?.find((p: any) => p.name?.toLowerCase().includes("table"));
       const proj1 = analyticList?.find((a: any) => a.name?.toLowerCase().includes("project 1"));
@@ -629,6 +640,15 @@ export default function PurchaseOrders() {
                   )}
                 </tbody>
               </table>
+            </div>
+            <div className="p-3 border-t border-border/80">
+              <PaginationControls
+                page={ordersPage}
+                totalPages={ordersTotalPages}
+                total={ordersTotal}
+                limit={20}
+                onPageChange={setOrdersPage}
+              />
             </div>
           </CardContent>
         </Card>

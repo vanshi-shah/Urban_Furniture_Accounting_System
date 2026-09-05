@@ -20,12 +20,21 @@ exports.postEntry = async (req, res, next) => {
 
 exports.getLedger = async (req, res, next) => {
   try {
-    const entries = await prisma.journalEntry.findMany({
-      where: { companyId: req.user.companyId },
-      include: { lines: { include: { account: true } }, journal: true },
-      orderBy: { date: 'desc' }
-    });
-    res.json(entries);
+    const page  = Math.max(1, parseInt(req.query.page)  || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
+    const skip  = (page - 1) * limit;
+    const where = { companyId: req.user.companyId };
+    const [entries, total] = await Promise.all([
+      prisma.journalEntry.findMany({
+        where,
+        skip,
+        take: limit,
+        include: { lines: { include: { account: true } }, journal: true },
+        orderBy: { date: 'desc' }
+      }),
+      prisma.journalEntry.count({ where })
+    ]);
+    res.json({ data: entries, total, page, totalPages: Math.ceil(total / limit) });
   } catch (error) { next(error); }
 };
 
