@@ -122,6 +122,8 @@ To ensure we build this effectively, we will construct the core features and the
 - **Layout & Filtering Controls**: Quick filter tabs (`All`, `Purchases`, `Sales`, `Cash`, `Bank`, `General`), status filters (`All`, `Posted`, `Draft`), live search, and a layout switcher between "Cards" view (dashboard style) and "Table" view.
 - **Button Standards & Icon-Only Toggle**: Header buttons standardized to shadcn `size="sm"` (`h-9 rounded-md`) with single icons, and Cards/Table layout switchers transformed into minimal icon-only buttons.
 - **Backend Relation Enrichment**: Updated `accounting.controller.js` to include `contact` and `analyticAccount` relations in `lines`, providing complete partner names and project data.
+- **Database Seed Executed**: Populated all master and operational tables via `seed.js` (~126 records per domain across both companies).
+
 
 ## RBAC — Role-Based Access Control (Implemented)
 

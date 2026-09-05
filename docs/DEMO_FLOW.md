@@ -4,12 +4,16 @@
 
 ## 🔐 Demo Login Credentials
 
-| Role | Email | Password |
-|---|---|---|
-| **Admin** | `admin@urbanfurniture.com` | `password123` |
-| **Employee** | `designer@urbanfurniture.com` | `password123` |
+| Role | Email / Login ID | Password | Company |
+|---|---|---|---|
+| **Admin** | `admin@urbanfurniture.com` | `Password@123` | Urban Furniture Co. |
+| **Accountant** | `accountant@urbanfurniture.com` | `Password@123` | Urban Furniture Co. |
+| **User** | `user@urbanfurniture.com` | `Password@123` | Urban Furniture Co. |
+| **Manager (Admin)** | `manager@modernteak.com` | `Password@123` | Modern Teak Ltd. |
+| **Books (Accountant)** | `books@modernteak.com` | `Password@123` | Modern Teak Ltd. |
+| **Staff (User)** | `staff@modernteak.com` | `Password@123` | Modern Teak Ltd. |
 
-> These users can be logged in instantly via **1-Click Quick Demo Access** directly on the **Welcome Page** (`/welcome`) or the **Login Page** (`/login`).
+> All accounts seeded with password: `Password@123` (case-sensitive). Use **1-Click Quick Demo Access** on `/welcome` or enter credentials on `/login`.
 
 ### -0:30 — Modura Welcome Portal Experience
 - Present the animated **Modura Welcome Page** (`/` or `/welcome`).

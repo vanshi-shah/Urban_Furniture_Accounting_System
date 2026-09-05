@@ -186,4 +186,10 @@ Added frontend and backend validation for Journals using react-hook-form + zod o
     - **Header Button Standardization**: Standardized the header action buttons (`New Entry`, `Dashboard`, and form action buttons) in `JournalEntries.tsx` to use standard shadcn/ui button proportions (`size="sm"` with default `h-9` and `rounded-md`), removing custom pill heights (`h-8.5`) and fixing duplicate plus icons (`+ + New Entry` -> single `<Plus /> New Entry`).
     - **Icon-Only Layout Switcher**: Removed text labels ("Cards", "Table") from the view toggle, converting it into a clean, minimal icon-only segmented control (`<LayoutGrid className="h-4 w-4" />` and `<List className="h-4 w-4" />` in standard `size="icon" h-8 w-8 rounded-md` buttons).
 
+25. **Prisma Client Regeneration & Complete Database Seeding (`seed.js`)**:
+    - Regenerated Prisma Client (`npx prisma generate`) and synchronized the database schema (`npx prisma db push`) to include the `ACCOUNTANT` role.
+    - Executed `node prisma/seed.js`, generating all master records: 2 companies, 6 users (ADMIN, ACCOUNTANT, USER), default Chart of Accounts, Journals, and 126 interrelated records per company (Contacts, Products, Analytic Accounts, Submissions, Orders, and balanced Journal Entries).
+    - Synchronized demo credentials across documentation (`admin@urbanfurniture.com` / `Password@123`).
+
+
 

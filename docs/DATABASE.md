@@ -64,3 +64,11 @@ node prisma/seed.js
 ```
 
 This seeds 2 companies × 3 users × ~126 records per entity type.
+
+### Seeded Credentials (Password: `Password@123`):
+- `admin@urbanfurniture.com` → ADMIN (Urban Furniture Co.)
+- `accountant@urbanfurniture.com` → ACCOUNTANT (Urban Furniture Co.)
+- `user@urbanfurniture.com` → USER (Urban Furniture Co.)
+- `manager@modernteak.com` → ADMIN (Modern Teak Ltd.)
+- `books@modernteak.com` → ACCOUNTANT (Modern Teak Ltd.)
+- `staff@modernteak.com` → USER (Modern Teak Ltd.)
