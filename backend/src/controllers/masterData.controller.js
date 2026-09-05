@@ -104,6 +104,60 @@ module.exports = {
     remove: productCrud.remove
   },
   account: makeCrud("account"),
-  journal: makeCrud("journal"),
+  journal: {
+    list: makeCrud("journal").list,
+    create: async (req, res, next) => {
+      try {
+        const { name, code, type } = req.body;
+        
+        if (!name || (typeof name === 'string' && name.trim() === "")) {
+          return res.status(400).json({ error: "Journal name is required" });
+        }
+        if (!code || (typeof code === 'string' && code.trim() === "")) {
+          return res.status(400).json({ error: "Journal code is required" });
+        }
+        
+        const validTypes = ["BANK", "CASH", "SALES", "PURCHASES", "GENERAL"];
+        if (!type || !validTypes.includes(type)) {
+          return res.status(400).json({ error: `Invalid journal type. Must be one of: ${validTypes.join(", ")}` });
+        }
+
+        const data = await prisma.journal.create({
+          data: { ...sanitizeBody(req.body), companyId: req.user.companyId }
+        });
+        res.status(201).json(data);
+      } catch (error) { next(error); }
+    },
+    update: async (req, res, next) => {
+      try {
+        const { name, code, type } = req.body;
+        
+        if (name !== undefined && (typeof name !== 'string' || name.trim() === "")) {
+          return res.status(400).json({ error: "Journal name cannot be empty" });
+        }
+        if (code !== undefined && (typeof code !== 'string' || code.trim() === "")) {
+          return res.status(400).json({ error: "Journal code cannot be empty" });
+        }
+        
+        const validTypes = ["BANK", "CASH", "SALES", "PURCHASES", "GENERAL"];
+        if (type !== undefined && !validTypes.includes(type)) {
+          return res.status(400).json({ error: `Invalid journal type. Must be one of: ${validTypes.join(", ")}` });
+        }
+
+        const existing = await prisma.journal.findFirst({
+          where: { id: req.params.id, companyId: req.user.companyId }
+        });
+        if (!existing) {
+          return res.status(404).json({ error: "Record not found" });
+        }
+        const data = await prisma.journal.update({
+          where: { id: req.params.id },
+          data: sanitizeBody(req.body)
+        });
+        res.json(data);
+      } catch (error) { next(error); }
+    },
+    remove: makeCrud("journal").remove
+  },
   analyticAccount: makeCrud("analyticAccount")
 };
