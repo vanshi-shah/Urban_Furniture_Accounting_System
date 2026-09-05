@@ -13,6 +13,7 @@ import Contacts from "./pages/Contacts";
 import Products from "./pages/Products";
 import ChartOfAccounts from "./pages/ChartOfAccounts";
 import Journals from "./pages/Journals";
+import JournalEntries from "./pages/JournalEntries";
 import AnalyticAccounts from "./pages/AnalyticAccounts";
 
 export function App() {
@@ -118,6 +119,17 @@ export function App() {
             <ProtectedRoute>
               <DashboardLayout>
                 <Journals />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/journal-entries"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <JournalEntries />
               </DashboardLayout>
             </ProtectedRoute>
           }

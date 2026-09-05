@@ -29,7 +29,7 @@
 
 ### 2:15 — Receive Payment & Accounting Impact
 - Workflow: ₹XX received -> Bank -> Journal Entry.
-- **Signature UX**: Visually show the Accounting Impact (Debit/Credit) of the action just performed.
+- **Signature UX**: Visually show the Accounting Impact (Debit/Credit) of the action just performed, highlighting the new **Journal Entries List View** (`/journal-entries`) and balancing checks.
 
 ### 3:00 — Reports
 - Open **P&L**: Show how the numbers just increased.

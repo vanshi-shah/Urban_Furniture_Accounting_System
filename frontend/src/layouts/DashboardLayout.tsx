@@ -33,6 +33,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
     { label: "Products", path: "/products", icon: Box },
     { label: "Chart of Accounts", path: "/chart-of-accounts", icon: FileText },
     { label: "Journals", path: "/journals", icon: BookOpen },
+    { label: "Journal Entries", path: "/journal-entries", icon: FileText },
     { label: "Budgets", path: "/budgets", icon: PieChart },
   ];
 
