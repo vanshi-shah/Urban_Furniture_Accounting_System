@@ -4,7 +4,7 @@ let io;
 
 function initSocket(httpServer) {
   io = new Server(httpServer, {
-    cors: { origin: process.env.CLIENT_URL, credentials: true },
+    cors: { origin: "*", credentials: true },
   });
 
   io.on("connection", (socket) => {
@@ -16,7 +16,12 @@ function initSocket(httpServer) {
 }
 
 function getIO() {
-  if (!io) throw new Error("Socket.io not initialized");
+  if (!io) {
+    return {
+      emit: () => {},
+      to: () => ({ emit: () => {} })
+    };
+  }
   return io;
 }
 

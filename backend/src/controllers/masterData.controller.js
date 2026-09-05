@@ -17,8 +17,14 @@ const makeCrud = (modelName) => ({
   },
   update: async (req, res, next) => {
     try {
+      const existing = await prisma[modelName].findFirst({
+        where: { id: req.params.id, companyId: req.user.companyId }
+      });
+      if (!existing) {
+        return res.status(404).json({ error: "Record not found" });
+      }
       const data = await prisma[modelName].update({
-        where: { id: req.params.id, companyId: req.user.companyId },
+        where: { id: req.params.id },
         data: req.body
       });
       res.json(data);
@@ -26,8 +32,14 @@ const makeCrud = (modelName) => ({
   },
   remove: async (req, res, next) => {
     try {
-      await prisma[modelName].delete({
+      const existing = await prisma[modelName].findFirst({
         where: { id: req.params.id, companyId: req.user.companyId }
+      });
+      if (!existing) {
+        return res.status(404).json({ error: "Record not found" });
+      }
+      await prisma[modelName].delete({
+        where: { id: req.params.id }
       });
       res.json({ success: true });
     } catch (error) { next(error); }
