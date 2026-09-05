@@ -22,6 +22,7 @@ import {
   ShieldCheck,
   CheckCircle2,
 } from "lucide-react";
+import logo from "@/assets/logo.png";
 
 const registerSchema = z
   .object({
@@ -93,9 +94,7 @@ export default function Register() {
       {/* Top Navigation Bar */}
       <header className="w-full flex items-center justify-between px-6 py-4 border-b border-border/50 backdrop-blur-sm z-10">
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-xl bg-primary text-primary-foreground flex items-center justify-center font-bold text-base shadow-sm">
-            UF
-          </div>
+          <img src={logo} alt="Urban Furniture Logo" className="h-9 w-9 object-contain" />
           <div>
             <span className="font-bold text-sm tracking-wider uppercase text-foreground">
               Urban Furniture

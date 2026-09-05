@@ -17,6 +17,7 @@ import {
   BookOpen,
   PieChart
 } from "lucide-react";
+import logo from "@/assets/logo.png";
 
 export function DashboardLayout({ children }: { children: ReactNode }) {
   const location = useLocation();
@@ -48,9 +49,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
         {/* Brand Header */}
         <div className="h-16 flex items-center justify-between px-6 border-b border-border/80">
           <div className="flex items-center gap-3 font-bold text-base tracking-tight">
-            <div className="h-8 w-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm shadow-sm">
-              UF
-            </div>
+            <img src={logo} alt="Urban Furniture Logo" className="h-8 w-8 object-contain" />
             <div className="flex flex-col">
               <span className="leading-tight uppercase tracking-wider text-xs font-bold text-foreground">
                 Urban Furniture
@@ -150,9 +149,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
         <header className="h-16 border-b border-border/80 flex items-center justify-between px-6 bg-card/60 backdrop-blur-md z-10">
           <div className="flex items-center gap-3">
             <div className="md:hidden flex items-center gap-2 font-bold">
-              <div className="h-7 w-7 rounded-lg bg-primary text-primary-foreground flex items-center justify-center text-xs font-black">
-                UF
-              </div>
+              <img src={logo} alt="Urban Furniture Logo" className="h-7 w-7 object-contain" />
               <span className="text-xs uppercase font-bold tracking-wider">Urban Furniture</span>
             </div>
             <h1 className="text-base font-semibold tracking-tight hidden md:block text-foreground">

@@ -14,4 +14,4 @@
    - Synchronized JWT user claims (`id` and `userId`) across all middleware and controllers so foreign-key assignments (e.g. `ownerId`) and tenant queries never receive `undefined`.
    - Automated provisioning of the standard Chart of Accounts (Cash, Bank, AR, AP, Equity, Revenue, COGS) and primary Journals (Cash, Bank, Sales, Purchases, General) directly upon company registration, ensuring orders can immediately post balanced ledger entries without missing account errors.
    - Dedicated local development port `5000` exclusively to the interactive terminal `nodemon` watcher, eliminating duplicate background daemon bindings and `EADDRINUSE` conflicts.
-
+8. **Brand Integration**: Incorporated the provided Urban Furniture logo (`logo.png`) as the official favicon and across the primary navigation components (Dashboard Layout sidebar, Login, and Registration pages) to reinforce brand identity.
