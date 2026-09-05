@@ -12,10 +12,22 @@ enum Role {
   ADMIN
 }
 
-enum SubmissionStatus {
-  PENDING
-  APPROVED
-  REJECTED
+model Company {
+  id                String             @id @default(cuid())
+  name              String
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  users             User[]
+  contacts          Contact[]
+  products          Product[]
+  accounts          Account[]
+  journals          Journal[]
+  analyticAccounts  AnalyticAccount[]
+  journalEntries    JournalEntry[]
+  journalEntryLines JournalEntryLine[]
+  submissions       Submission[]
+  orders            Order[]
+  orderLines        OrderLine[]
 }
 
 model User {
@@ -24,21 +36,221 @@ model User {
   email        String       @unique
   passwordHash String
   role         Role         @default(USER)
+  companyId    String
+  company      Company      @relation(fields: [companyId], references: [id])
   createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
   submissions  Submission[]
 }
 
-// Rename "Submission" to your actual domain entity once the problem
-// statement drops (e.g. Complaint, Listing, Ticket, Request).
-// The shape — owner, status, moderation trail — is what repeats across
-// past Odoo Combat problem statements, so keep this structure either way.
+enum ContactType {
+  CUSTOMER
+  VENDOR
+}
+
+model Contact {
+  id                String             @id @default(cuid())
+  name              String
+  email             String?
+  phone             String?
+  type              ContactType
+  companyId         String
+  company           Company            @relation(fields: [companyId], references: [id])
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  journalEntryLines JournalEntryLine[]
+  orders            Order[]
+}
+
+model Product {
+  id          String      @id @default(cuid())
+  name        String
+  description String?
+  price       Float       @default(0)
+  companyId   String
+  company     Company     @relation(fields: [companyId], references: [id])
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  orderLines  OrderLine[]
+}
+
+enum AccountType {
+  ASSET
+  LIABILITY
+  EQUITY
+  INCOME
+  EXPENSE
+}
+
+model Account {
+  id        String             @id @default(cuid())
+  code      String
+  name      String
+  type      AccountType
+  companyId String
+  company   Company            @relation(fields: [companyId], references: [id])
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  lines     JournalEntryLine[]
+
+  @@unique([code, companyId])
+}
+
+enum JournalType {
+  BANK
+  CASH
+  SALES
+  PURCHASES
+  GENERAL
+}
+
+model Journal {
+  id        String         @id @default(cuid())
+  name      String
+  code      String
+  type      JournalType
+  companyId String
+  company   Company        @relation(fields: [companyId], references: [id])
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  entries   JournalEntry[]
+
+  @@unique([code, companyId])
+}
+
+model AnalyticAccount {
+  id                String             @id @default(cuid())
+  name              String
+  budgetLimit       Float?
+  companyId         String
+  company           Company            @relation(fields: [companyId], references: [id])
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  journalEntryLines JournalEntryLine[]
+}
+
+enum EntryStatus {
+  DRAFT
+  POSTED
+  CANCELLED
+}
+
+model JournalEntry {
+  id        String             @id @default(cuid())
+  date      DateTime           @default(now())
+  reference String?
+  status    EntryStatus        @default(DRAFT)
+  journalId String
+  journal   Journal            @relation(fields: [journalId], references: [id])
+  companyId String
+  company   Company            @relation(fields: [companyId], references: [id])
+  lines     JournalEntryLine[]
+  orders    Order[]
+
+  submissionId String?
+  submission   Submission? @relation(fields: [submissionId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model JournalEntryLine {
+  id          String  @id @default(cuid())
+  description String?
+  debit       Float   @default(0)
+  credit      Float   @default(0)
+
+  accountId String
+  account   Account @relation(fields: [accountId], references: [id])
+
+  journalEntryId String
+  journalEntry   JournalEntry @relation(fields: [journalEntryId], references: [id], onDelete: Cascade)
+
+  contactId String?
+  contact   Contact? @relation(fields: [contactId], references: [id])
+
+  analyticAccountId String?
+  analyticAccount   AnalyticAccount? @relation(fields: [analyticAccountId], references: [id])
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum SubmissionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model Submission {
-  id          String            @id @default(cuid())
-  title       String
-  description String
-  status      SubmissionStatus  @default(PENDING)
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
-  ownerId     String
-  owner       User              @relation(fields: [ownerId], references: [id])
+  id             String           @id @default(cuid())
+  title          String
+  description    String
+  status         SubmissionStatus @default(PENDING)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  ownerId        String
+  owner          User             @relation(fields: [ownerId], references: [id])
+  companyId      String
+  company        Company          @relation(fields: [companyId], references: [id])
+  journalEntries JournalEntry[]
+}
+
+enum OrderStatus {
+  DRAFT
+  CONFIRMED
+  CANCELLED
+}
+
+enum OrderType {
+  CUSTOMER_INVOICE
+  VENDOR_BILL
+}
+
+model Order {
+  id          String      @id @default(cuid())
+  orderNumber String
+  date        DateTime    @default(now())
+  type        OrderType
+  status      OrderStatus @default(DRAFT)
+  totalAmount Float       @default(0)
+
+  contactId String
+  contact   Contact @relation(fields: [contactId], references: [id])
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
+
+  journalEntryId String?
+  journalEntry   JournalEntry? @relation(fields: [journalEntryId], references: [id])
+
+  lines OrderLine[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([orderNumber, companyId])
+}
+
+model OrderLine {
+  id          String  @id @default(cuid())
+  description String?
+  quantity    Int     @default(1)
+  unitPrice   Float   @default(0)
+  subtotal    Float   @default(0)
+
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id])
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
