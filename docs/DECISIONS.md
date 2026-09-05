@@ -14,4 +14,5 @@
    - Synchronized JWT user claims (`id` and `userId`) across all middleware and controllers so foreign-key assignments (e.g. `ownerId`) and tenant queries never receive `undefined`.
    - Automated provisioning of the standard Chart of Accounts (Cash, Bank, AR, AP, Equity, Revenue, COGS) and primary Journals (Cash, Bank, Sales, Purchases, General) directly upon company registration, ensuring orders can immediately post balanced ledger entries without missing account errors.
    - Dedicated local development port `5000` exclusively to the interactive terminal `nodemon` watcher, eliminating duplicate background daemon bindings and `EADDRINUSE` conflicts.
+8. **Security — Sensitive Field Sanitization in CRUD Factory**: The generic `makeCrud` factory in `masterData.controller.js` now runs all incoming request bodies through a `sanitizeBody()` guard that strips `passwordHash`, `companyId`, `id`, `createdAt`, and `updatedAt` before any `create` or `update` call. This prevents hash-injection attacks (bypassing bcrypt) and ensures `companyId` is always sourced from the verified JWT, never from the client.
 

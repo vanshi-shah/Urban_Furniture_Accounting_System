@@ -1,5 +1,15 @@
 const { prisma } = require("../lib/prisma");
 
+// Strip fields that must never be set via the generic CRUD routes.
+// Password changes MUST go through auth controller (bcrypt hashing).
+// companyId is always injected from the JWT, never from the client body.
+const BLOCKED_FIELDS = ["passwordHash", "companyId", "id", "createdAt", "updatedAt"];
+const sanitizeBody = (body) => {
+  const safe = { ...body };
+  for (const field of BLOCKED_FIELDS) delete safe[field];
+  return safe;
+};
+
 const makeCrud = (modelName) => ({
   list: async (req, res, next) => {
     try {
@@ -10,7 +20,7 @@ const makeCrud = (modelName) => ({
   create: async (req, res, next) => {
     try {
       const data = await prisma[modelName].create({
-        data: { ...req.body, companyId: req.user.companyId }
+        data: { ...sanitizeBody(req.body), companyId: req.user.companyId }
       });
       res.status(201).json(data);
     } catch (error) { next(error); }
@@ -25,7 +35,7 @@ const makeCrud = (modelName) => ({
       }
       const data = await prisma[modelName].update({
         where: { id: req.params.id },
-        data: req.body
+        data: sanitizeBody(req.body)
       });
       res.json(data);
     } catch (error) { next(error); }
