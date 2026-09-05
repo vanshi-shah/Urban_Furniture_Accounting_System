@@ -105,3 +105,31 @@ To ensure we build this effectively, we will construct the core features and the
 - Added product validation in masterData.controller.js
 
 - Added journal frontend and backend validation
+
+## RBAC — Role-Based Access Control (Implemented)
+
+Three roles are enforced at the backend (route middleware) and frontend (RoleRoute component + role-aware sidebar navigation).
+
+| Role | Prisma Enum | Access |
+|---|---|---|
+| **Admin** | `ADMIN` | Full access — all pages, all CRUD, user management, reports |
+| **Accountant** | `ACCOUNTANT` | All accounting features: master data (contacts, products, accounts, journals), journal entries, purchase orders, vendor bills, payments, reports |
+| **User** | `USER` | Read-only: view own `CUSTOMER_INVOICE` orders (paid/unpaid). Can pay outstanding invoices. Cannot access accounting/admin pages. |
+
+### Demo Credentials (password: `Password@123`)
+
+| Company | Email | Role |
+|---|---|---|
+| Urban Furniture Co. | `admin@urbanfurniture.com` | ADMIN |
+| Urban Furniture Co. | `accountant@urbanfurniture.com` | ACCOUNTANT |
+| Urban Furniture Co. | `user@urbanfurniture.com` | USER |
+| Modern Teak Ltd. | `manager@modernteak.com` | ADMIN |
+| Modern Teak Ltd. | `books@modernteak.com` | ACCOUNTANT |
+| Modern Teak Ltd. | `staff@modernteak.com` | USER |
+
+### Implementation Layers
+- **Backend**: `requireRoles(...roles)` middleware in `src/middleware/auth.js` — applied per route in all 6 route files.
+- **Order Controller**: `listOrders`, `getOrderById`, `recordPayment` scope results for USER role (CUSTOMER_INVOICE only).
+- **Frontend Routes**: `RoleRoute` component in `components/auth/RoleRoute.tsx` wraps pages in `App.tsx`.
+- **Frontend Nav**: `DashboardLayout.tsx` filters sidebar items by role — USER sees only Dashboard + My Invoices.
+- **Frontend Page**: `pages/MyInvoices.tsx` — dedicated invoice view with Pay Now modal for USER role.

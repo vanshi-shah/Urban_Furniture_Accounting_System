@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/context/AuthContext";
+import { UserRole } from "@/types/auth";
 import {
   LayoutDashboard,
   LogOut,
@@ -16,35 +17,71 @@ import {
   PieChart,
   Layers,
   ShoppingCart,
-  Receipt
+  Receipt,
+  UserCog,
+  CreditCard,
 } from "lucide-react";
 import logo from "@/assets/logo.png";
+
+interface NavItem {
+  label: string;
+  path: string;
+  icon: React.ElementType;
+  roles: UserRole[];
+}
+
+const ALL_NAV_ITEMS: NavItem[] = [
+  // ── All roles ────────────────────────────────────────────────
+  { label: "Dashboard",        path: "/dashboard",        icon: LayoutDashboard, roles: ["ADMIN", "ACCOUNTANT"] },
+  { label: "My Invoices",      path: "/my-invoices",      icon: CreditCard,      roles: ["USER"] },
+
+  // ── ADMIN + ACCOUNTANT ───────────────────────────────────────
+  { label: "Purchase Orders",  path: "/purchase-orders",  icon: ShoppingCart,    roles: ["ADMIN", "ACCOUNTANT"] },
+  { label: "Vendor Bills",     path: "/vendor-bills",     icon: Receipt,         roles: ["ADMIN", "ACCOUNTANT"] },
+  { label: "Contacts",         path: "/contacts",         icon: Users,           roles: ["ADMIN", "ACCOUNTANT"] },
+  { label: "Products",         path: "/products",         icon: Box,             roles: ["ADMIN", "ACCOUNTANT"] },
+  { label: "Chart of Accounts",path: "/chart-of-accounts",icon: FileText,        roles: ["ADMIN", "ACCOUNTANT"] },
+  { label: "Journals",         path: "/journals",         icon: BookOpen,        roles: ["ADMIN", "ACCOUNTANT"] },
+  { label: "Journal Entries",  path: "/journal-entries",  icon: FileText,        roles: ["ADMIN", "ACCOUNTANT"] },
+  { label: "Budgets",          path: "/budgets",          icon: PieChart,        roles: ["ADMIN", "ACCOUNTANT"] },
+  { label: "Analytic Accounts",path: "/analytic-accounts",icon: Layers,          roles: ["ADMIN", "ACCOUNTANT"] },
+
+  // ── ADMIN only ───────────────────────────────────────────────
+  { label: "Create User",      path: "/users/create",     icon: UserCog,         roles: ["ADMIN"] },
+];
+
+const ROLE_LABELS: Record<UserRole, string> = {
+  ADMIN:      "Admin",
+  ACCOUNTANT: "Accountant",
+  USER:       "User",
+};
+
+const ROLE_COLORS: Record<UserRole, string> = {
+  ADMIN:      "text-rose-500",
+  ACCOUNTANT: "text-violet-500",
+  USER:       "text-sky-500",
+};
 
 export function DashboardLayout({ children }: { children: ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
+  const userRole = (user?.role as UserRole) || "USER";
+
   const handleLogout = () => {
     logout();
     navigate("/login", { replace: true });
   };
 
-  const navItems = [
-    { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
-    { label: "Purchase Orders", path: "/purchase-orders", icon: ShoppingCart },
-    { label: "Vendor Bills", path: "/vendor-bills", icon: Receipt },
-    { label: "Contacts", path: "/contacts", icon: Users },
-    { label: "Products", path: "/products", icon: Box },
-    { label: "Chart of Accounts", path: "/chart-of-accounts", icon: FileText },
-    { label: "Journals", path: "/journals", icon: BookOpen },
-    { label: "Journal Entries", path: "/journal-entries", icon: FileText },
-    { label: "Budgets", path: "/budgets", icon: PieChart },
-    { label: "Analytic Accounts", path: "/analytic-accounts", icon: Layers },
-  ];
+  // Filter nav items based on current user role
+  const visibleNavItems = ALL_NAV_ITEMS.filter((item) =>
+    item.roles.includes(userRole)
+  );
 
   const userInitial = user?.name ? user.name.charAt(0).toUpperCase() : "U";
-  const userRole = user?.role ? user.role.toUpperCase() : "EMPLOYEE";
+  const roleLabel   = ROLE_LABELS[userRole] || userRole;
+  const roleColor   = ROLE_COLORS[userRole] || "text-muted-foreground";
 
   return (
     <div className="flex h-screen w-full bg-background text-foreground overflow-hidden font-sans">
@@ -70,12 +107,25 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
           </Link>
         </div>
 
+        {/* Role Banner */}
+        <div className={`px-4 py-2 border-b border-border/50 bg-background/30 flex items-center gap-2`}>
+          <Shield className={`h-3 w-3 ${roleColor}`} />
+          <span className={`text-[11px] font-semibold uppercase tracking-wider ${roleColor}`}>
+            {roleLabel}
+          </span>
+          <span className="text-[10px] text-muted-foreground ml-auto">
+            {userRole === "ADMIN"      && "Full Access"}
+            {userRole === "ACCOUNTANT" && "Accounting Access"}
+            {userRole === "USER"       && "Invoice Access"}
+          </span>
+        </div>
+
         {/* Navigation Links */}
-        <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto">
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           <div className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             Navigation
           </div>
-          {navItems.map((item) => {
+          {visibleNavItems.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
             return (
@@ -112,10 +162,10 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
                 <div className="flex items-center gap-1.5">
                   <Badge
                     variant="outline"
-                    className="text-[10px] py-0 px-1.5 font-medium border-border/80 bg-background/50 text-muted-foreground"
+                    className={`text-[10px] py-0 px-1.5 font-medium border-border/80 bg-background/50 ${roleColor}`}
                   >
-                    <Shield className="h-2.5 w-2.5 mr-0.5 text-accent" />
-                    {userRole}
+                    <Shield className="h-2.5 w-2.5 mr-0.5" />
+                    {roleLabel}
                   </Badge>
                 </div>
               </div>
@@ -159,9 +209,6 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
               <Button variant="ghost" size="sm" asChild>
                 <Link to="/dashboard">Dash</Link>
               </Button>
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/journals">Journals</Link>
-              </Button>
               <Button
                 variant="ghost"
                 size="icon"
@@ -176,7 +223,10 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
             {/* Desktop User Tag */}
             <div className="hidden lg:flex items-center gap-2 border-r border-border/80 pr-3 mr-1 text-xs text-muted-foreground">
               <UserIcon className="h-3.5 w-3.5 text-primary" />
-              <span>Signed in as <strong className="text-foreground">{user?.name || "User"}</strong></span>
+              <span>
+                Signed in as <strong className="text-foreground">{user?.name || "User"}</strong>
+                <span className={`ml-1.5 font-semibold ${roleColor}`}>({roleLabel})</span>
+              </span>
               <Button
                 variant="ghost"
                 size="sm"

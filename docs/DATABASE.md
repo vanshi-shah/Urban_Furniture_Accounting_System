@@ -3,6 +3,34 @@
 ## Core Philosophy
 The database must support a strict double-entry accounting system where business transactions (invoices, payments) immutably generate journal entries.
 
+## Role-Based Access Control (RBAC)
+
+The system uses a three-tier role model enforced at both the backend API and frontend routing levels.
+
+| Role | Enum Value | Access Level |
+|---|---|---|
+| **Admin** | `ADMIN` | Full access — all pages, all operations, user management |
+| **Accountant** | `ACCOUNTANT` | Create master data, record transactions, view all accounting reports |
+| **User** | `USER` | View own CUSTOMER_INVOICE orders (paid/unpaid), pay outstanding invoices |
+
+### Demo Credentials (all passwords: `Password@123`)
+
+**Urban Furniture Co.**
+| Email | Role |
+|---|---|
+| `admin@urbanfurniture.com` | ADMIN |
+| `accountant@urbanfurniture.com` | ACCOUNTANT |
+| `user@urbanfurniture.com` | USER |
+
+**Modern Teak Ltd.**
+| Email | Role |
+|---|---|
+| `manager@modernteak.com` | ADMIN |
+| `books@modernteak.com` | ACCOUNTANT |
+| `staff@modernteak.com` | USER |
+
+---
+
 ## Key Domains
 
 ### Master Data
@@ -28,22 +56,11 @@ The database must support a strict double-entry accounting system where business
 
 ## Team Database Setup & Synchronization
 
-To allow both teammates to access and seed the same ledger state:
-1. **Shared Database (Recommended)**: Use a hosted PostgreSQL connection string (Supabase / Neon) in `backend/.env`:
-   ```env
-   DATABASE_URL="postgresql://<user>:<password>@<cloud-host>:5432/<dbname>?sslmode=require"
-   ```
-2. **Local PostgreSQL**: If running locally on `localhost:5432`, ensure the local PostgreSQL service is started:
-   ```env
-   DATABASE_URL="postgresql://postgres:<password>@localhost:5432/urban_finance?schema=public"
-   ```
-3. **Provisioning & Seeding**:
-   ```bash
-   cd backend
-   npx prisma db push
-   npm run seed
-   ```
-   Demo accounts seeded:
-   - `admin@urbanfurniture.com` / `password123` (Admin)
-   - `designer@urbanfurniture.com` / `password123` (Employee)
+To provision the database:
+```bash
+cd backend
+npx prisma migrate dev
+node prisma/seed.js
+```
 
+This seeds 2 companies × 3 users × ~126 records per entity type.

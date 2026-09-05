@@ -1,5 +1,5 @@
 const { Router } = require("express");
-const { requireAuth, requireRole } = require("../middleware/auth");
+const { requireAuth, requireRoles } = require("../middleware/auth");
 const {
   listSubmissions,
   createSubmission,
@@ -8,8 +8,12 @@ const {
 
 const router = Router();
 router.use(requireAuth);
+
+// All authenticated users can list and create submissions
 router.get("/", listSubmissions);
 router.post("/", createSubmission);
-router.patch("/:id/status", requireRole("ADMIN"), updateSubmissionStatus);
+
+// Only ADMIN can approve/reject submission status
+router.patch("/:id/status", requireRoles("ADMIN"), updateSubmissionStatus);
 
 module.exports = router;
