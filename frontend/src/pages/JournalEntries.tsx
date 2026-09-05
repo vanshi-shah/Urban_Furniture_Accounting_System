@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   Search, 
   ArrowLeft, 
   Plus,
   CheckCircle2,
   XCircle,
-  AlertCircle
+  AlertCircle,
+  Save,
+  Send
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,47 +30,143 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
-
-// Mock Data
-const initialEntries = [
-  { id: "1", date: "Sep 1", number: "Bill/2026/0001", partner: "Mr. Rahul", journal: "Purchases", total: 30000, status: "Posted" },
-  { id: "2", date: "Sep 2", number: "Inv/2026/001", partner: "Mr. Raj", journal: "Sales", total: 10500, status: "Draft" },
-];
+import { apiFetch } from "@/lib/api";
 
 export default function JournalEntries() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<"list" | "form">("list");
-  const [entries, setEntries] = useState(initialEntries);
-
+  
+  // Data State
+  const [entries, setEntries] = useState<any[]>([]);
+  const [journals, setJournals] = useState<any[]>([]);
+  const [accounts, setAccounts] = useState<any[]>([]);
+  const [contacts, setContacts] = useState<any[]>([]);
+  const [analyticAccounts, setAnalyticAccounts] = useState<any[]>([]);
+  
   // Form State
-  const [date, setDate] = useState("");
-  const [journal, setJournal] = useState("");
-  const [lines, setLines] = useState([{ account: "Asset A/c", partner: "Rahul", debit: 10000, credit: 0 }, { account: "Bank A/c", partner: "", debit: 0, credit: 10000 }]);
+  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [journalId, setJournalId] = useState("");
+  const [reference, setReference] = useState("");
+  const [lines, setLines] = useState<any[]>([
+    { accountId: "", contactId: "", analyticAccountId: "", description: "", debit: 0, credit: 0 },
+    { accountId: "", contactId: "", analyticAccountId: "", description: "", debit: 0, credit: 0 }
+  ]);
+  
+  const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState("");
 
-  const filteredEntries = entries.filter(e =>
-    e.number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    e.partner.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    e.journal.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const [entriesData, journalsData, accountsData, contactsData, analyticData] = await Promise.all([
+        apiFetch('/accounting/entries'),
+        apiFetch('/master/journals'),
+        apiFetch('/master/accounts'),
+        apiFetch('/master/contacts'),
+        apiFetch('/master/analytic-accounts')
+      ]);
+      setEntries(entriesData || []);
+      setJournals(journalsData || []);
+      setAccounts(accountsData || []);
+      setContacts(contactsData || []);
+      setAnalyticAccounts(analyticData || []);
+    } catch (error: any) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const filteredEntries = entries.filter(e => {
+    const search = searchTerm.toLowerCase();
+    const refMatch = e.reference?.toLowerCase().includes(search);
+    const idMatch = e.id?.toLowerCase().includes(search);
+    const journalMatch = e.journal?.name?.toLowerCase().includes(search);
+    
+    return refMatch || idMatch || journalMatch;
+  });
 
   const totalDebit = lines.reduce((acc, line) => acc + (Number(line.debit) || 0), 0);
   const totalCredit = lines.reduce((acc, line) => acc + (Number(line.credit) || 0), 0);
   const isBalanced = totalDebit === totalCredit && totalDebit > 0;
 
-  const handlePost = () => {
+  const handleCreate = async (postImmediately: boolean = false) => {
     if (!isBalanced) return;
-    const newEntry = {
-      id: String(entries.length + 1),
-      date: date || "Today",
-      number: `JRNL/${new Date().getFullYear()}/${String(entries.length + 1).padStart(4, '0')}`,
-      partner: lines[0]?.partner || "Unknown",
-      journal: journal || "Miscellaneous",
-      total: totalDebit,
-      status: "Posted"
-    };
-    setEntries([...entries, newEntry]);
-    setViewMode("list");
+    if (!journalId) {
+      setApiError("Please select a journal");
+      return;
+    }
+    
+    // Filter out completely empty lines
+    const validLines = lines.filter(l => l.accountId && (l.debit > 0 || l.credit > 0));
+    
+    if (validLines.length < 2) {
+      setApiError("A journal entry must have at least two valid lines");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setApiError("");
+      
+      const payload = {
+        date,
+        reference,
+        journalId,
+        lines: validLines.map(l => ({
+          accountId: l.accountId,
+          description: l.description,
+          debit: Number(l.debit) || 0,
+          credit: Number(l.credit) || 0,
+          contactId: l.contactId || null,
+          analyticAccountId: l.analyticAccountId || null
+        }))
+      };
+
+      const newEntry = await apiFetch('/accounting/entries', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+      
+      if (postImmediately && newEntry && newEntry.id) {
+        await apiFetch(`/accounting/entries/${newEntry.id}/post`, {
+          method: 'POST'
+        });
+      }
+      
+      await fetchData();
+      
+      // Reset form
+      setJournalId("");
+      setReference("");
+      setLines([
+        { accountId: "", contactId: "", analyticAccountId: "", description: "", debit: 0, credit: 0 },
+        { accountId: "", contactId: "", analyticAccountId: "", description: "", debit: 0, credit: 0 }
+      ]);
+      setViewMode("list");
+      
+    } catch (err: any) {
+      setApiError(err.message || "Failed to create journal entry");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePostExisting = async (id: string) => {
+    try {
+      setLoading(true);
+      await apiFetch(`/accounting/entries/${id}/post`, { method: 'POST' });
+      await fetchData();
+    } catch (err: any) {
+      alert(err.message || "Failed to post entry");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const updateLine = (index: number, field: string, value: string | number) => {
@@ -78,7 +176,7 @@ export default function JournalEntries() {
   };
 
   const addLine = () => {
-    setLines([...lines, { account: "", partner: "", debit: 0, credit: 0 }]);
+    setLines([...lines, { accountId: "", contactId: "", analyticAccountId: "", description: "", debit: 0, credit: 0 }]);
   };
 
   const removeLine = (index: number) => {
@@ -86,7 +184,7 @@ export default function JournalEntries() {
   };
 
   return (
-    <div className="flex flex-col gap-6 max-w-[1440px] mx-auto">
+    <div className="flex flex-col gap-6 max-w-[1440px] mx-auto pb-12">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Journal Entries</h1>
@@ -102,15 +200,19 @@ export default function JournalEntries() {
               {viewMode === "list" ? (
                 <Button size="sm" className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold" onClick={() => setViewMode("form")}>
                   <Plus className="h-4 w-4" />
-                  New
+                  New Entry
                 </Button>
               ) : (
                 <>
-                  <Button size="sm" className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold" onClick={handlePost} disabled={!isBalanced}>
-                    <CheckCircle2 className="h-4 w-4" />
-                    Post
+                  <Button size="sm" variant="outline" className="gap-2 text-foreground font-semibold" onClick={() => handleCreate(false)} disabled={!isBalanced || loading}>
+                    <Save className="h-4 w-4" />
+                    Save as Draft
                   </Button>
-                  <Button size="sm" variant="outline" className="gap-2 border-border text-muted-foreground" onClick={() => setViewMode("list")}>
+                  <Button size="sm" className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold" onClick={() => handleCreate(true)} disabled={!isBalanced || loading}>
+                    <Send className="h-4 w-4" />
+                    Save & Post
+                  </Button>
+                  <Button size="sm" variant="outline" className="gap-2 border-border text-muted-foreground" onClick={() => setViewMode("list")} disabled={loading}>
                     Cancel
                   </Button>
                 </>
@@ -122,14 +224,14 @@ export default function JournalEntries() {
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
                     type="search"
-                    placeholder="Search entries..."
+                    placeholder="Search reference or journal..."
                     className="pl-9 w-full md:w-[250px] bg-background h-9 text-xs"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
               )}
-              <Button size="sm" variant="outline" onClick={() => viewMode === "form" ? setViewMode("list") : navigate(-1)} className="gap-2 border-border">
+              <Button size="sm" variant="outline" onClick={() => viewMode === "form" ? setViewMode("list") : navigate("/dashboard")} className="gap-2 border-border">
                 <ArrowLeft className="h-4 w-4 text-muted-foreground" />
                 Back
               </Button>
@@ -139,8 +241,18 @@ export default function JournalEntries() {
           {/* Form View */}
           {viewMode === "form" && (
             <div className="p-8">
+              {apiError && (
+                 <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-md flex items-center gap-3 text-destructive">
+                   <AlertCircle className="h-5 w-5" />
+                   <div>
+                     <h4 className="font-semibold text-sm">Error</h4>
+                     <p className="text-xs mt-1">{apiError}</p>
+                   </div>
+                 </div>
+              )}
+
               {!isBalanced && (
-                <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-md flex items-center gap-3 text-destructive">
+                <div className="mb-6 p-4 bg-amber-500/10 border border-amber-500/20 rounded-md flex items-center gap-3 text-amber-700 dark:text-amber-400">
                   <AlertCircle className="h-5 w-5" />
                   <div>
                     <h4 className="font-semibold text-sm">Unbalanced Journal Entry</h4>
@@ -161,18 +273,26 @@ export default function JournalEntries() {
                     />
                   </div>
                   <div className="grid grid-cols-[140px_1fr] items-center gap-4">
-                    <label className="text-sm font-medium text-muted-foreground">Journal</label>
+                    <label className="text-sm font-medium text-muted-foreground">Journal <span className="text-destructive">*</span></label>
                     <select 
-                      value={journal}
-                      onChange={(e) => setJournal(e.target.value)}
+                      value={journalId}
+                      onChange={(e) => setJournalId(e.target.value)}
                       className="flex h-10 w-full items-center justify-between rounded-md border border-border/80 bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                     >
-                      <option value="" disabled>Selection (From journals Many to one)</option>
-                      <option value="Sales">Sales</option>
-                      <option value="Purchases">Purchases</option>
-                      <option value="Bank">Bank</option>
-                      <option value="Miscellaneous">Miscellaneous</option>
+                      <option value="" disabled>Select Journal</option>
+                      {journals.map(j => (
+                        <option key={j.id} value={j.id}>{j.name} ({j.code})</option>
+                      ))}
                     </select>
+                  </div>
+                  <div className="grid grid-cols-[140px_1fr] items-center gap-4">
+                    <label className="text-sm font-medium text-muted-foreground">Reference</label>
+                    <Input 
+                      placeholder="e.g. INV/2026/001"
+                      value={reference}
+                      onChange={(e) => setReference(e.target.value)}
+                      className="bg-background border-border/80"
+                    />
                   </div>
                 </div>
               </div>
@@ -182,8 +302,9 @@ export default function JournalEntries() {
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-muted/10">
-                      <TableHead>Account</TableHead>
+                      <TableHead>Account <span className="text-destructive">*</span></TableHead>
                       <TableHead>Partner</TableHead>
+                      <TableHead>Analytic Account</TableHead>
                       <TableHead className="text-right">Debit</TableHead>
                       <TableHead className="text-right">Credit</TableHead>
                       <TableHead className="w-[50px]"></TableHead>
@@ -194,26 +315,38 @@ export default function JournalEntries() {
                       <TableRow key={index}>
                         <TableCell>
                           <select 
-                            value={line.account}
-                            onChange={(e) => updateLine(index, "account", e.target.value)}
+                            value={line.accountId}
+                            onChange={(e) => updateLine(index, "accountId", e.target.value)}
                             className="w-full bg-transparent border-0 focus:ring-0 p-0 text-sm text-foreground"
                           >
-                            <option value="" disabled>Selection From Chart of Accounts</option>
-                            <option value="Asset A/c">Asset A/c</option>
-                            <option value="Bank A/c">Bank A/c</option>
-                            <option value="Cash A/c">Cash A/c</option>
-                            <option value="Sales Revenue A/c">Sales Revenue A/c</option>
+                            <option value="" disabled>Select Account</option>
+                            {accounts.map(a => (
+                               <option key={a.id} value={a.id}>{a.code} - {a.name}</option>
+                            ))}
                           </select>
                         </TableCell>
                         <TableCell>
                           <select 
-                            value={line.partner}
-                            onChange={(e) => updateLine(index, "partner", e.target.value)}
+                            value={line.contactId}
+                            onChange={(e) => updateLine(index, "contactId", e.target.value)}
                             className="w-full bg-transparent border-0 focus:ring-0 p-0 text-sm text-foreground"
                           >
-                            <option value="">Selection from contact master</option>
-                            <option value="Rahul">Rahul</option>
-                            <option value="Raj">Raj</option>
+                            <option value="">None</option>
+                            {contacts.map(c => (
+                               <option key={c.id} value={c.id}>{c.name}</option>
+                            ))}
+                          </select>
+                        </TableCell>
+                        <TableCell>
+                          <select 
+                            value={line.analyticAccountId}
+                            onChange={(e) => updateLine(index, "analyticAccountId", e.target.value)}
+                            className="w-full bg-transparent border-0 focus:ring-0 p-0 text-sm text-foreground"
+                          >
+                            <option value="">None</option>
+                            {analyticAccounts.map(c => (
+                               <option key={c.id} value={c.id}>{c.name}</option>
+                            ))}
                           </select>
                         </TableCell>
                         <TableCell className="text-right text-destructive font-medium">
@@ -223,7 +356,7 @@ export default function JournalEntries() {
                             value={line.debit || ""}
                             onChange={(e) => updateLine(index, "debit", Number(e.target.value))}
                             className="w-24 text-right ml-auto bg-transparent border-border/50 h-8"
-                            placeholder="Rs. 0"
+                            placeholder="0"
                           />
                         </TableCell>
                         <TableCell className="text-right text-primary font-medium">
@@ -233,7 +366,7 @@ export default function JournalEntries() {
                             value={line.credit || ""}
                             onChange={(e) => updateLine(index, "credit", Number(e.target.value))}
                             className="w-24 text-right ml-auto bg-transparent border-border/50 h-8"
-                            placeholder="Rs. 0"
+                            placeholder="0"
                           />
                         </TableCell>
                         <TableCell>
@@ -244,12 +377,12 @@ export default function JournalEntries() {
                       </TableRow>
                     ))}
                     <TableRow className="bg-muted/5 font-semibold">
-                      <TableCell colSpan={2} className="text-right">Total:</TableCell>
-                      <TableCell className={`text-right ${totalDebit !== totalCredit ? "text-destructive" : ""}`}>
-                        Rs. {totalDebit.toLocaleString()}
+                      <TableCell colSpan={3} className="text-right">Total:</TableCell>
+                      <TableCell className={`text-right ${totalDebit !== totalCredit ? "text-amber-600" : ""}`}>
+                        {totalDebit.toLocaleString()}
                       </TableCell>
-                      <TableCell className={`text-right ${totalDebit !== totalCredit ? "text-destructive" : ""}`}>
-                        Rs. {totalCredit.toLocaleString()}
+                      <TableCell className={`text-right ${totalDebit !== totalCredit ? "text-amber-600" : ""}`}>
+                        {totalCredit.toLocaleString()}
                       </TableCell>
                       <TableCell></TableCell>
                     </TableRow>
@@ -267,8 +400,8 @@ export default function JournalEntries() {
                 <ul className="text-xs text-muted-foreground space-y-2">
                   <li><strong className="text-destructive">Account</strong> - Selection From Chart of Accounts (Many to one)</li>
                   <li><strong className="text-destructive">Partner</strong> - Selection from contact master</li>
+                  <li><strong className="text-destructive">Analytic Account</strong> - Selection from Cost Centers/Projects</li>
                 </ul>
-                <p className="text-xs mt-3 text-muted-foreground italic">The Transaction would be connected through Chart of Accounts</p>
               </div>
             </div>
           )}
@@ -281,43 +414,62 @@ export default function JournalEntries() {
                   <TableHeader>
                     <TableRow className="bg-muted/10 hover:bg-muted/10">
                       <TableHead>Date</TableHead>
-                      <TableHead>Number</TableHead>
-                      <TableHead>Partner</TableHead>
                       <TableHead>Journal</TableHead>
-                      <TableHead className="text-right">Total</TableHead>
+                      <TableHead>Reference</TableHead>
+                      <TableHead>Debit</TableHead>
+                      <TableHead>Credit</TableHead>
                       <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredEntries.length > 0 ? (
-                      filteredEntries.map((entry) => (
-                        <TableRow key={entry.id} className="group">
-                          <TableCell className="text-muted-foreground">
-                            {entry.date}
-                          </TableCell>
-                          <TableCell className="font-medium text-destructive">
-                            {entry.number}
-                          </TableCell>
-                          <TableCell className="text-foreground">
-                            {entry.partner}
-                          </TableCell>
-                          <TableCell className="text-primary font-medium">
-                            {entry.journal}
-                          </TableCell>
-                          <TableCell className="text-right font-medium">
-                            Rs. {entry.total.toLocaleString()}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={entry.status === "Posted" ? "default" : "outline"} className={entry.status === "Posted" ? "bg-green-500/10 text-green-600 border-green-200 hover:bg-green-500/20" : "text-blue-500 border-blue-200"}>
-                              {entry.status}
-                            </Badge>
-                          </TableCell>
-                        </TableRow>
-                      ))
+                      filteredEntries.map((entry) => {
+                        const sumDebit = entry.lines?.reduce((acc: number, l: any) => acc + (l.debit || 0), 0) || 0;
+                        const sumCredit = entry.lines?.reduce((acc: number, l: any) => acc + (l.credit || 0), 0) || 0;
+                        return (
+                          <TableRow key={entry.id} className="group">
+                            <TableCell className="text-muted-foreground">
+                              {new Date(entry.date).toLocaleDateString()}
+                            </TableCell>
+                            <TableCell className="font-medium text-foreground">
+                              {entry.journal?.name}
+                            </TableCell>
+                            <TableCell className="text-muted-foreground">
+                              {entry.reference || "N/A"}
+                            </TableCell>
+                            <TableCell className="font-medium text-destructive">
+                              Rs. {sumDebit.toLocaleString()}
+                            </TableCell>
+                            <TableCell className="text-primary font-medium">
+                              Rs. {sumCredit.toLocaleString()}
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={entry.status === "POSTED" ? "default" : "outline"} className={entry.status === "POSTED" ? "bg-emerald-500/10 text-emerald-600 border-emerald-200 hover:bg-emerald-500/20" : "text-blue-500 border-blue-200"}>
+                                {entry.status}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-right">
+                               {entry.status === "DRAFT" && (
+                                 <Button 
+                                    size="sm" 
+                                    variant="outline" 
+                                    className="h-7 text-xs bg-primary/10 text-primary border-primary/20 hover:bg-primary/20"
+                                    onClick={() => handlePostExisting(entry.id)}
+                                    disabled={loading}
+                                 >
+                                    <Send className="h-3 w-3 mr-1" />
+                                    Post
+                                 </Button>
+                               )}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
-                          No journal entries found.
+                        <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
+                          {loading ? "Loading entries..." : "No journal entries found."}
                         </TableCell>
                       </TableRow>
                     )}
@@ -325,24 +477,11 @@ export default function JournalEntries() {
                 </Table>
               </div>
 
-              {/* Pagination */}
+              {/* Pagination Placeholder */}
               <div className="p-4 border-t border-border/80 flex items-center justify-between">
                 <div className="text-sm text-muted-foreground">
                   Showing <span className="font-medium">{filteredEntries.length}</span> entries
                 </div>
-                <Pagination className="justify-end">
-                  <PaginationContent>
-                    <PaginationItem>
-                      <PaginationPrevious href="#" />
-                    </PaginationItem>
-                    <PaginationItem>
-                      <PaginationLink href="#" isActive>1</PaginationLink>
-                    </PaginationItem>
-                    <PaginationItem>
-                      <PaginationNext href="#" />
-                    </PaginationItem>
-                  </PaginationContent>
-                </Pagination>
               </div>
             </>
           )}

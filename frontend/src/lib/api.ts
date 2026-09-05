@@ -1,29 +1,45 @@
-import axios from "axios";
+export const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
-export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
-});
+export const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
+  const token = localStorage.getItem('token');
+  
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(options.headers as Record<string, string> || {}),
+  };
 
-// Attach Bearer token to every request
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
 
-// On 401 response, clear session and redirect to login
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // Only clear if we actually had a token (avoid redirect loop on login page)
-      const token = localStorage.getItem("token");
+  try {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      ...options,
+      headers,
+    });
+
+    if (response.status === 401) {
       if (token) {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
         window.location.href = "/login";
       }
+      throw new Error("Unauthorized");
     }
-    return Promise.reject(error);
+
+    // Some endpoints might return 204 No Content
+    if (response.status === 204) {
+      return null;
+    }
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      throw new Error(data?.error || data?.message || 'Something went wrong');
+    }
+
+    return data;
+  } catch (error) {
+    throw error;
   }
-);
+};

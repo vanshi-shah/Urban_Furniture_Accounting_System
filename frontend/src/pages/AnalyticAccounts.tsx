@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   Search, 
   ArrowLeft, 
   Plus,
-  Info
+  AlertCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,29 +24,71 @@ import {
   PaginationPrevious 
 } from "@/components/ui/pagination";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { apiFetch } from "@/lib/api";
 
-// Mock Data
-const initialAccounts = [
-  { id: "1", name: "Marketing / Advertising", type: "Expense", startDate: "01/01/2026", endDate: "31/12/2026", status: "Active", achieved: 45, committed: 200000, achievedValue: 10000 },
-  { id: "2", name: "R&D / Prototypes", type: "Expense", startDate: "01/01/2026", endDate: "31/12/2026", status: "Active", achieved: 75, committed: 500000, achievedValue: 375000 },
-  { id: "3", name: "Sales / Commission", type: "Expense", startDate: "01/01/2026", endDate: "31/12/2026", status: "Draft", achieved: 0, committed: 200000, achievedValue: 0 },
-];
+type AnalyticAccount = {
+  id: string;
+  name: string;
+  budgetLimit: number | null;
+};
 
 export default function AnalyticAccounts() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isFormView, setIsFormView] = useState(false);
+  
+  const [accounts, setAccounts] = useState<AnalyticAccount[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const filteredAccounts = initialAccounts.filter(a =>
+  const [newName, setNewName] = useState("");
+  const [newBudgetLimit, setNewBudgetLimit] = useState("");
+
+  const fetchAccounts = async () => {
+    try {
+      const data = await apiFetch('/master/analytic-accounts');
+      setAccounts(data || []);
+    } catch (err: any) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    fetchAccounts();
+  }, []);
+
+  const filteredAccounts = accounts.filter(a =>
     a.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleSave = async () => {
+    if (!newName) {
+      setError("Please fill in the account name.");
+      return;
+    }
+    
+    setLoading(true);
+    setError("");
+
+    try {
+      await apiFetch('/master/analytic-accounts', {
+        method: 'POST',
+        body: JSON.stringify({
+          name: newName,
+          budgetLimit: newBudgetLimit ? parseFloat(newBudgetLimit) : null
+        })
+      });
+      
+      await fetchAccounts();
+      
+      setIsFormView(false);
+      setNewName("");
+      setNewBudgetLimit("");
+    } catch (err: any) {
+      setError(err.message || "Failed to save analytic account");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (isFormView) {
     return (
@@ -62,10 +104,7 @@ export default function AnalyticAccounts() {
           <CardContent className="p-0">
             {/* Action Bar */}
             <div className="p-4 border-b border-border/80 flex flex-wrap items-center gap-4 bg-muted/20">
-              <Button size="sm" variant="outline" className="gap-2 font-semibold">
-                New
-              </Button>
-              <Button size="sm" className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold">
+              <Button size="sm" className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold" onClick={handleSave} disabled={loading}>
                 Confirm
               </Button>
               <Button 
@@ -73,66 +112,39 @@ export default function AnalyticAccounts() {
                 size="sm" 
                 onClick={() => setIsFormView(false)} 
                 className="gap-2 ml-auto font-semibold"
+                disabled={loading}
               >
                 Back
               </Button>
             </div>
 
+            {error && (
+              <div className="p-4 bg-destructive/10 text-destructive text-sm flex items-center gap-2 border-b border-destructive/20">
+                <AlertCircle className="h-4 w-4" />
+                {error}
+              </div>
+            )}
+
             {/* Form Fields */}
             <div className="p-8 max-w-2xl mx-auto space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-[150px_1fr] items-center gap-4">
-                <label className="text-muted-foreground font-medium text-right md:text-left text-sm leading-none">Analytic Account</label>
+                <label className="text-muted-foreground font-medium text-right md:text-left text-sm leading-none">Account Name <span className="text-destructive">*</span></label>
                 <Input 
                   placeholder="Enter account name..." 
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
                   className="bg-background border-border"
                 />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-[150px_1fr] items-center gap-4">
-                <label className="text-muted-foreground font-medium text-right md:text-left text-sm leading-none">Type</label>
-                <Select defaultValue="income">
-                  <SelectTrigger className="bg-background border-border">
-                    <SelectValue placeholder="Select type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="income">Income</SelectItem>
-                    <SelectItem value="expense">Expense</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            
-            {/* Distinct Okapi Badge */}
-            <div className="relative flex justify-center -mb-3 mt-4 z-10">
-              <Badge variant="secondary" className="bg-[#fcd3c7] text-[#8e3c31] hover:bg-[#fcd3c7]/80 px-4 py-1 text-sm font-semibold rounded-md border border-[#edb9aa] flex items-center gap-1 shadow-sm">
-                Distinct Okapi
-              </Badge>
-            </div>
-
-            {/* Sub Table */}
-            <div className="border-t border-border/80">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-muted/10 hover:bg-muted/10">
-                    <TableHead className="text-[#a83250] font-semibold">Budget</TableHead>
-                    <TableHead className="text-[#a83250] font-semibold">Start Date</TableHead>
-                    <TableHead className="text-[#a83250] font-semibold">End Date</TableHead>
-                    <TableHead className="text-[#a83250] font-semibold">Committed</TableHead>
-                    <TableHead className="text-[#a83250] font-semibold">Achieved</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  <TableRow className="hover:bg-muted/5 group">
-                    <TableCell className="font-medium text-muted-foreground text-sm">January 2026</TableCell>
-                    <TableCell className="text-muted-foreground text-sm">01/01/2026</TableCell>
-                    <TableCell className="text-muted-foreground text-sm">31/01/2026</TableCell>
-                    <TableCell className="text-muted-foreground text-sm">200000</TableCell>
-                    <TableCell className="text-muted-foreground text-sm">10000</TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-              <div className="p-4 text-xs text-[#d15456] italic pl-8 pb-8 flex items-start gap-1">
-                <span className="inline-block mt-0.5">↪</span>
-                All the Budgets where this Analytic Account is used
+                <label className="text-muted-foreground font-medium text-right md:text-left text-sm leading-none">Budget Limit</label>
+                <Input 
+                  type="number"
+                  placeholder="e.g. 5000" 
+                  value={newBudgetLimit}
+                  onChange={(e) => setNewBudgetLimit(e.target.value)}
+                  className="bg-background border-border"
+                />
               </div>
             </div>
           </CardContent>
@@ -140,6 +152,8 @@ export default function AnalyticAccounts() {
       </div>
     );
   }
+
+  const totalBudget = accounts.reduce((acc, curr) => acc + (curr.budgetLimit || 0), 0);
 
   return (
     <div className="flex flex-col gap-6 max-w-[1440px] mx-auto">
@@ -181,53 +195,24 @@ export default function AnalyticAccounts() {
                   <TableHeader>
                     <TableRow className="bg-muted/10 hover:bg-muted/10">
                       <TableHead>Analytic Account</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Start Date</TableHead>
-                      <TableHead>End Date</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Achieved %</TableHead>
+                      <TableHead>Budget Limit</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredAccounts.length > 0 ? (
                       filteredAccounts.map((account) => (
-                        <TableRow key={account.id} onClick={() => setIsFormView(true)} className="group cursor-pointer hover:bg-muted/5">
+                        <TableRow key={account.id} className="group hover:bg-muted/5">
                           <TableCell className="font-medium text-foreground">
                             {account.name}
                           </TableCell>
-                          <TableCell className="text-muted-foreground">
-                            {account.type}
-                          </TableCell>
-                          <TableCell className="text-muted-foreground text-sm">
-                            {account.startDate}
-                          </TableCell>
-                          <TableCell className="text-muted-foreground text-sm">
-                            {account.endDate}
-                          </TableCell>
-                          <TableCell>
-                            <Badge 
-                              variant={account.status === "Active" ? "default" : "outline"}
-                              className={account.status === "Active" ? "bg-muted-green text-white hover:bg-muted-green/90" : ""}
-                            >
-                              {account.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <div className="h-2 w-full max-w-[60px] bg-muted rounded-full overflow-hidden">
-                                <div 
-                                  className="h-full bg-primary" 
-                                  style={{ width: `${account.achieved}%` }}
-                                />
-                              </div>
-                              <span className="text-xs text-muted-foreground font-mono">{account.achieved}%</span>
-                            </div>
+                          <TableCell className="text-muted-foreground font-mono">
+                            {account.budgetLimit !== null ? account.budgetLimit.toLocaleString() : "-"}
                           </TableCell>
                         </TableRow>
                       ))
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
+                        <TableCell colSpan={2} className="h-24 text-center text-muted-foreground">
                           No analytic accounts found.
                         </TableCell>
                       </TableRow>
@@ -269,34 +254,23 @@ export default function AnalyticAccounts() {
               {/* CSS Only Pie Chart representation */}
               <div className="relative w-48 h-48 rounded-full shadow-inner bg-muted mb-8"
                    style={{
-                     background: "conic-gradient(#5F6848 0% 45%, #F7F5EF 45% 100%)",
+                     background: "conic-gradient(#5F6848 0% 10%, #F7F5EF 10% 100%)",
                      border: "1px solid #DCDDD3"
                    }}
               >
                 <div className="absolute inset-0 m-auto w-32 h-32 bg-card rounded-full shadow-sm flex items-center justify-center flex-col border border-border/50">
-                  <span className="text-2xl font-bold text-foreground">45%</span>
-                  <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mt-1">Achieved</span>
+                  <span className="text-2xl font-bold text-foreground">10%</span>
+                  <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mt-1">Used</span>
                 </div>
               </div>
 
               <div className="w-full space-y-4">
                 <div className="flex justify-between items-center border-b border-border/40 pb-2">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <div className="w-3 h-3 rounded-sm bg-primary" />
-                    Achieved / Spent
-                  </div>
-                  <span className="font-mono font-medium text-foreground">₹4,50,000</span>
-                </div>
-                <div className="flex justify-between items-center pb-2">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <div className="w-3 h-3 rounded-sm bg-[#F7F5EF] border border-border" />
-                    Allocated
+                    Total Budget Limits
                   </div>
-                  <span className="font-mono font-medium text-foreground">₹5,50,000</span>
-                </div>
-                <div className="pt-4 mt-2 border-t border-border/80 flex justify-between items-center">
-                  <span className="font-semibold text-foreground text-sm">Total Planned</span>
-                  <span className="font-mono font-bold text-foreground">₹10,00,000</span>
+                  <span className="font-mono font-medium text-foreground">{totalBudget.toLocaleString()}</span>
                 </div>
               </div>
             </CardContent>

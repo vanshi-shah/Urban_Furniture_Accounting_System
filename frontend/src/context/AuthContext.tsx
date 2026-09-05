@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { api } from "@/lib/api";
+import { apiFetch } from "@/lib/api";
 import { User, LoginCredentials, RegisterCredentials, AuthResponse } from "@/types/auth";
 
 interface AuthContextType {
@@ -38,12 +38,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     // Verify token is still valid on the server
-    api
-      .get<{ success: boolean; user: User }>("/auth/me")
-      .then((res) => {
-        if (res.data.success && res.data.user) {
-          setUser(res.data.user);
-          localStorage.setItem("user", JSON.stringify(res.data.user));
+    apiFetch("/auth/me")
+      .then((data: any) => {
+        if (data.success && data.user) {
+          setUser(data.user);
+          localStorage.setItem("user", JSON.stringify(data.user));
         }
       })
       .catch(() => {
@@ -59,8 +58,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (credentials: LoginCredentials): Promise<User> => {
-    const response = await api.post<AuthResponse>("/auth/login", credentials);
-    const { token: receivedToken, user: receivedUser } = response.data;
+    const data: any = await apiFetch("/auth/login", {
+      method: "POST",
+      body: JSON.stringify(credentials)
+    });
+    const { token: receivedToken, user: receivedUser } = data;
 
     setToken(receivedToken);
     setUser(receivedUser);
@@ -72,8 +74,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const register = async (payload: RegisterCredentials): Promise<User> => {
-    const response = await api.post<AuthResponse>("/auth/register", payload);
-    const { token: receivedToken, user: receivedUser } = response.data;
+    const data: any = await apiFetch("/auth/register", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+    const { token: receivedToken, user: receivedUser } = data;
 
     setToken(receivedToken);
     setUser(receivedUser);

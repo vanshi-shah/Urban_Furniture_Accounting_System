@@ -25,7 +25,10 @@ async function createSubmission(req, res, next) {
   try {
     const ownerId = req.user.id || req.user.userId;
     const companyId = req.user.companyId;
-    const data = createSubmissionSchema.parse(req.body);
+    const data = createSubmissionSchema.parse({
+      description: "No description provided",
+      ...req.body
+    });
     const submission = await prisma.submission.create({
       data: {
         ...data,

@@ -1,5 +1,4 @@
-import { useState, useMemo } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Search,
@@ -11,7 +10,6 @@ import {
   Upload,
   Package,
   Boxes,
-  Briefcase,
   Tag,
   DollarSign,
   TrendingUp,
@@ -19,11 +17,10 @@ import {
   Edit,
   X,
   PlusCircle,
-  Percent,
   Sparkles,
-  Info,
   Check,
-  ChevronDown
+  ChevronDown,
+  AlertCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,9 +29,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Textarea } from "@/components/ui/textarea";
-import { api } from "@/lib/api";
+import { apiFetch } from "@/lib/api";
 
-export type ProductType = "Goods" | "Service" | "Combo";
+export type ProductType = "GOODS" | "SERVICE" | "COMBO";
 
 export interface Product {
   id: string;
@@ -46,78 +43,19 @@ export interface Product {
   imageUrl?: string;
   sku?: string;
   description?: string;
-  createdAt?: string;
 }
 
-// Initial default products matching wireframe and furniture enterprise context
-const initialProducts: Product[] = [
-  {
-    id: "prod-1",
-    name: "Air Conditioner",
-    type: "Goods",
-    category: "Electronics",
-    salesPrice: 25000,
-    cost: 15000,
-    sku: "ELEC-AC-01",
-    description: "Inverter 1.5 Ton split air conditioner with smart climate sensing.",
-    imageUrl: "https://images.unsplash.com/photo-1628744448840-55bdb2497bd4?w=400&auto=format&fit=crop&q=80",
-  },
-  {
-    id: "prod-2",
-    name: "Refrigerator",
-    type: "Goods",
-    category: "Electronics",
-    salesPrice: 10000,
-    cost: 7000,
-    sku: "ELEC-RF-02",
-    description: "Double door frost-free multi-zone luxury refrigerator.",
-    imageUrl: "https://images.unsplash.com/photo-1584992236310-6edddc08acff?w=400&auto=format&fit=crop&q=80",
-  },
-  {
-    id: "prod-3",
-    name: "Teakwood Dining Table (6-Seater)",
-    type: "Goods",
-    category: "Dining Furniture",
-    salesPrice: 65000,
-    cost: 38000,
-    sku: "FURN-DT-03",
-    description: "Solid aged Mysore teak with matte satin oil finish.",
-    imageUrl: "https://images.unsplash.com/photo-1615066390971-03e4e1c36ddf?w=400&auto=format&fit=crop&q=80",
-  },
-  {
-    id: "prod-4",
-    name: "Chesterfield Leather Armchair",
-    type: "Goods",
-    category: "Living Room Furniture",
-    salesPrice: 42000,
-    cost: 24000,
-    sku: "FURN-CH-04",
-    description: "Hand-tufted top-grain cognac leather accent chair.",
-    imageUrl: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&auto=format&fit=crop&q=80",
-  },
-  {
-    id: "prod-5",
-    name: "Architectural Interior Consultation",
-    type: "Service",
-    category: "Architectural Services",
-    salesPrice: 35000,
-    cost: 10000,
-    sku: "SERV-INT-05",
-    description: "On-site spatial planning, 3D CAD visualization, and timber material curation.",
-    imageUrl: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400&auto=format&fit=crop&q=80",
-  },
-  {
-    id: "prod-6",
-    name: "Executive Workspace Suite Combo",
-    type: "Combo",
-    category: "Combos & Sets",
-    salesPrice: 115000,
-    cost: 72000,
-    sku: "COMB-OFF-06",
-    description: "Includes Walnut Executive Desk, Ergonomic Mesh Chair, and Credenza storage unit.",
-    imageUrl: "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=400&auto=format&fit=crop&q=80",
-  }
-];
+const emptyProduct: Product = {
+  id: "",
+  name: "",
+  type: "GOODS",
+  category: "General",
+  salesPrice: 0,
+  cost: 0,
+  sku: "",
+  description: "",
+  imageUrl: ""
+};
 
 const defaultCategories = [
   "Electronics",
@@ -130,21 +68,8 @@ const defaultCategories = [
   "Raw Materials"
 ];
 
-const emptyProduct: Product = {
-  id: "",
-  name: "",
-  type: "Goods",
-  category: "Electronics",
-  salesPrice: 0,
-  cost: 0,
-  sku: "",
-  description: "",
-  imageUrl: ""
-};
-
 export default function Products() {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
 
   // View state: "list" | "kanban" | "form"
   const [viewMode, setViewMode] = useState<"list" | "kanban" | "form">("list");
@@ -156,63 +81,50 @@ export default function Products() {
   const [activeProduct, setActiveProduct] = useState<Product>(emptyProduct);
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [apiError, setApiError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   // Category selection with "Create on the Fly" state
   const [categories, setCategories] = useState<string[]>(defaultCategories);
   const [isAddingCategory, setIsAddingCategory] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
 
-  // Local fallback storage for robust instant editing/saving
-  const [localProducts, setLocalProducts] = useState<Product[]>(() => {
-    const saved = localStorage.getItem("modura_products_master");
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch {
-        return initialProducts;
+  const [productsList, setProductsList] = useState<Product[]>([]);
+
+  const fetchProducts = async () => {
+    try {
+      const data = await apiFetch('/master/products');
+      setProductsList(data || []);
+      // Extract unique categories
+      if (data) {
+        const uniqueCategories = new Set(defaultCategories);
+        data.forEach((p: any) => {
+          if (p.category) uniqueCategories.add(p.category);
+        });
+        setCategories(Array.from(uniqueCategories));
       }
+    } catch (err: any) {
+      console.error(err);
     }
-    return initialProducts;
-  });
+  };
 
-  // Query products from backend or use local state
-  const { data: productsData } = useQuery<Product[]>({
-    queryKey: ["products-master"],
-    queryFn: async () => {
-      try {
-        const res = await api.get("/master/products");
-        if (res.data && Array.isArray(res.data) && res.data.length > 0) {
-          // Normalize backend fields if needed
-          return res.data.map((item: any) => ({
-            id: item.id || `prod-${Date.now()}`,
-            name: item.name || "Unnamed Product",
-            type: (item.type as ProductType) || "Goods",
-            category: item.category || "General",
-            salesPrice: item.salesPrice || item.price || 0,
-            cost: item.cost || 0,
-            sku: item.sku || "",
-            description: item.description || "",
-            imageUrl: item.imageUrl || ""
-          }));
-        }
-        return localProducts;
-      } catch {
-        return localProducts;
-      }
-    },
-  });
-
-  const productsList = productsData || localProducts;
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
   // Filter products by search and type
   const filteredProducts = useMemo(() => {
     return productsList.filter((p) => {
       const q = searchTerm.toLowerCase();
+      const categoryStr = p.category || "";
+      const skuStr = p.sku || "";
+      const typeStr = p.type || "";
+      
       const matchesSearch =
         p.name.toLowerCase().includes(q) ||
-        p.category.toLowerCase().includes(q) ||
-        p.type.toLowerCase().includes(q) ||
-        (p.sku && p.sku.toLowerCase().includes(q));
+        categoryStr.toLowerCase().includes(q) ||
+        typeStr.toLowerCase().includes(q) ||
+        skuStr.toLowerCase().includes(q);
       
       const matchesType = typeFilter === "ALL" || p.type === typeFilter;
       return matchesSearch && matchesType;
@@ -250,10 +162,10 @@ export default function Products() {
   const handleOpenNew = () => {
     setActiveProduct({
       ...emptyProduct,
-      id: `prod-${Date.now()}`,
       category: categories[0] || "Electronics",
     });
     setFormErrors({});
+    setApiError("");
     setSaveSuccess(false);
     setIsAddingCategory(false);
     setNewCategoryName("");
@@ -264,6 +176,7 @@ export default function Products() {
   const handleOpenEdit = (product: Product) => {
     setActiveProduct({ ...product });
     setFormErrors({});
+    setApiError("");
     setSaveSuccess(false);
     setIsAddingCategory(false);
     setNewCategoryName("");
@@ -283,7 +196,7 @@ export default function Products() {
     setIsAddingCategory(false);
   };
 
-  // Save product (backend or local state)
+  // Save product
   const handleSaveProduct = async () => {
     const errors: { [key: string]: string } = {};
     if (!activeProduct.name.trim()) {
@@ -302,51 +215,41 @@ export default function Products() {
     }
 
     setFormErrors({});
+    setApiError("");
+    setLoading(true);
 
-    const productToSave: Product = {
+    const productToSave = {
       ...activeProduct,
       salesPrice: Number(activeProduct.salesPrice) || 0,
       cost: Number(activeProduct.cost) || 0,
     };
 
-    // Attempt backend sync
     try {
-      if (productsList.some((p) => p.id === productToSave.id)) {
-        await api.put(`/master/products/${productToSave.id}`, {
-          ...productToSave,
-          price: productToSave.salesPrice,
-        }).catch(() => {});
-        
-        const updated = localProducts.map((p) =>
-          p.id === productToSave.id ? productToSave : p
-        );
-        setLocalProducts(updated);
-        localStorage.setItem("modura_products_master", JSON.stringify(updated));
+      if (productToSave.id) {
+        await apiFetch(`/master/products/${productToSave.id}`, {
+          method: 'PUT',
+          body: JSON.stringify(productToSave)
+        });
       } else {
-        await api.post("/master/products", {
-          ...productToSave,
-          price: productToSave.salesPrice,
-        }).catch(() => {});
-        
-        const updated = [productToSave, ...localProducts];
-        setLocalProducts(updated);
-        localStorage.setItem("modura_products_master", JSON.stringify(updated));
+        const { id, ...newProduct } = productToSave;
+        await apiFetch('/master/products', {
+          method: 'POST',
+          body: JSON.stringify(newProduct)
+        });
       }
-    } catch {
-      const exists = localProducts.some((p) => p.id === productToSave.id);
-      const updated = exists
-        ? localProducts.map((p) => (p.id === productToSave.id ? productToSave : p))
-        : [productToSave, ...localProducts];
-      setLocalProducts(updated);
-      localStorage.setItem("modura_products_master", JSON.stringify(updated));
-    }
 
-    queryClient.invalidateQueries({ queryKey: ["products-master"] });
-    setSaveSuccess(true);
-    setTimeout(() => {
-      setSaveSuccess(false);
-      setViewMode("list");
-    }, 700);
+      await fetchProducts();
+
+      setSaveSuccess(true);
+      setTimeout(() => {
+        setSaveSuccess(false);
+        setViewMode("list");
+      }, 700);
+    } catch (err: any) {
+      setApiError(err.message || "Failed to save product");
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Delete product
@@ -356,62 +259,14 @@ export default function Products() {
       return;
     }
     try {
-      await api.delete(`/master/products/${id}`).catch(() => {});
-    } catch {}
-
-    const updated = localProducts.filter((p) => p.id !== id);
-    setLocalProducts(updated);
-    localStorage.setItem("modura_products_master", JSON.stringify(updated));
-    queryClient.invalidateQueries({ queryKey: ["products-master"] });
-  };
-
-  // Image Upload handler
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setActiveProduct((prev) => ({ ...prev, imageUrl: reader.result as string }));
-      };
-      reader.readAsDataURL(file);
+      await apiFetch(`/master/products/${id}`, {
+        method: 'DELETE'
+      });
+      await fetchProducts();
+    } catch (err: any) {
+      alert(err.message || "Failed to delete product");
     }
   };
-
-  // Quick preset samples
-  const samplePresets = [
-    {
-      name: "Air Conditioner Inverter",
-      type: "Goods" as ProductType,
-      category: "Electronics",
-      salesPrice: 25000,
-      cost: 15000,
-      imageUrl: "https://images.unsplash.com/photo-1628744448840-55bdb2497bd4?w=400&auto=format&fit=crop&q=80",
-    },
-    {
-      name: "Smart French-Door Refrigerator",
-      type: "Goods" as ProductType,
-      category: "Electronics",
-      salesPrice: 10000,
-      cost: 7000,
-      imageUrl: "https://images.unsplash.com/photo-1584992236310-6edddc08acff?w=400&auto=format&fit=crop&q=80",
-    },
-    {
-      name: "Teak Dining Table Masterpiece",
-      type: "Goods" as ProductType,
-      category: "Dining Furniture",
-      salesPrice: 65000,
-      cost: 38000,
-      imageUrl: "https://images.unsplash.com/photo-1615066390971-03e4e1c36ddf?w=400&auto=format&fit=crop&q=80",
-    },
-    {
-      name: "Custom Furniture CAD Styling",
-      type: "Service" as ProductType,
-      category: "Architectural Services",
-      salesPrice: 35000,
-      cost: 10000,
-      imageUrl: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400&auto=format&fit=crop&q=80",
-    }
-  ];
 
   // Calculated margin stats for active form product
   const calculatedProfit = (activeProduct.salesPrice || 0) - (activeProduct.cost || 0);
@@ -420,12 +275,11 @@ export default function Products() {
     : 0;
 
   // -------------------------------------------------------------
-  // RENDER 1: PRODUCT MASTER FORM VIEW (Matching Wireframe)
+  // RENDER 1: PRODUCT MASTER FORM VIEW
   // -------------------------------------------------------------
   if (viewMode === "form") {
     return (
       <div className="flex flex-col gap-6 max-w-5xl mx-auto pb-12">
-        {/* Top Action Bar matching wireframe: New, Confirm, Back */}
         <div className="flex items-center justify-between p-4 rounded-2xl border border-border/80 bg-card shadow-xs">
           <div className="flex items-center gap-2">
             <Button
@@ -441,6 +295,7 @@ export default function Products() {
               variant="outline"
               className="border-border hover:bg-secondary text-xs h-9 px-4 font-semibold text-foreground"
               onClick={handleSaveProduct}
+              disabled={loading}
             >
               <CheckCircle2 className="h-3.5 w-3.5 mr-1 text-emerald-600 dark:text-emerald-400" />
               Confirm
@@ -453,6 +308,7 @@ export default function Products() {
               variant="outline"
               className="text-xs h-9 px-4 border-border/80 text-foreground"
               onClick={() => setViewMode("list")}
+              disabled={loading}
             >
               <ArrowLeft className="h-3.5 w-3.5 mr-1" />
               Back
@@ -460,7 +316,13 @@ export default function Products() {
           </div>
         </div>
 
-        {/* Save Confirmation Alert */}
+        {apiError && (
+          <div className="p-4 bg-destructive/10 text-destructive text-sm flex items-center gap-2 border border-destructive/20 rounded-md">
+            <AlertCircle className="h-4 w-4" />
+            {apiError}
+          </div>
+        )}
+
         {saveSuccess && (
           <Alert className="bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-400">
             <CheckCircle2 className="h-4 w-4" />
@@ -470,10 +332,8 @@ export default function Products() {
           </Alert>
         )}
 
-        {/* Form View Body Card */}
         <Card className="border-border/80 shadow-sm bg-card">
           <CardContent className="p-6 sm:p-8">
-            {/* Header / Subtitle */}
             <div className="flex flex-wrap items-center justify-between gap-2 pb-6 border-b border-border/60 mb-6">
               <div>
                 <h2 className="text-xl font-bold tracking-tight text-foreground">
@@ -487,23 +347,20 @@ export default function Products() {
                 <Badge
                   variant="outline"
                   className={`text-xs px-2.5 py-0.5 font-semibold ${
-                    activeProduct.type === "Goods"
+                    activeProduct.type === "GOODS"
                       ? "border-primary/40 text-primary bg-primary/5"
-                      : activeProduct.type === "Service"
+                      : activeProduct.type === "SERVICE"
                       ? "border-accent/50 text-accent-foreground bg-accent/10"
                       : "border-purple-500/40 text-purple-700 dark:text-purple-300 bg-purple-500/10"
                   }`}
                 >
-                  {activeProduct.type === "Goods" ? "Physical Goods" : activeProduct.type === "Service" ? "Billable Service" : "Product Combo Pack"}
+                  {activeProduct.type === "GOODS" ? "Physical Goods" : activeProduct.type === "SERVICE" ? "Billable Service" : "Product Combo Pack"}
                 </Badge>
               </div>
             </div>
 
-            {/* Main Form Layout (2 Columns: Data Fields + Upload Box) */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Left Column: Form Fields */}
               <div className="lg:col-span-2 space-y-5">
-                {/* 1. Product Name */}
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-foreground flex items-center justify-between">
                     <span className="flex items-center gap-1.5">
@@ -525,7 +382,6 @@ export default function Products() {
                   )}
                 </div>
 
-                {/* 2. Product Type Dropdown (Goods, Service, Combo) */}
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-foreground flex items-center justify-between">
                     <span className="flex items-center gap-1.5">
@@ -535,20 +391,19 @@ export default function Products() {
                     <span className="text-[11px] text-muted-foreground">Drop-down selection</span>
                   </label>
                   
-                  {/* Visual Dropdown / Button Selector for Goods, Service, Combo */}
                   <div className="grid grid-cols-3 gap-3">
                     <button
                       type="button"
-                      onClick={() => setActiveProduct({ ...activeProduct, type: "Goods" })}
+                      onClick={() => setActiveProduct({ ...activeProduct, type: "GOODS" })}
                       className={`p-3 rounded-xl border text-left transition-all flex flex-col gap-1 ${
-                        activeProduct.type === "Goods"
+                        activeProduct.type === "GOODS"
                           ? "border-primary bg-primary/10 text-primary ring-1 ring-primary shadow-xs"
                           : "border-border/80 bg-background/50 text-muted-foreground hover:bg-secondary/40"
                       }`}
                     >
                       <div className="flex items-center justify-between w-full">
                         <span className="text-xs font-bold text-foreground">Goods</span>
-                        {activeProduct.type === "Goods" && <Check className="h-3.5 w-3.5 text-primary" />}
+                        {activeProduct.type === "GOODS" && <Check className="h-3.5 w-3.5 text-primary" />}
                       </div>
                       <span className="text-[10px] text-muted-foreground leading-tight">
                         Physical furniture & inventory
@@ -557,16 +412,16 @@ export default function Products() {
 
                     <button
                       type="button"
-                      onClick={() => setActiveProduct({ ...activeProduct, type: "Service" })}
+                      onClick={() => setActiveProduct({ ...activeProduct, type: "SERVICE" })}
                       className={`p-3 rounded-xl border text-left transition-all flex flex-col gap-1 ${
-                        activeProduct.type === "Service"
+                        activeProduct.type === "SERVICE"
                           ? "border-primary bg-primary/10 text-primary ring-1 ring-primary shadow-xs"
                           : "border-border/80 bg-background/50 text-muted-foreground hover:bg-secondary/40"
                       }`}
                     >
                       <div className="flex items-center justify-between w-full">
                         <span className="text-xs font-bold text-foreground">Service</span>
-                        {activeProduct.type === "Service" && <Check className="h-3.5 w-3.5 text-primary" />}
+                        {activeProduct.type === "SERVICE" && <Check className="h-3.5 w-3.5 text-primary" />}
                       </div>
                       <span className="text-[10px] text-muted-foreground leading-tight">
                         Design, delivery & styling
@@ -575,16 +430,16 @@ export default function Products() {
 
                     <button
                       type="button"
-                      onClick={() => setActiveProduct({ ...activeProduct, type: "Combo" })}
+                      onClick={() => setActiveProduct({ ...activeProduct, type: "COMBO" })}
                       className={`p-3 rounded-xl border text-left transition-all flex flex-col gap-1 ${
-                        activeProduct.type === "Combo"
+                        activeProduct.type === "COMBO"
                           ? "border-primary bg-primary/10 text-primary ring-1 ring-primary shadow-xs"
                           : "border-border/80 bg-background/50 text-muted-foreground hover:bg-secondary/40"
                       }`}
                     >
                       <div className="flex items-center justify-between w-full">
                         <span className="text-xs font-bold text-foreground">Combo</span>
-                        {activeProduct.type === "Combo" && <Check className="h-3.5 w-3.5 text-primary" />}
+                        {activeProduct.type === "COMBO" && <Check className="h-3.5 w-3.5 text-primary" />}
                       </div>
                       <span className="text-[10px] text-muted-foreground leading-tight">
                         Bundled room & office sets
@@ -593,16 +448,12 @@ export default function Products() {
                   </div>
                 </div>
 
-                {/* 3. Category (Many2one Field with "Create on the fly") */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
                     <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
                       <Tag className="h-3.5 w-3.5 text-primary" />
                       Category
                     </label>
-                    <span className="text-[11px] text-primary/80 font-medium">
-                      Many2one Field (Create on the fly)
-                    </span>
                   </div>
 
                   {!isAddingCategory ? (
@@ -611,7 +462,7 @@ export default function Products() {
                         <select
                           value={activeProduct.category}
                           onChange={(e) => setActiveProduct({ ...activeProduct, category: e.target.value })}
-                          className="w-full h-10 px-3 pr-8 rounded-xl border border-border/80 bg-background/70 text-xs font-medium text-foreground focus:outline-hidden focus:ring-1 focus:ring-primary appearance-none cursor-pointer"
+                          className="w-full h-10 px-3 pr-8 rounded-xl border border-border/80 bg-background/70 text-xs font-medium text-foreground focus:outline-none focus:ring-1 focus:ring-primary appearance-none cursor-pointer"
                         >
                           {categories.map((cat) => (
                             <option key={cat} value={cat}>
@@ -634,7 +485,6 @@ export default function Products() {
                       </Button>
                     </div>
                   ) : (
-                    /* Inline "Create on the fly" Input */
                     <div className="p-3 rounded-xl border border-primary/40 bg-primary/5 space-y-2">
                       <div className="text-[11px] font-semibold text-primary flex items-center gap-1">
                         <Sparkles className="h-3 w-3" />
@@ -647,8 +497,8 @@ export default function Products() {
                           onChange={(e) => setNewCategoryName(e.target.value)}
                           onKeyDown={(e) => {
                             if (e.key === "Enter") {
-                              e.preventDefault();
-                              handleCreateCategoryOnTheFly();
+                               e.preventDefault();
+                               handleCreateCategoryOnTheFly();
                             }
                           }}
                           className="h-9 bg-background text-xs"
@@ -677,7 +527,6 @@ export default function Products() {
                   )}
                 </div>
 
-                {/* 4. Pricing Row: Sales Price & Cost (Financial Precision) */}
                 <div className="pt-2">
                   <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-foreground mb-3">
                     <DollarSign className="h-3.5 w-3.5 text-primary" />
@@ -685,7 +534,6 @@ export default function Products() {
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {/* Sales Price */}
                     <div className="p-4 rounded-xl border border-border/80 bg-background/50 space-y-2">
                       <label className="text-xs font-semibold text-foreground flex items-center justify-between">
                         <span>Sales Price</span>
@@ -713,7 +561,6 @@ export default function Products() {
                       </div>
                     </div>
 
-                    {/* Cost */}
                     <div className="p-4 rounded-xl border border-border/80 bg-background/50 space-y-2">
                       <label className="text-xs font-semibold text-foreground flex items-center justify-between">
                         <span>Cost</span>
@@ -737,12 +584,11 @@ export default function Products() {
                         />
                       </div>
                       <div className="text-[11px] text-muted-foreground">
-                        Acquisition/Bill of Materials: <strong>{formatCurrency(activeProduct.cost)}</strong>
+                        Acquisition/BOM: <strong>{formatCurrency(activeProduct.cost)}</strong>
                       </div>
                     </div>
                   </div>
 
-                  {/* Dynamic Margin Indicator (Quiet Luxury Financial Metric) */}
                   <div className="mt-3 p-3 rounded-xl border border-border/60 bg-secondary/30 flex items-center justify-between text-xs">
                     <div className="flex items-center gap-2">
                       <TrendingUp className="h-4 w-4 text-primary" />
@@ -766,7 +612,6 @@ export default function Products() {
                   </div>
                 </div>
 
-                {/* 5. Additional Ledger Meta: SKU & Description */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
                   <div className="space-y-1">
                     <label className="text-[11px] font-semibold text-muted-foreground">
@@ -792,99 +637,6 @@ export default function Products() {
                   </div>
                 </div>
               </div>
-
-              {/* Right Column: Upload Image Box matching wireframe */}
-              <div className="flex flex-col items-center justify-start space-y-4">
-                <div className="w-full flex items-center justify-between">
-                  <label className="text-xs font-semibold text-foreground">
-                    Upload Image
-                  </label>
-                  {activeProduct.imageUrl && (
-                    <button
-                      type="button"
-                      onClick={() => setActiveProduct({ ...activeProduct, imageUrl: "" })}
-                      className="text-[11px] text-destructive hover:underline font-medium"
-                    >
-                      Remove
-                    </button>
-                  )}
-                </div>
-
-                {/* Upload Area Box */}
-                <div className="relative w-full h-64 rounded-2xl border-2 border-dashed border-border/80 bg-secondary/20 flex flex-col items-center justify-center p-4 text-center group hover:border-primary/60 transition-all overflow-hidden">
-                  {activeProduct.imageUrl ? (
-                    <div className="relative w-full h-full flex flex-col items-center justify-center">
-                      <img
-                        src={activeProduct.imageUrl}
-                        alt="Product Preview"
-                        className="h-44 w-full object-cover rounded-xl border border-border/60 shadow-xs"
-                      />
-                      <button
-                        type="button"
-                        className="absolute top-2 right-2 p-1.5 rounded-full bg-background/80 text-destructive hover:bg-destructive hover:text-white shadow-xs transition-colors"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setActiveProduct({ ...activeProduct, imageUrl: "" });
-                        }}
-                        title="Delete image"
-                      >
-                        <X className="h-3.5 w-3.5" />
-                      </button>
-                      <span className="text-[11px] text-muted-foreground mt-2 font-medium">
-                        Click box to upload new photo
-                      </span>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center space-y-2 text-muted-foreground">
-                      <div className="h-12 w-12 rounded-full bg-secondary flex items-center justify-center group-hover:scale-105 transition-transform text-primary">
-                        <Upload className="h-5 w-5" />
-                      </div>
-                      <div className="text-xs font-semibold text-foreground">
-                        Upload Image
-                      </div>
-                      <p className="text-[11px] text-muted-foreground max-w-[180px]">
-                        Click or drag image file here (PNG, JPG, WebP)
-                      </p>
-                    </div>
-                  )}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="absolute inset-0 opacity-0 cursor-pointer"
-                  />
-                </div>
-
-                {/* Quick Presets for Demo / Testing */}
-                <div className="w-full space-y-2 pt-2 border-t border-border/60">
-                  <div className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1">
-                    <Sparkles className="h-3 w-3 text-primary" />
-                    1-Click Demo Fill Presets:
-                  </div>
-                  <div className="grid grid-cols-2 gap-1.5">
-                    {samplePresets.map((preset) => (
-                      <button
-                        key={preset.name}
-                        type="button"
-                        onClick={() => {
-                          setActiveProduct((prev) => ({
-                            ...prev,
-                            name: preset.name,
-                            type: preset.type,
-                            category: preset.category,
-                            salesPrice: preset.salesPrice,
-                            cost: preset.cost,
-                            imageUrl: preset.imageUrl,
-                          }));
-                        }}
-                        className="p-1.5 rounded-lg border border-border/60 bg-card hover:bg-secondary text-left text-[10px] text-foreground font-medium truncate transition-colors"
-                      >
-                        {preset.name}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
             </div>
           </CardContent>
         </Card>
@@ -897,7 +649,6 @@ export default function Products() {
   // -------------------------------------------------------------
   return (
     <div className="flex flex-col gap-6 max-w-7xl mx-auto pb-12">
-      {/* Page Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
@@ -908,7 +659,6 @@ export default function Products() {
           </p>
         </div>
 
-        {/* Global Stats Bar */}
         <div className="flex items-center gap-3 bg-card px-4 py-2 rounded-2xl border border-border/80 shadow-2xs">
           <div className="text-right">
             <div className="text-[10px] uppercase font-semibold text-muted-foreground">Total Catalogue</div>
@@ -924,9 +674,7 @@ export default function Products() {
 
       <Card className="border-border/80 shadow-xs bg-card">
         <CardContent className="p-0">
-          {/* Top Action Bar matching wireframe: New, Search, Back, View Switcher */}
           <div className="p-4 border-b border-border/80 flex flex-wrap items-center justify-between gap-3 bg-secondary/30">
-            {/* Left Actions: New, Back */}
             <div className="flex items-center gap-2">
               <Button
                 size="sm"
@@ -948,7 +696,6 @@ export default function Products() {
               </Button>
             </div>
 
-            {/* Center: Search & Type Filter */}
             <div className="flex items-center gap-2 flex-1 max-w-xl">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -961,9 +708,8 @@ export default function Products() {
                 />
               </div>
 
-              {/* Quick Type Filter Pills */}
               <div className="hidden sm:flex items-center gap-1 bg-background/60 p-0.5 rounded-lg border border-border/70 text-[11px]">
-                {["ALL", "Goods", "Service", "Combo"].map((t) => (
+                {["ALL", "GOODS", "SERVICE", "COMBO"].map((t) => (
                   <button
                     key={t}
                     onClick={() => setTypeFilter(t)}
@@ -979,7 +725,6 @@ export default function Products() {
               </div>
             </div>
 
-            {/* Right: View Toggle (List View vs Kanban View) */}
             <div className="flex items-center gap-1 bg-background/60 p-1 rounded-xl border border-border/80">
               <Button
                 size="sm"
@@ -1013,9 +758,6 @@ export default function Products() {
             </div>
           </div>
 
-          {/* ------------------------------------------------------------- */}
-          {/* VIEW A: PRODUCT MASTER LIST VIEW                              */}
-          {/* ------------------------------------------------------------- */}
           {viewMode === "list" && (
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs">
@@ -1030,7 +772,6 @@ export default function Products() {
                         aria-label="Select all products"
                       />
                     </th>
-                    <th className="w-16 px-4 py-3">Image</th>
                     <th className="px-4 py-3">Product</th>
                     <th className="px-4 py-3">Category</th>
                     <th className="px-4 py-3">Type</th>
@@ -1058,19 +799,6 @@ export default function Products() {
                               aria-label={`Select ${prod.name}`}
                             />
                           </td>
-                          <td className="px-4 py-3">
-                            {prod.imageUrl ? (
-                              <img
-                                src={prod.imageUrl}
-                                alt={prod.name}
-                                className="h-10 w-10 object-cover rounded-xl border border-border/70 shadow-2xs"
-                              />
-                            ) : (
-                              <div className="h-10 w-10 rounded-xl bg-secondary flex items-center justify-center border border-border/60 text-primary font-bold text-xs">
-                                {prod.name.substring(0, 2).toUpperCase()}
-                              </div>
-                            )}
-                          </td>
                           <td className="px-4 py-3 font-semibold text-foreground group-hover:text-primary transition-colors">
                             <div>{prod.name}</div>
                             {prod.sku && (
@@ -1088,9 +816,9 @@ export default function Products() {
                             <Badge
                               variant="outline"
                               className={`text-[10px] font-semibold ${
-                                prod.type === "Goods"
+                                prod.type === "GOODS"
                                   ? "border-primary/30 text-primary bg-primary/5"
-                                  : prod.type === "Service"
+                                  : prod.type === "SERVICE"
                                   ? "border-accent/40 text-accent-foreground bg-accent/10"
                                   : "border-purple-500/30 text-purple-700 dark:text-purple-300 bg-purple-500/5"
                               }`}
@@ -1144,7 +872,7 @@ export default function Products() {
                     })
                   ) : (
                     <tr>
-                      <td colSpan={9} className="h-32 text-center text-muted-foreground">
+                      <td colSpan={8} className="h-32 text-center text-muted-foreground">
                         No products found matching &quot;{searchTerm}&quot;. Click <strong>New</strong> to create a record.
                       </td>
                     </tr>
@@ -1154,9 +882,6 @@ export default function Products() {
             </div>
           )}
 
-          {/* ------------------------------------------------------------- */}
-          {/* VIEW B: PRODUCT MASTER KANBAN VIEW (Matching Wireframe)       */}
-          {/* ------------------------------------------------------------- */}
           {viewMode === "kanban" && (
             <div className="p-6">
               {filteredProducts.length > 0 ? (
@@ -1170,25 +895,7 @@ export default function Products() {
                         onClick={() => handleOpenEdit(product)}
                         className="p-4 rounded-2xl border border-border/80 bg-card hover:border-primary/50 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between group relative overflow-hidden"
                       >
-                        {/* Top Section: Image + Details matching wireframe */}
                         <div className="flex items-start gap-4">
-                          {/* Image Box */}
-                          <div className="relative h-20 w-20 rounded-xl border border-border/70 bg-secondary/30 shrink-0 overflow-hidden group-hover:scale-105 transition-transform">
-                            {product.imageUrl ? (
-                              <img
-                                src={product.imageUrl}
-                                alt={product.name}
-                                className="h-full w-full object-cover"
-                              />
-                            ) : (
-                              <div className="h-full w-full flex flex-col items-center justify-center text-muted-foreground p-1 text-center">
-                                <Package className="h-6 w-6 text-primary/70 mb-0.5" />
-                                <span className="text-[9px] font-semibold">Image</span>
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Product Info */}
                           <div className="min-w-0 flex-1 space-y-1">
                             <div className="flex items-start justify-between gap-1">
                               <h3 className="font-bold text-sm text-foreground leading-snug group-hover:text-primary transition-colors">
@@ -1203,9 +910,9 @@ export default function Products() {
                               <Badge
                                 variant="outline"
                                 className={`text-[9px] px-1.5 py-0 font-semibold ${
-                                  product.type === "Goods"
+                                  product.type === "GOODS"
                                     ? "border-primary/30 text-primary bg-primary/5"
-                                    : product.type === "Service"
+                                    : product.type === "SERVICE"
                                     ? "border-accent/40 text-accent-foreground bg-accent/10"
                                     : "border-purple-500/30 text-purple-700 dark:text-purple-300 bg-purple-500/5"
                                 }`}
@@ -1222,7 +929,6 @@ export default function Products() {
                           </div>
                         </div>
 
-                        {/* Bottom Section: Sales Price & Cost (Matching Wireframe: Sales Price 25000, Cost 15000) */}
                         <div className="mt-4 pt-3 border-t border-border/60 flex items-end justify-between">
                           <div>
                             <span className="text-[10px] uppercase font-semibold text-muted-foreground tracking-wider block mb-0.5">
@@ -1272,7 +978,6 @@ export default function Products() {
             </div>
           )}
 
-          {/* Bottom Bar: Record Count & Hint */}
           <div className="p-4 border-t border-border/80 flex items-center justify-between text-xs text-muted-foreground bg-secondary/20 rounded-b-xl">
             <span>
               Showing <strong className="text-foreground">{filteredProducts.length}</strong> of {productsList.length} products

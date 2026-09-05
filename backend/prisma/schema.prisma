@@ -92,6 +92,7 @@ model Account {
   createdAt DateTime           @default(now())
   updatedAt DateTime           @updatedAt
   lines     JournalEntryLine[]
+  defaultForJournals Journal[] @relation("JournalDefaultAccount")
 
   @@unique([code, companyId])
 }
@@ -105,15 +106,17 @@ enum JournalType {
 }
 
 model Journal {
-  id        String         @id @default(cuid())
-  name      String
-  code      String
-  type      JournalType
-  companyId String
-  company   Company        @relation(fields: [companyId], references: [id])
-  createdAt DateTime       @default(now())
-  updatedAt DateTime       @updatedAt
-  entries   JournalEntry[]
+  id               String         @id @default(cuid())
+  name             String
+  code             String
+  type             JournalType
+  defaultAccountId String?
+  defaultAccount   Account?       @relation("JournalDefaultAccount", fields: [defaultAccountId], references: [id])
+  companyId        String
+  company          Company        @relation(fields: [companyId], references: [id])
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  entries          JournalEntry[]
 
   @@unique([code, companyId])
 }

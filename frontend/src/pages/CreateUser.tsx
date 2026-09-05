@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { api } from "@/lib/api";
+import { apiFetch } from "@/lib/api";
 import {
   User,
   Mail,
@@ -79,21 +79,21 @@ export default function CreateUser() {
     setIsLoading(true);
     try {
       // Create user via backend auth/register or master user endpoint
-      await api.post("/auth/register", {
-        name: data.name,
-        email: data.email,
-        password: data.password,
-        role: data.role,
+      await apiFetch("/auth/register", {
+        method: "POST",
+        body: JSON.stringify({
+          name: data.name,
+          email: data.email,
+          password: data.password,
+          role: data.role,
+        })
       });
       setIsSuccess(true);
       setTimeout(() => {
         navigate("/contacts");
       }, 1500);
     } catch (err: any) {
-      const message =
-        err.response?.data?.error ||
-        err.response?.data?.message ||
-        "Unable to create user. Email or Login Id may already be in use.";
+      const message = err.message || "Unable to create user. Email or Login Id may already be in use.";
       setServerError(message);
     } finally {
       setIsLoading(false);

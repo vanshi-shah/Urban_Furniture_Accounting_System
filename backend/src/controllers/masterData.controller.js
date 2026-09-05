@@ -10,12 +10,19 @@ const sanitizeBody = (body) => {
   return safe;
 };
 
+const handleError = (error, res, next) => {
+  if (error.code === 'P2002') {
+    return res.status(400).json({ error: "A record with this unique field already exists." });
+  }
+  next(error);
+};
+
 const makeCrud = (modelName) => ({
   list: async (req, res, next) => {
     try {
       const data = await prisma[modelName].findMany({ where: { companyId: req.user.companyId } });
       res.json(data);
-    } catch (error) { next(error); }
+    } catch (error) { handleError(error, res, next); }
   },
   create: async (req, res, next) => {
     try {
@@ -23,7 +30,7 @@ const makeCrud = (modelName) => ({
         data: { ...sanitizeBody(req.body), companyId: req.user.companyId }
       });
       res.status(201).json(data);
-    } catch (error) { next(error); }
+    } catch (error) { handleError(error, res, next); }
   },
   update: async (req, res, next) => {
     try {
@@ -38,7 +45,7 @@ const makeCrud = (modelName) => ({
         data: sanitizeBody(req.body)
       });
       res.json(data);
-    } catch (error) { next(error); }
+    } catch (error) { handleError(error, res, next); }
   },
   remove: async (req, res, next) => {
     try {
@@ -52,7 +59,7 @@ const makeCrud = (modelName) => ({
         where: { id: req.params.id }
       });
       res.json({ success: true });
-    } catch (error) { next(error); }
+    } catch (error) { handleError(error, res, next); }
   }
 });
 
@@ -72,8 +79,14 @@ module.exports = {
            return res.status(400).json({ error: "Price must be a valid positive number" });
         }
 
+        const productData = {
+          name: req.body.name,
+          description: req.body.description,
+          price: req.body.price,
+          companyId: req.user.companyId
+        };
         const data = await prisma.product.create({
-          data: { ...sanitizeBody(req.body), companyId: req.user.companyId }
+          data: productData
         });
         res.status(201).json(data);
       } catch (error) { next(error); }
@@ -96,7 +109,11 @@ module.exports = {
         }
         const data = await prisma.product.update({
           where: { id: req.params.id },
-          data: sanitizeBody(req.body)
+          data: {
+            ...(req.body.name !== undefined && { name: req.body.name }),
+            ...(req.body.description !== undefined && { description: req.body.description }),
+            ...(req.body.price !== undefined && { price: req.body.price })
+          }
         });
         res.json(data);
       } catch (error) { next(error); }
@@ -105,7 +122,15 @@ module.exports = {
   },
   account: makeCrud("account"),
   journal: {
-    list: makeCrud("journal").list,
+    list: async (req, res, next) => {
+      try {
+        const data = await prisma.journal.findMany({ 
+          where: { companyId: req.user.companyId },
+          include: { defaultAccount: true }
+        });
+        res.json(data);
+      } catch (error) { handleError(error, res, next); }
+    },
     create: async (req, res, next) => {
       try {
         const { name, code, type } = req.body;

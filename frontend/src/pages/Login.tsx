@@ -59,10 +59,7 @@ export default function Login() {
           navigate(from, { replace: true });
         },
         onError: (err: any) => {
-          const message =
-            err.response?.data?.error ||
-            err.response?.data?.message ||
-            "Invalid Login Id or Password";
+          const message = err.message || "Invalid Login Id or Password";
           setServerError(message.includes("database") ? message : "Invalid Login Id or Password");
         },
       }

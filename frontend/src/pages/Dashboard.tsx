@@ -14,7 +14,7 @@ import {
   Cell,
   Legend,
 } from "recharts";
-import { api } from "@/lib/api";
+import { apiFetch } from "@/lib/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -114,8 +114,8 @@ export default function Dashboard() {
     queryKey: ["orders-dashboard"],
     queryFn: async () => {
       try {
-        const res = await api.get("/orders");
-        return res.data;
+        const data = await apiFetch("/orders");
+        return data;
       } catch {
         return null;
       }

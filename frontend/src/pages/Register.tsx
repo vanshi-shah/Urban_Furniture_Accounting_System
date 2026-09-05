@@ -86,10 +86,7 @@ export default function Register() {
           navigate("/dashboard", { replace: true });
         },
         onError: (err: any) => {
-          const message =
-            err.response?.data?.error ||
-            err.response?.data?.message ||
-            "Unable to complete sign up. Email or Login Id may already exist.";
+          const message = err.message || "Unable to complete sign up. Email or Login Id may already exist.";
           setServerError(message);
         },
       }

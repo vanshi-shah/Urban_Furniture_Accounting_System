@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   Search, 
   ArrowLeft, 
   Plus,
   CheckCircle2,
   Archive,
-  Home
+  Home,
+  AlertCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,55 +29,88 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
+import { apiFetch } from "@/lib/api";
 
-// Mock Data
-const initialAccounts = [
-  { id: "1", name: "Bank A/C", type: "Asset" },
-  { id: "2", name: "Purchase Expenses A/C", type: "Expense" },
-  { id: "3", name: "Creditors A/C", type: "Liability" },
-  { id: "4", name: "Debtors A/C", type: "Asset" },
-  { id: "5", name: "Sales Revenue A/C", type: "Revenue" },
-  { id: "6", name: "Cash A/C", type: "Asset" },
-  { id: "7", name: "Other Expenses A/C", type: "Expense" },
-  { id: "8", name: "Capital A/C", type: "Equity" },
-];
+type Account = {
+  id: string;
+  code: string;
+  name: string;
+  type: string;
+};
 
 export default function ChartOfAccounts() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<"list" | "form">("list");
-  const [accounts, setAccounts] = useState(initialAccounts);
+  
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
+  const [newAccountCode, setNewAccountCode] = useState("");
   const [newAccountName, setNewAccountName] = useState("");
   const [newAccountType, setNewAccountType] = useState("");
 
+  const fetchAccounts = async () => {
+    try {
+      const data = await apiFetch('/master/accounts');
+      setAccounts(data || []);
+    } catch (err: any) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    fetchAccounts();
+  }, []);
+
   const filteredAccounts = accounts.filter(acc =>
     acc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    acc.type.toLowerCase().includes(searchTerm.toLowerCase())
+    acc.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    acc.code.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const getTypeColor = (type: string) => {
     switch(type) {
-      case 'Asset': return 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300';
-      case 'Liability': return 'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900/30 dark:text-orange-300';
-      case 'Equity': return 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300';
-      case 'Revenue': return 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300';
-      case 'Expense': return 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300';
+      case 'ASSET': return 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300';
+      case 'LIABILITY': return 'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900/30 dark:text-orange-300';
+      case 'EQUITY': return 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300';
+      case 'INCOME': return 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300';
+      case 'EXPENSE': return 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300';
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
-  const handleSave = () => {
-    if (!newAccountName || !newAccountType) return;
-    const newAcc = {
-      id: String(accounts.length + 1),
-      name: newAccountName,
-      type: newAccountType
-    };
-    setAccounts([...accounts, newAcc]);
-    setViewMode("list");
-    setNewAccountName("");
-    setNewAccountType("");
+  const handleSave = async () => {
+    if (!newAccountCode || !newAccountName || !newAccountType) {
+      setError("Please fill in all required fields.");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+      await apiFetch('/master/accounts', {
+        method: 'POST',
+        body: JSON.stringify({
+          code: newAccountCode,
+          name: newAccountName,
+          type: newAccountType
+        })
+      });
+
+      await fetchAccounts();
+      
+      setViewMode("list");
+      setNewAccountCode("");
+      setNewAccountName("");
+      setNewAccountType("");
+    } catch (err: any) {
+      setError(err.message || "Failed to save account");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -100,22 +134,14 @@ export default function ChartOfAccounts() {
                     <Plus className="h-4 w-4" />
                     New
                   </Button>
-                  <Button size="sm" variant="outline" className="gap-2 border-border font-semibold">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                    Confirm
-                  </Button>
-                  <Button size="sm" variant="outline" className="gap-2 border-border text-muted-foreground">
-                    <Archive className="h-4 w-4" />
-                    Archived
-                  </Button>
                 </>
               ) : (
                 <>
-                  <Button size="sm" className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold" onClick={handleSave}>
+                  <Button size="sm" className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold" onClick={handleSave} disabled={loading}>
                     <CheckCircle2 className="h-4 w-4" />
                     Save
                   </Button>
-                  <Button size="sm" variant="outline" className="gap-2 border-border text-muted-foreground" onClick={() => setViewMode("list")}>
+                  <Button size="sm" variant="outline" className="gap-2 border-border text-muted-foreground" onClick={() => setViewMode("list")} disabled={loading}>
                     Discard
                   </Button>
                 </>
@@ -146,12 +172,29 @@ export default function ChartOfAccounts() {
             </div>
           </div>
 
+          {error && (
+            <div className="p-4 bg-destructive/10 text-destructive text-sm flex items-center gap-2 border-b border-destructive/20">
+              <AlertCircle className="h-4 w-4" />
+              {error}
+            </div>
+          )}
+
           {/* Form View */}
           {viewMode === "form" && (
             <div className="p-8 max-w-2xl">
               <div className="space-y-6">
                 <div className="grid grid-cols-[140px_1fr] items-center gap-4">
-                  <label className="text-sm font-medium text-muted-foreground text-right">Account Name</label>
+                  <label className="text-sm font-medium text-muted-foreground text-right">Account Code <span className="text-destructive">*</span></label>
+                  <Input 
+                    placeholder="e.g. 10100" 
+                    value={newAccountCode}
+                    onChange={(e) => setNewAccountCode(e.target.value)}
+                    className="bg-background max-w-md border-border/80"
+                  />
+                </div>
+
+                <div className="grid grid-cols-[140px_1fr] items-center gap-4">
+                  <label className="text-sm font-medium text-muted-foreground text-right">Account Name <span className="text-destructive">*</span></label>
                   <Input 
                     placeholder="e.g. Petty Cash" 
                     value={newAccountName}
@@ -161,25 +204,18 @@ export default function ChartOfAccounts() {
                 </div>
                 
                 <div className="grid grid-cols-[140px_1fr] items-center gap-4">
-                  <label className="text-sm font-medium text-muted-foreground text-right">Type</label>
+                  <label className="text-sm font-medium text-muted-foreground text-right">Type <span className="text-destructive">*</span></label>
                   <select 
                     value={newAccountType}
                     onChange={(e) => setNewAccountType(e.target.value)}
                     className="flex h-10 w-full max-w-md items-center justify-between rounded-md border border-border/80 bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <option value="" disabled>Select Account Type...</option>
-                    <optgroup label="Balancesheet">
-                      <option value="Asset">Asset</option>
-                      <option value="Liability">Liability</option>
-                      <option value="Bank">Bank</option>
-                      <option value="Capital">Capital</option>
-                      <option value="Cash">Cash</option>
-                    </optgroup>
-                    <optgroup label="Profit and Loss">
-                      <option value="Income">Income</option>
-                      <option value="Expense">Expenses</option>
-                      <option value="Other Expense">Other Expenses</option>
-                    </optgroup>
+                    <option value="ASSET">Asset</option>
+                    <option value="LIABILITY">Liability</option>
+                    <option value="EQUITY">Equity</option>
+                    <option value="INCOME">Income</option>
+                    <option value="EXPENSE">Expense</option>
                   </select>
                 </div>
                 
@@ -199,17 +235,17 @@ export default function ChartOfAccounts() {
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-muted/10 hover:bg-muted/10">
-                      <TableHead className="w-[100px]">Account ID</TableHead>
+                      <TableHead className="w-[120px]">Account Code</TableHead>
                       <TableHead>Account Name</TableHead>
                       <TableHead>Type</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredAccounts.length > 0 ? (
-                      filteredAccounts.map((acc, index) => (
+                      filteredAccounts.map((acc) => (
                         <TableRow key={acc.id} className="group">
                           <TableCell className="font-mono text-muted-foreground">
-                            {String(index + 1).padStart(4, '0')}
+                            {acc.code}
                           </TableCell>
                           <TableCell className="font-medium text-foreground">
                             {acc.name}
