@@ -109,3 +109,5 @@ To ensure we build this effectively, we will construct the core features and the
 *   **Demo Prep:** Rehearse the 5-minute script specifically walking through: Dashboard -> Purchase -> Sale -> Payment -> P&L -> "Explain this Number".
 
 - Added product validation in masterData.controller.js
+
+- Added journal frontend and backend validation

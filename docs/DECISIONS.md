@@ -53,3 +53,7 @@
 
 ## Product Backend Validation
 Added backend validation for product name and price in masterData.controller.js.
+
+
+## Journal Validation
+Added frontend and backend validation for Journals using react-hook-form + zod on the frontend, and manual body validation in masterData.controller.js on the backend.
