@@ -20,8 +20,19 @@
 - "Modura currently has ₹X revenue, ₹Y expenses and ₹Z outstanding."
 - Highlight the **Financial Health Score**.
 
-### 0:30 — Create Purchase
-- Workflow: Vendor -> Product -> Purchase Order -> Vendor Bill -> Payment.
+### 0:30 — Purchase Order & Vendor Bill Excel Flow
+- Open **Purchase Orders** (`/purchase-orders`):
+  - View sequence `PO0001`, Vendor `Mr. Rahul`, Date, and the interactive Excel Sheet grid.
+  - Show live formula calculation: Qty (3) * Unit Price (2,000) = Total (6,000).
+  - Click **Confirm**: Observe the non-blocking warning: `⚠️ Exceeds Approved Budget: The entered amount is higher than the remaining budget amount for this budget line.`
+  - Click **Create Bill**: Seamlessly transfers vendor, products, price, and quantities to **Vendor Bills** (`/vendor-bills`).
+- Inspect **Vendor Bill** (`BILL/2026/0001`):
+  - Point out smart buttons: `PO` (jumps back to originating PO) and `Budget` (opens analytic report).
+  - Show Status badge: initially `Not Paid` (amount due == total).
+  - Click **Confirm**: Informs that a balanced Journal Entry has been created in the Purchases journal.
+  - Click **Pay**: Opens the **Bill Payment** modal with status breadcrumb `Draft -> Posted`, `Send`, `Mr. Rahul`, `₹ 6,000`, and `Cash/Bank`.
+  - Confirm payment: status badge instantly turns to green `Paid`, Amount Due drops to `₹ 0`, and options gear allows **Print / PDF** and **Excel Export**.
+  - Navigate to **Demo Journal Entry** (`/demo-journal-entry`): Visually demonstrate the balanced debit (`Purchase a/c` ₹6,000) and credit (`Creditor a/c` ₹6,000).
 
 ### 1:30 — Create Sale
 - Workflow: Customer -> 5 Office Chairs -> Sales Order -> Invoice.

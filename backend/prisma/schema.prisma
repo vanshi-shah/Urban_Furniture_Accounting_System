@@ -28,6 +28,7 @@ model Company {
   submissions       Submission[]
   orders            Order[]
   orderLines        OrderLine[]
+  payments          Payment[]
 }
 
 model User {
@@ -60,6 +61,7 @@ model Contact {
   updatedAt         DateTime           @updatedAt
   journalEntryLines JournalEntryLine[]
   orders            Order[]
+  payments          Payment[]
 }
 
 model Product {
@@ -91,7 +93,8 @@ model Account {
   company   Company            @relation(fields: [companyId], references: [id])
   createdAt DateTime           @default(now())
   updatedAt DateTime           @updatedAt
-  lines     JournalEntryLine[]
+  lines             JournalEntryLine[]
+  orderLines        OrderLine[]
   defaultForJournals Journal[] @relation("JournalDefaultAccount")
 
   @@unique([code, companyId])
@@ -130,6 +133,7 @@ model AnalyticAccount {
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
   journalEntryLines JournalEntryLine[]
+  orderLines        OrderLine[]
 }
 
 enum EntryStatus {
@@ -149,6 +153,7 @@ model JournalEntry {
   company   Company            @relation(fields: [companyId], references: [id])
   lines     JournalEntryLine[]
   orders    Order[]
+  payments  Payment[]
 
   submissionId String?
   submission   Submission? @relation(fields: [submissionId], references: [id])
@@ -209,6 +214,7 @@ enum OrderStatus {
 }
 
 enum OrderType {
+  PURCHASE_ORDER
   CUSTOMER_INVOICE
   VENDOR_BILL
 }
@@ -216,10 +222,19 @@ enum OrderType {
 model Order {
   id          String      @id @default(cuid())
   orderNumber String
+  reference   String?
   date        DateTime    @default(now())
+  dueDate     DateTime?
   type        OrderType
   status      OrderStatus @default(DRAFT)
   totalAmount Float       @default(0)
+  paidCash    Float       @default(0)
+  paidBank    Float       @default(0)
+  amountDue   Float       @default(0)
+
+  sourceOrderId String?
+  sourceOrder   Order?      @relation("OrderSource", fields: [sourceOrderId], references: [id])
+  childOrders   Order[]     @relation("OrderSource")
 
   contactId String
   contact   Contact @relation(fields: [contactId], references: [id])
@@ -230,7 +245,8 @@ model Order {
   journalEntryId String?
   journalEntry   JournalEntry? @relation(fields: [journalEntryId], references: [id])
 
-  lines OrderLine[]
+  lines    OrderLine[]
+  payments Payment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -251,9 +267,57 @@ model OrderLine {
   productId String?
   product   Product? @relation(fields: [productId], references: [id])
 
+  accountId String?
+  account   Account? @relation(fields: [accountId], references: [id])
+
+  analyticAccountId String?
+  analyticAccount   AnalyticAccount? @relation(fields: [analyticAccountId], references: [id])
+
   companyId String
   company   Company @relation(fields: [companyId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+enum PaymentType {
+  SEND
+  RECEIVE
+}
+
+enum PaymentMethod {
+  CASH
+  BANK
+}
+
+enum PaymentStatus {
+  DRAFT
+  POSTED
+  CANCELLED
+}
+
+model Payment {
+  id            String        @id @default(cuid())
+  paymentNumber String
+  paymentType   PaymentType   @default(SEND)
+  method        PaymentMethod @default(CASH)
+  status        PaymentStatus @default(POSTED)
+  amount        Float
+  date          DateTime      @default(now())
+
+  contactId String
+  contact   Contact @relation(fields: [contactId], references: [id])
+
+  orderId String?
+  order   Order?  @relation(fields: [orderId], references: [id])
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
+
+  journalEntryId String?
+  journalEntry   JournalEntry? @relation(fields: [journalEntryId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+

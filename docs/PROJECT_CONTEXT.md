@@ -64,26 +64,20 @@ To ensure we build this effectively, we will construct the core features and the
     *   *Backend:* Function to automatically calculate the "Balance" of an account.
     *   *Backend:* Function to auto-generate reversing entries (if needed).
 
-### Phase 4: Business Transactions (Sales & Purchases) *(Completed)*
-*   **Database:** Create `Order` and `OrderLine` models (handling both Sales and Purchases).
-*   **Backend:** API to create Sales/Purchases.
-*   **Frontend:** Create forms for New Sale and New Purchase (Product select, quantity, price, tax).
-*   **Micro-Feature (Transaction -> Accounting Impact):** 
-    *   *Frontend:* When a sale is confirmed, display a modal or timeline element showing "Sale Created". (No journal entry yet, just the business document).
-*   **Micro-Changes:**
-    *   *Backend:* Auto-calculate subtotal, tax, and total.
+### Phase 4: Business Transactions (Purchase Orders & Sales) *(Completed)*
+*   **Database:** `Order` and `OrderLine` models supporting `PURCHASE_ORDER`, `VENDOR_BILL`, and `CUSTOMER_INVOICE`.
+*   **Backend:** Automatic sequence numbering (`PO0001`...), budget checking against analytic limits, and `createBillFromPO` endpoint.
+*   **Frontend:** Built Excel Sheet Purchase Order interface (`/purchase-orders`) with live formulas, Product/Analytics master dropdowns, non-blocking `⚠️ Exceeds Approved Budget` warning, and 1-click `Create Bill` navigation. Export to Excel (.csv) and Print/PDF.
 
-### Phase 5: Financial Operations (Invoices & Payments) *(Backend Completed)*
-*   **Database:** Create `Invoice`, `InvoiceLine`, and `Payment` models.
+### Phase 5: Financial Operations (Vendor Bills & Payments) *(Completed)*
+*   **Database:** `Order` payment tracking (`paidCash`, `paidBank`, `amountDue`), `Payment` model, and relations to `JournalEntry`.
 *   **Backend:** 
-    *   API to convert Order -> Invoice. (This triggers the `AccountingService` to debit Receivables and credit Revenue).
-    *   API to record Payment. (This triggers the `AccountingService` to debit Bank and credit Receivables).
-*   **Frontend:** Invoice Generation screen. Payment modal.
-*   **Micro-Feature (Payment Risk):** 
-    *   *Backend:* Query past late payments for a contact.
-    *   *Frontend:* Show a Yellow/Red badge on the Invoice screen if the customer has a history of late payments.
-*   **Micro-Feature (Transaction -> Accounting Impact):**
-    *   *Frontend:* When an invoice is created, visually render the exact Debit/Credit journal entry that was generated in the background. Do the same when payment is received.
+    *   API to confirm Vendor Bill and immediately auto-generate balanced double-entry Journal Entry (Debit: Purchase a/c, Credit: Creditor a/c).
+    *   API to record Payment (Debit: Creditor a/c, Credit: Cash/Bank a/c).
+*   **Frontend:** 
+    *   Vendor Bill screen (`/vendor-bills`) with sequence `BILL/2026/0001`, `ABC-26-001` reference, dynamic status badges (`Paid`, `Partial`, `Not Paid`), smart `PO` and `Budget` navigation buttons, and financial totals breakdown.
+    *   **Bill Payment Modal**: `Draft -> Posted -> Cancelled` workflow breadcrumbs, `Send`/`Receive`, auto-fetched partner/amount, `Cash`/`Bank` selection, and options gear providing `Print / PDF` and `Excel Export`.
+    *   **Demo Journal Entry (`/demo-journal-entry`)**: Displays balanced `Purchase a/c` and `Creditor a/c` debit/credit entries with post and reset actions.
 
 ### Phase 6: Reporting & Analytics *(Backend Completed in Phase 5)*
 *   **Backend:** Endpoints for `/api/reports/profit-loss`, `/balance-sheet`, and `/budget`. These endpoints aggregate data directly from `JournalEntryLine`.

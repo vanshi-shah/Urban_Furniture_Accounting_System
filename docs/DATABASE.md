@@ -13,16 +13,16 @@ The database must support a strict double-entry accounting system where business
 - **AnalyticAccount/Budget**: For budget tracking.
 
 ### Transactions
-- **Order**: Handles both Sales (CUSTOMER_INVOICE) and Purchases (VENDOR_BILL).
-- **OrderLine**: Line items for orders.
-- **Payment**: Financial settlement.
+- **Order**: Handles Purchase Orders (`PURCHASE_ORDER`), Vendor Bills (`VENDOR_BILL`), and Sales Invoices (`CUSTOMER_INVOICE`). Includes `reference`, `dueDate`, `paidCash`, `paidBank`, `amountDue`, and `sourceOrderId` (linking bills to originating purchase orders).
+- **OrderLine**: Line items for orders with product reference, quantity, unit price, subtotal, linked `accountId` (Chart of Account), and `analyticAccountId` (Budget Analytics).
+- **Payment**: Settlement record with `paymentNumber`, `paymentType` (SEND/RECEIVE), `method` (CASH/BANK), `status` (DRAFT/POSTED/CANCELLED), `amount`, `orderId`, and linked `journalEntryId`.
 
 ### Accounting
 - **JournalEntry (Move)**: The accounting event.
 - **JournalEntryLine (MoveLine)**: The individual debit or credit line.
 
 ## Example Flow
-`Sale` creates `Invoice` -> `Invoice` confirmed creates `JournalEntry` (Debit Accounts Receivable, Credit Sales Revenue) -> `Payment` creates `JournalEntry` (Debit Bank, Credit Accounts Receivable).
+`Purchase Order` -> `Vendor Bill` -> `Vendor Bill` confirmed creates balanced `JournalEntry` (Debit Purchase a/c, Credit Creditor a/c) -> `Bill Payment` creates `Payment` & `JournalEntry` (Debit Creditor a/c, Credit Cash/Bank a/c).
 
 ---
 

@@ -40,10 +40,13 @@
     - **Kanban View**: Visual card grid rendering image thumbnail, product title, category & type badges, highlighted Sales Price & Cost, and unit margin percentages with hover elevation and quick edit triggers.
     - **List View**: Dense financial data table with selection checkboxes, image avatars, monospace currency formatting in INR, and quick action controls.
     - **Backend & Local Storage Synchronization**: Connected to `/master/products` using TanStack Query and local persistence for reliable online/offline presentation.
-15. **Chart of Accounts Action Bar & Form Alignment**:
-    - Updated the Action Bar in the `ChartOfAccounts.tsx` List View to strictly match the provided wireframe, including new `Confirm`, `Archived`, and `Home` navigation controls mapped to the primary design tokens.
-    - Implemented a `viewMode` state toggle to switch between the List and Form View.
-    - Built a New Account Form with `Account Name` and `Type` dropdowns categorized accurately under `Balancesheet` and `Profit and Loss` sections to strictly match the requested data model.
+16. **Purchase Order to Vendor Bill Workflow & Excel Sheet Integration**:
+    - Built dedicated Excel Sheet data grids with cell-level editing, formula calculation (`Qty * Unit Price = Total`, running column sum), letter column headers (A, B, C...), row indices (1, 2...), and one-click export to both **Excel (.csv)** and **Print / PDF**.
+    - **Purchase Order (`/purchase-orders`)**: Auto-sequence generator (`PO0001`, `PO0002`...), Vendor Master selector, Excel data table, non-blocking `⚠️ Exceeds Approved Budget` warning, and 1-click `Create Bill` transition.
+    - **Vendor Bill (`/vendor-bills`)**: Auto-sequence generator (`BILL/2026/0001`...), Alphanumeric reference (`ABC-26-001`), single status badge computation (`Paid` if amount due = 0, `Partial` if amount due < total, `Not Paid` if amount due == total), `PO` smart link (only shown if created from PO), `Budget` smart link (opens analytic budget report), and auto-creation of balanced double-entry Journal Entry in Purchases journal.
+    - **Bill Payment Modal**: `Draft` -> `Posted` -> `Cancelled` status breadcrumbs, `Send`/`Receive` payment type, auto-fetched partner & amount, `Cash` or `Bank` payment method, and options gear menu providing `1. Print / PDF` and `2. Excel Export`.
+    - **Demo Journal Entry (`/demo-journal-entry`)**: Dedicated view with `Post`, `Reset to Draft`, `Back`, auto-fetched bill date and `Purchase` journal, balanced debit (`Purchase a/c`) and credit (`Creditor a/c`).
+
 
 
 

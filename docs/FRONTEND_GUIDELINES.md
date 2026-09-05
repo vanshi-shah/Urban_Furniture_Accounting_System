@@ -75,19 +75,31 @@
 - Ensure that the "Accounting Impact" of every transaction is clearly communicated to the user.
 - Build interactive reports where aggregate numbers can be clicked to reveal underlying data ("Explain this number").
 
-## 7. Master Data Multi-View Pattern (List, Kanban, and Form Views)
-All Master Data screens (Contacts, Products, Analytics) follow a unified 3-view workflow:
-1. **List View (Default)**:
-   - Header action bar with `New` button, live `Search` input, type filters, `Back` navigation, and view mode toggle buttons (`List` vs `Kanban`).
-   - Density-optimized table with row selection, image thumbnails, key metadata columns, right-aligned monospace prices, margin badges, and quick edit/delete actions.
-   - Clicking any row navigates directly to the Master Form View populated with that record.
-2. **Kanban View**:
-   - Responsive grid of cards displaying the product/contact image thumbnail, title, category, type badge (`Goods`, `Service`, `Combo`), highlighted Sales Price, Cost, and unit margin percentage (`+X%`).
-   - Clicking any Kanban card opens the Master Form View for that record.
-3. **Master Form View (Create & Edit)**:
-   - Header action bar containing `New` (blank form reset), `Confirm` (save/commit with feedback alert), and `Back` (return to List/Kanban).
-   - 2-Column form grid:
-     - **Left Column**: Entity attributes, Product Type selector (`Goods` for inventory items, `Service` for billable fees, `Combo` for furniture room packs), Many2one Category field with dynamic "Create and save category on the fly" inline popover, and commercial pricing (Sales Price & Cost in INR) with live Gross Margin calculation.
-     - **Right Column**: Drag-and-drop Image Upload preview box with remove control and 1-click sample presets for instant demonstration.
+## 8. Purchase Order, Vendor Bill & Excel Sheet Specifications
+All purchasing transactions adhere strictly to the whiteboard operational diagram:
+1. **Interactive Excel Data Grid (`ExcelGrid.tsx`)**:
+   - Monospace tabular font with cell-by-cell editing, row indices (1, 2...), column letter markers (A, B, C...), and live formula execution: `Qty * Unit Price = Total`, with dynamic footer sum (`Total`).
+   - One-click export to both **Excel (.csv)** and **Print / PDF**.
+2. **Purchase Order (`/purchase-orders`)**:
+   - Header actions: `New`, `Confirm`, `Create Bill`, `Cancel`, `Back`.
+   - Auto-generated sequence: `PO0001` (+1 of last order).
+   - Vendor selector from Contact Master (`Mr. Rahul`).
+   - Non-blocking Warning on Confirmation: `⚠️ Exceeds Approved Budget: The entered amount is higher than the remaining budget amount for this budget line. Consider adjusting the value or revise the budget.`
+   - `Create Bill` button: transfers vendor, products, price, and quantities directly to Vendor Bill.
+3. **Vendor Bill (`/vendor-bills`)**:
+   - Header actions: `New`, `Confirm`, `Pay`, `PO` (smart link - visible only if created from PO), `Budget` (smart link to analytic budget report), `Cancel`, `Back`.
+   - Auto-generated sequence: `BILL/2026/0001` (+1 of last bill).
+   - Single computed status badge: `Paid` (amount due = 0), `Partial` (amount due < total), `Not Paid` (amount due == total).
+   - Payment breakdown: `Paid Via Cash`, `Paid Via Bank`, `Amount Due: (Total - Amount Paid)`.
+   - On Confirm: automatically creates balanced double-entry Journal Entry in Purchases journal.
+4. **Bill Payment Modal**:
+   - Status breadcrumbs: `Draft` -> `Posted` -> `Cancelled`.
+   - `Payment Type`: `Send` (default) vs `Receiving`.
+   - Auto-fetched `Partner` and `Amount` (due amount).
+   - `Payment Via`: `Cash` or `Bank`.
+   - Options gear menu: `1. Print / PDF` and `2. Excel Export`.
+5. **Demo Journal Entry (`/demo-journal-entry`)**:
+   - Displays balanced ledger entry with `Accounting Date` (from bill), `Journal: Purchase`, `Purchase a/c` (debit) and `Creditor a/c` (credit).
+
 
 

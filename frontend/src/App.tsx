@@ -16,6 +16,9 @@ import Journals from "./pages/Journals";
 import JournalEntries from "./pages/JournalEntries";
 import AnalyticAccounts from "./pages/AnalyticAccounts";
 import Budgets from "./pages/Budgets";
+import PurchaseOrders from "./pages/PurchaseOrders";
+import VendorBills from "./pages/VendorBills";
+import DemoJournalEntry from "./pages/DemoJournalEntry";
 
 export function App() {
   return (
@@ -153,6 +156,39 @@ export function App() {
             <ProtectedRoute>
               <DashboardLayout>
                 <AnalyticAccounts />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/purchase-orders"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <PurchaseOrders />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/vendor-bills"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <VendorBills />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/demo-journal-entry"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <DemoJournalEntry />
               </DashboardLayout>
             </ProtectedRoute>
           }

@@ -14,7 +14,9 @@ import {
   FileText,
   BookOpen,
   PieChart,
-  Layers
+  Layers,
+  ShoppingCart,
+  Receipt
 } from "lucide-react";
 import logo from "@/assets/logo.png";
 
@@ -30,6 +32,8 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
 
   const navItems = [
     { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
+    { label: "Purchase Orders", path: "/purchase-orders", icon: ShoppingCart },
+    { label: "Vendor Bills", path: "/vendor-bills", icon: Receipt },
     { label: "Contacts", path: "/contacts", icon: Users },
     { label: "Products", path: "/products", icon: Box },
     { label: "Chart of Accounts", path: "/chart-of-accounts", icon: FileText },

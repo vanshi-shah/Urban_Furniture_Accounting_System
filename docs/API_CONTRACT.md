@@ -25,10 +25,15 @@
 - `GET /api/master/journals` & `POST /api/master/journals`
 - `GET /api/master/analytic-accounts` & `POST /api/master/analytic-accounts`
 
-### Transactions & Invoicing (`/api/orders`)
-- `GET /api/orders` (Lists all sales and purchases)
-- `POST /api/orders` (Creates a draft order with line items and auto-calculated totals)
-- `POST /api/orders/:id/confirm` (Confirms order, automatically generates balanced debit/credit JournalEntry and posts to ledger)
+### Transactions, Invoicing & Payments (`/api/orders`)
+- `GET /api/orders?type=PURCHASE_ORDER|VENDOR_BILL` (Lists all purchase orders and vendor bills)
+- `GET /api/orders/next-sequence?type=PURCHASE_ORDER|VENDOR_BILL` (Generates next sequence e.g. `PO0001` or `BILL/2026/0001`)
+- `GET /api/orders/:id` (Retrieves single order with lines, contact, sourceOrder, journalEntry, and payments)
+- `POST /api/orders` (Creates draft order or bill with line items, accounts, and analytics)
+- `POST /api/orders/:id/confirm` (Confirms order; for Vendor Bills, automatically creates balanced Journal Entry in Purchases journal)
+- `POST /api/orders/:id/create-bill` (Converts Purchase Order into Vendor Bill with lines and vendor preserved)
+- `POST /api/orders/:id/pay` (Records payment against bill via Cash or Bank, updates paid amounts/amountDue, and creates payment journal entry)
+- `POST /api/orders/check-budget` (Checks whether line amounts exceed the remaining budget limit of analytic accounts)
 
 ### Accounting Engine (`/api/accounting`)
 - `POST /api/accounting/entries` (Creates manual draft JournalEntry)
