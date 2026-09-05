@@ -66,18 +66,7 @@ export default function Login() {
     );
   };
 
-  const handleQuickDemo = (role: "admin" | "employee") => {
-    setServerError(null);
-    const email = role === "admin" ? "admin@urbanfurniture.com" : "designer@urbanfurniture.com";
-    setValue("loginId", email);
-    setValue("password", "password123");
-  };
 
-  useEffect(() => {
-    if (location.state?.prefillRole) {
-      handleQuickDemo(location.state.prefillRole);
-    }
-  }, [location.state]);
 
   return (
     <div className="relative min-h-screen flex flex-col justify-between bg-background text-foreground selection:bg-primary/20">
@@ -132,36 +121,7 @@ export default function Login() {
               </div>
             </div>
 
-            {/* Quick Demo Pre-fill Box */}
-            <div className="mb-5 p-3 rounded-xl border border-border/70 bg-secondary/40 space-y-2">
-              <div className="flex items-center justify-between text-xs font-medium text-muted-foreground">
-                <span className="flex items-center gap-1.5 text-foreground font-semibold">
-                  <Sparkles className="h-3.5 w-3.5 text-accent" />
-                  Quick Demo Access
-                </span>
-                <span>Click to auto-fill</span>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="text-xs h-8 justify-center bg-card hover:bg-secondary/80 font-medium"
-                  onClick={() => handleQuickDemo("admin")}
-                >
-                  Admin Account
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="text-xs h-8 justify-center bg-card hover:bg-secondary/80 font-medium"
-                  onClick={() => handleQuickDemo("employee")}
-                >
-                  Employee Account
-                </Button>
-              </div>
-            </div>
+
 
             {/* Error Alert */}
             {serverError && (

@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 
 exports.register = async (req, res, next) => {
   try {
-    const { name, email, password, companyName } = req.body;
+    const { name, email, password, companyName, role } = req.body;
     
     // Password validation
     if (!password || password.length < 8) {
@@ -28,6 +28,7 @@ exports.register = async (req, res, next) => {
           name,
           email,
           passwordHash,
+          role: role && ['USER', 'ADMIN', 'ACCOUNTANT'].includes(role) ? role : 'USER',
           companyId: company.id
         }
       });

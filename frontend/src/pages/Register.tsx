@@ -2,12 +2,13 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useRegister } from "@/hooks/useAuth";
+import { UserRole } from "@/types/auth";
 import {
   User,
   Mail,
@@ -55,9 +56,12 @@ type SignUpFormData = z.infer<typeof signUpSchema>;
 
 export default function Register() {
   const navigate = useNavigate();
+  const location = useLocation();
   const registerMutation = useRegister();
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+
+  const role = (location.state as { role?: UserRole })?.role || "USER";
 
   const {
     register,
@@ -80,6 +84,7 @@ export default function Register() {
         name: data.loginId,
         email: data.email,
         password: data.password,
+        role: role,
       },
       {
         onSuccess: () => {

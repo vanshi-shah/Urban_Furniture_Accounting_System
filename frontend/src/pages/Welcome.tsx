@@ -24,7 +24,8 @@ export default function Welcome() {
   const { isAuthenticated, user } = useAuth();
   const loginMutation = useLogin();
   const [isReturningUser, setIsReturningUser] = useState(false);
-  const [activeDemoRole, setActiveDemoRole] = useState<string | null>(null);
+  const [selectedRole, setSelectedRole] = useState<string>("USER");
+
 
   useEffect(() => {
     // Check if user has previously visited or stored session info
@@ -35,28 +36,7 @@ export default function Welcome() {
     }
   }, [isAuthenticated]);
 
-  const handleQuickLogin = (role: "admin" | "employee") => {
-    setActiveDemoRole(role);
-    const email = role === "admin" ? "admin@urbanfurniture.com" : "designer@urbanfurniture.com";
-    const password = "password123";
 
-    loginMutation.mutate(
-      { email, password },
-      {
-        onSuccess: (userData) => {
-          localStorage.setItem("last_active_user", email);
-          navigate(userData.role === "USER" ? "/my-invoices" : "/dashboard", { replace: true });
-        },
-        onError: () => {
-          // If direct login fails (e.g. backend seed not yet present), route to login with state
-          navigate("/login", { state: { prefillRole: role } });
-        },
-        onSettled: () => {
-          setActiveDemoRole(null);
-        },
-      }
-    );
-  };
 
   const getTimeGreeting = () => {
     const hour = new Date().getHours();
@@ -209,67 +189,34 @@ export default function Welcome() {
                   variant="outline"
                   size="lg"
                   className="w-full bg-card hover:bg-secondary/70 border-border/90 text-foreground font-semibold text-sm h-12 rounded-xl shadow-sm flex items-center justify-center gap-2 transition-all hover:translate-y-[-1px]"
-                  onClick={() => navigate("/register")}
+                  onClick={() => navigate("/register", { state: { role: selectedRole } })}
                 >
                   <UserPlus className="h-4 w-4 text-muted-foreground" />
                   <span>Create Account</span>
                 </Button>
               </div>
 
-              {/* Quick Demo Access Bar */}
-              <div className="p-4 rounded-2xl bg-secondary/40 border border-border/70 space-y-2.5">
-                <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
-                  <span className="flex items-center gap-1.5 text-foreground font-semibold">
-                    <Sparkles className="h-3.5 w-3.5 text-accent" />
-                    Quick Demo Access
-                  </span>
-                  <span>Instant 1-Click Login</span>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="h-9 text-xs justify-center bg-card hover:bg-secondary/80 border-border font-medium rounded-lg"
-                    disabled={activeDemoRole !== null}
-                    onClick={() => handleQuickLogin("admin")}
-                  >
-                    {activeDemoRole === "admin" ? (
-                      <span className="flex items-center gap-1.5">
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                        Logging in...
-                      </span>
-                    ) : (
-                      <span className="flex items-center gap-1">
-                        Admin Account
-                        <ArrowUpRight className="h-3 w-3 text-muted-foreground" />
-                      </span>
-                    )}
-                  </Button>
-
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="h-9 text-xs justify-center bg-card hover:bg-secondary/80 border-border font-medium rounded-lg"
-                    disabled={activeDemoRole !== null}
-                    onClick={() => handleQuickLogin("employee")}
-                  >
-                    {activeDemoRole === "employee" ? (
-                      <span className="flex items-center gap-1.5">
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                        Logging in...
-                      </span>
-                    ) : (
-                      <span className="flex items-center gap-1">
-                        Employee Account
-                        <ArrowUpRight className="h-3 w-3 text-muted-foreground" />
-                      </span>
-                    )}
-                  </Button>
+              {/* Role Selection for New Account */}
+              <div className="pt-2">
+                <p className="text-xs text-muted-foreground mb-2 text-center">Select role for new account:</p>
+                <div className="flex items-center justify-center gap-2">
+                  {["USER", "ADMIN", "ACCOUNTANT"].map((role) => (
+                    <button
+                      key={role}
+                      onClick={() => setSelectedRole(role)}
+                      className={`px-3 py-1.5 text-xs font-medium rounded-full border transition-all ${
+                        selectedRole === role
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-secondary/50 text-muted-foreground border-border/50 hover:bg-secondary"
+                      }`}
+                    >
+                      {role.charAt(0) + role.slice(1).toLowerCase()}
+                    </button>
+                  ))}
                 </div>
               </div>
+
+
             </div>
           )}
 
