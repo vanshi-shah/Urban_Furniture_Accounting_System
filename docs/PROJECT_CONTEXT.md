@@ -107,3 +107,5 @@ To ensure we build this effectively, we will construct the core features and the
 *   **Full Stack:** Seed the database with a realistic "Urban Furniture" scenario (historical data, past transactions) so reports aren't empty.
 *   **Frontend:** Polish the UI. Ensure hover states, loading skeletons, and transitions (glassmorphism, micro-animations) feel premium.
 *   **Demo Prep:** Rehearse the 5-minute script specifically walking through: Dashboard -> Purchase -> Sale -> Payment -> P&L -> "Explain this Number".
+
+- Added product validation in masterData.controller.js
