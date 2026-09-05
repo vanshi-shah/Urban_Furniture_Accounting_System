@@ -6,6 +6,7 @@ import { RoleRoute } from "./components/auth/RoleRoute";
 import { DashboardLayout } from "./layouts/DashboardLayout";
 import { ErrorBoundary } from "./components/common/ErrorBoundary";
 import Dashboard from "./pages/Dashboard";
+import Landing from "./pages/Landing";
 import Welcome from "./pages/Welcome";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -44,7 +45,7 @@ export function App() {
       <AuthProvider>
         <Routes>
           {/* Welcome / Entry Experience */}
-          <Route path="/" element={<Welcome />} />
+          <Route path="/" element={<Landing />} />
         <Route path="/welcome" element={<Welcome />} />
 
         {/* Public Authentication Routes */}
