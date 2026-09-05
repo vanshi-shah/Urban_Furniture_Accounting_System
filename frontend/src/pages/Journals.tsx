@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Search,
   ArrowLeft,
@@ -31,6 +31,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { apiFetch } from "@/lib/api";
 
 // Validation Schema
 const journalSchema = z.object({
@@ -41,19 +42,34 @@ const journalSchema = z.object({
 
 type JournalFormValues = z.infer<typeof journalSchema>;
 
-// Mock Data
-const initialJournals = [
-  { id: "1", name: "Sales", code: "SAL", type: "SALES", defaultAccount: "Sales Revenue A/c" },
-  { id: "2", name: "Purchase", code: "PUR", type: "PURCHASES", defaultAccount: "Purchase Expenses A/c" },
-  { id: "3", name: "Bank", code: "BNK", type: "BANK", defaultAccount: "Bank A/c" },
-  { id: "4", name: "Cash", code: "CSH", type: "CASH", defaultAccount: "Cash A/c" },
-];
+export interface Journal {
+  id: string;
+  name: string;
+  code: string;
+  type: string;
+  defaultAccount?: { name: string } | null;
+}
 
 export default function Journals() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
-  const [journals, setJournals] = useState(initialJournals);
+  const [journals, setJournals] = useState<Journal[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState("");
+
+  const fetchJournals = async () => {
+    try {
+      const data = await apiFetch('/master/journals');
+      setJournals(data || []);
+    } catch (err: any) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    fetchJournals();
+  }, []);
 
   const {
     register,
@@ -69,17 +85,22 @@ export default function Journals() {
     },
   });
 
-  const onSubmit = (data: JournalFormValues) => {
-    const newJ = {
-      id: String(journals.length + 1),
-      name: data.name,
-      code: data.code,
-      type: data.type,
-      defaultAccount: "General A/c"
-    };
-    setJournals([...journals, newJ]);
-    setIsDialogOpen(false);
-    reset();
+  const onSubmit = async (data: JournalFormValues) => {
+    setLoading(true);
+    setApiError("");
+    try {
+      await apiFetch('/master/journals', {
+        method: 'POST',
+        body: JSON.stringify(data)
+      });
+      await fetchJournals();
+      setIsDialogOpen(false);
+      reset();
+    } catch (err: any) {
+      setApiError(err.message || "Failed to save journal");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const filteredJournals = journals.filter(j =>
@@ -195,7 +216,7 @@ export default function Journals() {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-muted-foreground">
-                        {journal.defaultAccount}
+                        {journal.defaultAccount ? journal.defaultAccount.name : "-"}
                       </TableCell>
                     </TableRow>
                   ))
