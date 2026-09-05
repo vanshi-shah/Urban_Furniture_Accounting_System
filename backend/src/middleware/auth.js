@@ -20,19 +20,40 @@ function requireAuth(req, res, next) {
     return res.status(401).json({ success: false, error: 'Unauthorized: Token expired or invalid' });
   }
 }
-function requireRole(role) {
+
+/**
+ * requireRoles(...roles)
+ * Allows one or more roles. ADMIN always passes.
+ * Usage: requireRoles('ADMIN', 'ACCOUNTANT')
+ */
+function requireRoles(...roles) {
   return function (req, res, next) {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Unauthorized: No user found' });
     }
-    
-    // Check if the user has the required role
-    if (req.user.role !== role) {
-      return res.status(403).json({ success: false, error: 'Forbidden: Insufficient permissions' });
+
+    const userRole = req.user.role;
+
+    // ADMIN always has full access
+    if (userRole === 'ADMIN') return next();
+
+    if (!roles.includes(userRole)) {
+      return res.status(403).json({
+        success: false,
+        error: `Forbidden: Access restricted to ${roles.join(', ')} role(s)`
+      });
     }
-    
+
     next();
   };
 }
 
-module.exports = { requireAuth, requireRole };
+/**
+ * requireRole(role) — backward-compatible single-role check.
+ * ADMIN always passes.
+ */
+function requireRole(role) {
+  return requireRoles(role);
+}
+
+module.exports = { requireAuth, requireRole, requireRoles };

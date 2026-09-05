@@ -35,7 +35,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
 
-  const from = (location.state as { from?: { pathname?: string } })?.from?.pathname || "/dashboard";
+  const from = (location.state as { from?: { pathname?: string } })?.from?.pathname;
 
   const {
     register,
@@ -55,8 +55,8 @@ export default function Login() {
     loginMutation.mutate(
       { email: data.loginId, password: data.password },
       {
-        onSuccess: () => {
-          navigate(from, { replace: true });
+        onSuccess: (userData) => {
+          navigate(from || (userData.role === "USER" ? "/my-invoices" : "/dashboard"), { replace: true });
         },
         onError: (err: any) => {
           const message = err.message || "Invalid Login Id or Password";

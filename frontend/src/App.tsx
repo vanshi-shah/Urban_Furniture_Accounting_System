@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { PublicRoute } from "./components/auth/PublicRoute";
+import { RoleRoute } from "./components/auth/RoleRoute";
 import { DashboardLayout } from "./layouts/DashboardLayout";
 import { ErrorBoundary } from "./components/common/ErrorBoundary";
 import Dashboard from "./pages/Dashboard";
@@ -22,6 +23,20 @@ import VendorBills from "./pages/VendorBills";
 import DemoJournalEntry from "./pages/DemoJournalEntry";
 import Sales from "./pages/Sales";
 import Reports from "./pages/Reports";
+import MyInvoices from "./pages/MyInvoices";
+import Unauthorized from "./pages/Unauthorized";
+
+// Role shorthand constants
+const ADMIN_ONLY = ["ADMIN"] as const;
+const ACCOUNTING_ROLES = ["ADMIN", "ACCOUNTANT"] as const;
+const ALL_ROLES = ["ADMIN", "ACCOUNTANT", "USER"] as const;
+
+function FallbackRoute() {
+  const { user, isAuthenticated } = useAuth();
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (user?.role === "USER") return <Navigate to="/my-invoices" replace />;
+  return <Navigate to="/dashboard" replace />;
+}
 
 export function App() {
   return (
@@ -33,68 +48,58 @@ export function App() {
         <Route path="/welcome" element={<Welcome />} />
 
         {/* Public Authentication Routes */}
-        <Route
-          path="/login"
-          element={
-            <PublicRoute>
-              <Login />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="/register"
-          element={
-            <PublicRoute>
-              <Register />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="/signup"
-          element={
-            <PublicRoute>
-              <Register />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="/forgot-password"
-          element={
-            <PublicRoute>
-              <ForgotPassword />
-            </PublicRoute>
-          }
-        />
+        <Route path="/login"           element={<PublicRoute><Login /></PublicRoute>} />
+        <Route path="/register"        element={<PublicRoute><Register /></PublicRoute>} />
+        <Route path="/signup"          element={<PublicRoute><Register /></PublicRoute>} />
+        <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
 
-        {/* Protected Application Routes */}
-        <Route
-          path="/users/create"
-          element={
-            <ProtectedRoute>
-              <DashboardLayout>
-                <CreateUser />
-              </DashboardLayout>
-            </ProtectedRoute>
-          }
-        />
+        {/* Unauthorized page */}
+        <Route path="/unauthorized" element={<ProtectedRoute><Unauthorized /></ProtectedRoute>} />
+
+        {/* ── Dashboard (ADMIN and ACCOUNTANT only) ────────────────────────── */}
         <Route
           path="/dashboard"
           element={
             <ProtectedRoute>
-              <DashboardLayout>
-                <Dashboard />
-              </DashboardLayout>
+              <RoleRoute allowedRoles={[...ACCOUNTING_ROLES]}>
+                <DashboardLayout><Dashboard /></DashboardLayout>
+              </RoleRoute>
             </ProtectedRoute>
           }
         />
 
+        {/* ── USER-only: My Invoices ──────────────────────────────────────── */}
+        <Route
+          path="/my-invoices"
+          element={
+            <ProtectedRoute>
+              <RoleRoute allowedRoles={[...ALL_ROLES]}>
+                <DashboardLayout><MyInvoices /></DashboardLayout>
+              </RoleRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ── ADMIN only: User Management ─────────────────────────────────── */}
+        <Route
+          path="/users/create"
+          element={
+            <ProtectedRoute>
+              <RoleRoute allowedRoles={[...ADMIN_ONLY]}>
+                <DashboardLayout><CreateUser /></DashboardLayout>
+              </RoleRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ── ADMIN + ACCOUNTANT: Master Data ─────────────────────────────── */}
         <Route
           path="/contacts"
           element={
             <ProtectedRoute>
-              <DashboardLayout>
-                <Contacts />
-              </DashboardLayout>
+              <RoleRoute allowedRoles={[...ACCOUNTING_ROLES]}>
+                <DashboardLayout><Contacts /></DashboardLayout>
+              </RoleRoute>
             </ProtectedRoute>
           }
         />
@@ -103,9 +108,9 @@ export function App() {
           path="/products"
           element={
             <ProtectedRoute>
-              <DashboardLayout>
-                <Products />
-              </DashboardLayout>
+              <RoleRoute allowedRoles={[...ACCOUNTING_ROLES]}>
+                <DashboardLayout><Products /></DashboardLayout>
+              </RoleRoute>
             </ProtectedRoute>
           }
         />
@@ -114,9 +119,9 @@ export function App() {
           path="/chart-of-accounts"
           element={
             <ProtectedRoute>
-              <DashboardLayout>
-                <ChartOfAccounts />
-              </DashboardLayout>
+              <RoleRoute allowedRoles={[...ACCOUNTING_ROLES]}>
+                <DashboardLayout><ChartOfAccounts /></DashboardLayout>
+              </RoleRoute>
             </ProtectedRoute>
           }
         />
@@ -125,20 +130,21 @@ export function App() {
           path="/journals"
           element={
             <ProtectedRoute>
-              <DashboardLayout>
-                <Journals />
-              </DashboardLayout>
+              <RoleRoute allowedRoles={[...ACCOUNTING_ROLES]}>
+                <DashboardLayout><Journals /></DashboardLayout>
+              </RoleRoute>
             </ProtectedRoute>
           }
         />
 
+        {/* ── ADMIN + ACCOUNTANT: Accounting Transactions ─────────────────── */}
         <Route
           path="/journal-entries"
           element={
             <ProtectedRoute>
-              <DashboardLayout>
-                <JournalEntries />
-              </DashboardLayout>
+              <RoleRoute allowedRoles={[...ACCOUNTING_ROLES]}>
+                <DashboardLayout><JournalEntries /></DashboardLayout>
+              </RoleRoute>
             </ProtectedRoute>
           }
         />
@@ -147,9 +153,9 @@ export function App() {
           path="/budgets"
           element={
             <ProtectedRoute>
-              <DashboardLayout>
-                <Budgets />
-              </DashboardLayout>
+              <RoleRoute allowedRoles={[...ACCOUNTING_ROLES]}>
+                <DashboardLayout><Budgets /></DashboardLayout>
+              </RoleRoute>
             </ProtectedRoute>
           }
         />
@@ -158,9 +164,9 @@ export function App() {
           path="/analytic-accounts"
           element={
             <ProtectedRoute>
-              <DashboardLayout>
-                <AnalyticAccounts />
-              </DashboardLayout>
+              <RoleRoute allowedRoles={[...ACCOUNTING_ROLES]}>
+                <DashboardLayout><AnalyticAccounts /></DashboardLayout>
+              </RoleRoute>
             </ProtectedRoute>
           }
         />
@@ -169,9 +175,9 @@ export function App() {
           path="/purchase-orders"
           element={
             <ProtectedRoute>
-              <DashboardLayout>
-                <PurchaseOrders />
-              </DashboardLayout>
+              <RoleRoute allowedRoles={[...ACCOUNTING_ROLES]}>
+                <DashboardLayout><PurchaseOrders /></DashboardLayout>
+              </RoleRoute>
             </ProtectedRoute>
           }
         />
@@ -180,9 +186,9 @@ export function App() {
           path="/vendor-bills"
           element={
             <ProtectedRoute>
-              <DashboardLayout>
-                <VendorBills />
-              </DashboardLayout>
+              <RoleRoute allowedRoles={[...ACCOUNTING_ROLES]}>
+                <DashboardLayout><VendorBills /></DashboardLayout>
+              </RoleRoute>
             </ProtectedRoute>
           }
         />
@@ -191,9 +197,9 @@ export function App() {
           path="/demo-journal-entry"
           element={
             <ProtectedRoute>
-              <DashboardLayout>
-                <DemoJournalEntry />
-              </DashboardLayout>
+              <RoleRoute allowedRoles={[...ACCOUNTING_ROLES]}>
+                <DashboardLayout><DemoJournalEntry /></DashboardLayout>
+              </RoleRoute>
             </ProtectedRoute>
           }
         />
@@ -283,8 +289,7 @@ export function App() {
         />
 
         {/* Fallbacks */}
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        <Route path="*" element={<FallbackRoute />} />
       </Routes>
     </AuthProvider>
     </ErrorBoundary>

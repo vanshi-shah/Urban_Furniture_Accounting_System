@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/context/AuthContext";
+import { UserRole } from "@/types/auth";
 import {
   ChevronDown,
   LogOut,
@@ -19,12 +20,19 @@ import {
   PieChart,
   FileText,
   BookOpen,
+import {
   Scale,
   TrendingUp,
   X,
   Menu,
   Sparkles,
   LayoutDashboard,
+  PieChart,
+  Layers,
+  ShoppingCart,
+  Receipt,
+  UserCog,
+  CreditCard,
 } from "lucide-react";
 import logo from "@/assets/logo.png";
 
@@ -41,11 +49,46 @@ interface NavCategory {
   links: NavLinkItem[];
 }
 
+interface NavItem {
+  label: string;
+  path: string;
+  icon: React.ElementType;
+  roles: UserRole[];
+}
+
+const ALL_NAV_ITEMS: NavItem[] = [
+  { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard, roles: ["ADMIN", "ACCOUNTANT"] },
+  { label: "My Invoices", path: "/my-invoices", icon: CreditCard, roles: ["USER"] },
+  { label: "Purchase Orders", path: "/purchase-orders", icon: ShoppingCart, roles: ["ADMIN", "ACCOUNTANT"] },
+  { label: "Vendor Bills", path: "/vendor-bills", icon: Receipt, roles: ["ADMIN", "ACCOUNTANT"] },
+  { label: "Contacts", path: "/contacts", icon: Users, roles: ["ADMIN", "ACCOUNTANT"] },
+  { label: "Products", path: "/products", icon: Box, roles: ["ADMIN", "ACCOUNTANT"] },
+  { label: "Chart of Accounts", path: "/chart-of-accounts", icon: FileText, roles: ["ADMIN", "ACCOUNTANT"] },
+  { label: "Journals", path: "/journals", icon: BookOpen, roles: ["ADMIN", "ACCOUNTANT"] },
+  { label: "Journal Entries", path: "/journal-entries", icon: FileText, roles: ["ADMIN", "ACCOUNTANT"] },
+  { label: "Budgets", path: "/budgets", icon: PieChart, roles: ["ADMIN", "ACCOUNTANT"] },
+  { label: "Analytic Accounts", path: "/analytic-accounts", icon: Layers, roles: ["ADMIN", "ACCOUNTANT"] },
+  { label: "Create User", path: "/users/create", icon: UserCog, roles: ["ADMIN"] },
+];
+
+const ROLE_LABELS: Record<UserRole, string> = {
+  ADMIN: "Admin",
+  ACCOUNTANT: "Accountant",
+  USER: "User",
+};
+
+const ROLE_COLORS: Record<UserRole, string> = {
+  ADMIN: "text-rose-500",
+  ACCOUNTANT: "text-violet-500",
+  USER: "text-sky-500",
+};
+
 export function DashboardLayout({ children }: { children: ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
+  const userRole = (user?.role as UserRole) || "USER";
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -102,6 +145,11 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
       ],
     },
   ];
+
+  // Filter nav items based on current user role
+  const visibleNavItems = ALL_NAV_ITEMS.filter((item) =>
+    item.roles.includes(userRole)
+  );
 
   // Detect current active category based on pathname
   const getCurrentCategoryKey = () => {
@@ -169,7 +217,8 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
   };
 
   const userInitial = user?.name ? user.name.charAt(0).toUpperCase() : "U";
-  const userRole = user?.role ? user.role.toUpperCase() : "EMPLOYEE";
+  const roleLabel   = ROLE_LABELS[userRole] || userRole;
+  const roleColor   = ROLE_COLORS[userRole] || "text-muted-foreground";
 
   return (
     <div className="min-h-screen w-full bg-background text-foreground flex flex-col font-sans selection:bg-primary/20">
@@ -202,14 +251,72 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
               </div>
             </Link>
 
-            {/* Desktop Navigation Tabs: Sales | Purchase | Account | Report */}
-            <nav className="hidden md:flex items-center space-x-1 pl-4 border-l border-border/70">
-              <Link
-                to="/dashboard"
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                  location.pathname === "/dashboard"
-                    ? "bg-secondary text-foreground shadow-xs"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
+        {/* Role Banner */}
+        <div className={`px-4 py-2 border-b border-border/50 bg-background/30 flex items-center gap-2`}>
+          <Shield className={`h-3 w-3 ${roleColor}`} />
+          <span className={`text-[11px] font-semibold uppercase tracking-wider ${roleColor}`}>
+            {roleLabel}
+          </span>
+          <span className="text-[10px] text-muted-foreground ml-auto">
+            {userRole === "ADMIN" && "Full Access"}
+            {userRole === "ACCOUNTANT" && "Accounting Access"}
+            {userRole === "USER" && "Invoice Access"}
+          </span>
+        </div>
+
+        {/* Navigation Links */}
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+          <div className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            Navigation
+          </div>
+          {visibleNavItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = location.pathname === item.path;
+            return (
+              <Button
+                key={item.path}
+                variant={isActive ? "secondary" : "ghost"}
+                className={`w-full justify-start gap-2.5 font-medium transition-all ${
+                  isActive
+                    ? "bg-secondary text-secondary-foreground shadow-sm font-semibold"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Icon className="h-3.5 w-3.5" />
+                <span>{item.label}</span>
+              </Button>
+            );
+          })}
+        </nav>
+
+        {/* Desktop Navigation Tabs: Sales | Purchase | Account | Report */}
+        <nav className="hidden md:flex items-center space-x-1 pl-4 border-l border-border/70">
+          <Link
+            to="/dashboard"
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              location.pathname === "/dashboard"
+                ? "bg-secondary text-foreground shadow-xs"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
+            }`}
+          >
+            <LayoutDashboard className="h-3.5 w-3.5" />
+            Dashboard
+          </Link>
+          {navCategories.map((category) => (
+            <button
+              key={category.key}
+              type="button"
+              onClick={() => setMegaMenuOpen((open) => !open)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                activeCategory === category.key || (megaMenuOpen && activeCategory === category.key)
+                  ? "bg-secondary text-foreground shadow-xs"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
+              }`}
+            >
+              {category.title}
+            </button>
+          ))}
+        </nav>
                 }`}
               >
                 <LayoutDashboard className="h-3.5 w-3.5 text-primary" />
@@ -264,10 +371,13 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
                 <div className="flex items-center gap-1">
                   <Badge
                     variant="outline"
-                    className="text-[9px] py-0 px-1 font-semibold border-border bg-background text-muted-foreground uppercase"
+                  <Badge
+                    variant="outline"
+                    className={`text-[10px] py-0 px-1.5 font-medium border-border/80 bg-background/50 ${roleColor}`}
                   >
-                    <Shield className="h-2 w-2 mr-0.5 text-accent" />
-                    {userRole}
+                    <Shield className="h-2.5 w-2.5 mr-0.5" />
+                    {roleLabel}
+                  </Badge>
                   </Badge>
                 </div>
               </div>
@@ -441,17 +551,21 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
         )}
       </header>
 
-      {/* Backdrop overlay when mega-menu is open */}
-      {megaMenuOpen && (
-        <div
-          className="fixed inset-0 top-16 bg-background/50 backdrop-blur-xs z-30 transition-opacity duration-200"
-          onClick={() => setMegaMenuOpen(false)}
-        />
-      )}
+        </header>
 
-      {/* Dynamic Page Content - Full Width without Sidebar */}
-      <main className="flex-1 w-full p-4 sm:p-6 lg:p-8 overflow-x-hidden">
-        {children}
+        {megaMenuOpen && (
+          <div
+            className="fixed inset-0 top-16 bg-background/50 backdrop-blur-xs z-30 transition-opacity duration-200"
+            onClick={() => setMegaMenuOpen(false)}
+          />
+        )}
+
+        <div className="flex-1 p-6 overflow-auto">
+          {children}
+        </div>
+      </main>
+    </div>
+  );
       </main>
     </div>
   );

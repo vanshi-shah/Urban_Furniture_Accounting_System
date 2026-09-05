@@ -43,9 +43,9 @@ export default function Welcome() {
     loginMutation.mutate(
       { email, password },
       {
-        onSuccess: () => {
+        onSuccess: (userData) => {
           localStorage.setItem("last_active_user", email);
-          navigate("/dashboard", { replace: true });
+          navigate(userData.role === "USER" ? "/my-invoices" : "/dashboard", { replace: true });
         },
         onError: () => {
           // If direct login fails (e.g. backend seed not yet present), route to login with state
@@ -117,9 +117,9 @@ export default function Welcome() {
             <Button
               size="sm"
               className="bg-primary text-primary-foreground hover:opacity-90 font-medium px-4 shadow-sm text-xs h-9 rounded-xl flex items-center gap-1.5"
-              onClick={() => navigate("/dashboard")}
+              onClick={() => navigate(user?.role === "USER" ? "/my-invoices" : "/dashboard")}
             >
-              <span>Dashboard</span>
+              <span>{user?.role === "USER" ? "My Invoices" : "Dashboard"}</span>
               <ArrowRight className="h-3.5 w-3.5" />
             </Button>
           ) : (
@@ -185,9 +185,9 @@ export default function Welcome() {
               <Button
                 size="lg"
                 className="w-full bg-primary text-primary-foreground hover:opacity-95 font-semibold text-sm h-12 rounded-xl shadow-md flex items-center justify-center gap-2"
-                onClick={() => navigate("/dashboard")}
+                onClick={() => navigate(user?.role === "USER" ? "/my-invoices" : "/dashboard")}
               >
-                <span>Enter Modura Dashboard</span>
+                <span>{user?.role === "USER" ? "View My Invoices" : "Enter Modura Dashboard"}</span>
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </div>

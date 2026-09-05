@@ -9,6 +9,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   login: (credentials: LoginCredentials) => Promise<User>;
   register: (payload: RegisterCredentials) => Promise<User>;
+  forgotPassword: (identifier: string) => Promise<User>;
   logout: () => void;
 }
 
@@ -89,6 +90,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return receivedUser;
   };
 
+  const forgotPassword = async (identifier: string): Promise<User> => {
+    const data: any = await apiFetch("/auth/forgot-password", {
+      method: "POST",
+      body: JSON.stringify({ identifier })
+    });
+    const { token: receivedToken, user: receivedUser } = data;
+
+    setToken(receivedToken);
+    setUser(receivedUser);
+
+    localStorage.setItem("token", receivedToken);
+    localStorage.setItem("user", JSON.stringify(receivedUser));
+
+    return receivedUser;
+  };
+
   const logout = () => {
     setToken(null);
     setUser(null);
@@ -105,6 +122,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAuthenticated: !!token,
         login,
         register,
+        forgotPassword,
         logout,
       }}
     >

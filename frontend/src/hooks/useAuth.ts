@@ -23,3 +23,13 @@ export function useRegister() {
     },
   });
 }
+
+export function useForgotPassword() {
+  const { forgotPassword } = useAuth();
+
+  return useMutation<User, Error, string>({
+    mutationFn: async (identifier: string) => {
+      return await forgotPassword(identifier);
+    },
+  });
+}

@@ -144,3 +144,39 @@ exports.me = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.forgotPassword = async (req, res, next) => {
+  try {
+    const { identifier } = req.body;
+    if (!identifier) {
+      return res.status(400).json({ success: false, error: "Email or Login Id is required" });
+    }
+
+    const user = await prisma.user.findUnique({ where: { email: identifier } });
+    
+    if (!user) {
+      return res.status(404).json({ success: false, error: "Account doesn't exist" });
+    }
+    
+    // As per request, directly give access if the user exists
+    const token = jwt.sign(
+      { userId: user.id, id: user.id, companyId: user.companyId, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
+    );
+    
+    res.json({
+      success: true,
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        companyId: user.companyId
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};

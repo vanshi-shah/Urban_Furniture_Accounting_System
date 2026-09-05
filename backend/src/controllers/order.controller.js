@@ -43,6 +43,22 @@ exports.confirmOrder = async (req, res, next) => {
 
 exports.recordPayment = async (req, res, next) => {
   try {
+    // USER role can only pay CUSTOMER_INVOICE orders that belong to their company
+    if (req.user.role === "USER") {
+      const order = await prisma.order.findUnique({
+        where: { id: req.params.id },
+      });
+      if (!order || order.companyId !== req.user.companyId) {
+        return res.status(404).json({ success: false, error: "Order not found" });
+      }
+      if (order.type !== "CUSTOMER_INVOICE") {
+        return res.status(403).json({
+          success: false,
+          error: "Forbidden: You can only pay customer invoices"
+        });
+      }
+    }
+
     const result = await OrderService.recordPayment(req.user.companyId, req.params.id, req.body);
     res.json({ success: true, ...result });
   } catch (error) {
@@ -87,9 +103,19 @@ exports.getOrderById = async (req, res, next) => {
         payments: true
       }
     });
+
     if (!order || order.companyId !== req.user.companyId) {
       return res.status(404).json({ error: "Order not found" });
     }
+
+    // USER role can only see CUSTOMER_INVOICE orders
+    if (req.user.role === "USER" && order.type !== "CUSTOMER_INVOICE") {
+      return res.status(403).json({
+        success: false,
+        error: "Forbidden: You can only view customer invoices"
+      });
+    }
+
     res.json(order);
   } catch (error) {
     next(error);
@@ -104,7 +130,13 @@ exports.listOrders = async (req, res, next) => {
     const skip  = (page - 1) * limit;
 
     const whereClause = { companyId: req.user.companyId };
-    if (type) whereClause.type = type;
+
+    // USER role can only see CUSTOMER_INVOICE orders
+    if (req.user.role === "USER") {
+      whereClause.type = "CUSTOMER_INVOICE";
+    } else if (type) {
+      whereClause.type = type;
+    }
 
     const [orders, total] = await Promise.all([
       prisma.order.findMany({
