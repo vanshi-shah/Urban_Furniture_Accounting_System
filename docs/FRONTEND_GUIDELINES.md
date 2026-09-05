@@ -4,6 +4,7 @@
 
 ## 1. Core Architecture
 - **Framework**: React (Vite + TypeScript/JavaScript), running locally on port `3000`.
+- **Typing & Compilation**: Strict TypeScript compiler (`tsconfig.json`) with `@types/node`, `@types/react`, `@types/react-dom` installed, path aliases (`@/*` mapping to `./src/*`), and `tsc -b` bundle verification.
 - **Styling**: Tailwind CSS configured with semantic design tokens and HSL CSS variables.
 - **Components**: Reusable component architecture (`DataTable`, `SearchBox`, `ConfirmDialog`, `Modal`, `MetricCard`).
 - **Icons**: Lucide React.
