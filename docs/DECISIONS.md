@@ -40,6 +40,10 @@
     - **Kanban View**: Visual card grid rendering image thumbnail, product title, category & type badges, highlighted Sales Price & Cost, and unit margin percentages with hover elevation and quick edit triggers.
     - **List View**: Dense financial data table with selection checkboxes, image avatars, monospace currency formatting in INR, and quick action controls.
     - **Backend & Local Storage Synchronization**: Connected to `/master/products` using TanStack Query and local persistence for reliable online/offline presentation.
+15. **Chart of Accounts Action Bar & Form Alignment**:
+    - Updated the Action Bar in the `ChartOfAccounts.tsx` List View to strictly match the provided wireframe, including new `Confirm`, `Archived`, and `Home` navigation controls mapped to the primary design tokens.
+    - Implemented a `viewMode` state toggle to switch between the List and Form View.
+    - Built a New Account Form with `Account Name` and `Type` dropdowns categorized accurately under `Balancesheet` and `Profit and Loss` sections to strictly match the requested data model.
 
 
 
