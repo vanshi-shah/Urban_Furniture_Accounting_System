@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "./context/AuthContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { PublicRoute } from "./components/auth/PublicRoute";
 import { RoleRoute } from "./components/auth/RoleRoute";
@@ -209,9 +209,11 @@ export function App() {
           path="/sales-orders"
           element={
             <ProtectedRoute>
-              <DashboardLayout>
-                <Sales />
-              </DashboardLayout>
+              <RoleRoute allowedRoles={[...ALL_ROLES]}>
+                <DashboardLayout>
+                  <Sales />
+                </DashboardLayout>
+              </RoleRoute>
             </ProtectedRoute>
           }
         />
@@ -219,9 +221,11 @@ export function App() {
           path="/sales-invoices"
           element={
             <ProtectedRoute>
-              <DashboardLayout>
-                <Sales />
-              </DashboardLayout>
+              <RoleRoute allowedRoles={[...ALL_ROLES]}>
+                <DashboardLayout>
+                  <Sales />
+                </DashboardLayout>
+              </RoleRoute>
             </ProtectedRoute>
           }
         />
@@ -229,9 +233,11 @@ export function App() {
           path="/receipts"
           element={
             <ProtectedRoute>
-              <DashboardLayout>
-                <Sales />
-              </DashboardLayout>
+              <RoleRoute allowedRoles={[...ALL_ROLES]}>
+                <DashboardLayout>
+                  <Sales />
+                </DashboardLayout>
+              </RoleRoute>
             </ProtectedRoute>
           }
         />
@@ -241,9 +247,11 @@ export function App() {
           path="/reports"
           element={
             <ProtectedRoute>
-              <DashboardLayout>
-                <Reports />
-              </DashboardLayout>
+              <RoleRoute allowedRoles={[...ACCOUNTING_ROLES]}>
+                <DashboardLayout>
+                  <Reports />
+                </DashboardLayout>
+              </RoleRoute>
             </ProtectedRoute>
           }
         />
@@ -251,9 +259,11 @@ export function App() {
           path="/reports/balance-sheet"
           element={
             <ProtectedRoute>
-              <DashboardLayout>
-                <Reports />
-              </DashboardLayout>
+              <RoleRoute allowedRoles={[...ACCOUNTING_ROLES]}>
+                <DashboardLayout>
+                  <Reports />
+                </DashboardLayout>
+              </RoleRoute>
             </ProtectedRoute>
           }
         />
@@ -261,9 +271,11 @@ export function App() {
           path="/reports/profit-and-loss"
           element={
             <ProtectedRoute>
-              <DashboardLayout>
-                <Reports />
-              </DashboardLayout>
+              <RoleRoute allowedRoles={[...ACCOUNTING_ROLES]}>
+                <DashboardLayout>
+                  <Reports />
+                </DashboardLayout>
+              </RoleRoute>
             </ProtectedRoute>
           }
         />
@@ -271,9 +283,11 @@ export function App() {
           path="/reports/budget-report"
           element={
             <ProtectedRoute>
-              <DashboardLayout>
-                <Reports />
-              </DashboardLayout>
+              <RoleRoute allowedRoles={[...ACCOUNTING_ROLES]}>
+                <DashboardLayout>
+                  <Reports />
+                </DashboardLayout>
+              </RoleRoute>
             </ProtectedRoute>
           }
         />
@@ -281,9 +295,11 @@ export function App() {
           path="/reports/trial-balance"
           element={
             <ProtectedRoute>
-              <DashboardLayout>
-                <Reports />
-              </DashboardLayout>
+              <RoleRoute allowedRoles={[...ACCOUNTING_ROLES]}>
+                <DashboardLayout>
+                  <Reports />
+                </DashboardLayout>
+              </RoleRoute>
             </ProtectedRoute>
           }
         />
