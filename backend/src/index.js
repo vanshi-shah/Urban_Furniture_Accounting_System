@@ -36,15 +36,8 @@ app.use("/api/accounting", accountingRoutes);
 app.use("/api/orders", require("./routes/order.routes"));
 app.use("/api/reports", require("./routes/report.routes"));
 
-// Use the error handler from Jaini's branch if possible, otherwise fallback
-if (typeof errorHandler === "function") {
-  app.use(errorHandler);
-} else {
-  app.use((err, req, res, next) => {
-    console.error(err);
-    res.status(500).json({ error: err.message || "Internal Server Error" });
-  });
-}
+// Global centralized error handling middleware
+app.use(errorHandler);
 
 const httpServer = createServer(app);
 if (typeof initSocket === "function") {

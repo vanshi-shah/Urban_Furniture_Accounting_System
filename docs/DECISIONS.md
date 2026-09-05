@@ -21,4 +21,12 @@
    - Created a dedicated, animated entry portal distinct from multi-section landing pages.
    - Welcomes users with dynamic greeting ("Welcome to Modura" vs "Welcome back to Modura" for returning sessions), animated breathing brand emblem with ambient lighting aura, floating hallmark badges, and 1-click Quick Demo login paths for Admin and Employee roles.
    - Wired default entry route `/` and `/welcome` to greet unauthenticated visitors and offer smooth transitions to `/login` and `/register`.
+10. **Backend Error Logging & Client-Side Sanitization**:
+   - Upgraded global `errorHandler.js` so that all internal Prisma stack traces, connection failures, query errors, and file paths are strictly logged on the backend console (`console.error`).
+   - Responses sent to the frontend are cleanly sanitized (e.g. "Database service is currently unreachable", "A record with this information already exists", validation alerts) preventing raw stack dumps from appearing in the user interface.
+11. **Modura Accounting Dashboard & Component Gallery Suppression**:
+   - Fully rebuilt `Dashboard.tsx` from the legacy hackathon starter to the official Modura financial intelligence architecture: Financial Health Score Radar (94/100), core financial KPIs (Revenue, COGS, Net Profit, Liquidity, AR/AP), Smart Alerts feed with action CTAs, monthly trajectory charts in Olive & Brass tokens, and interactive "Explain This Number" drilldown modal.
+   - Removed and suppressed the Component Gallery route and navigation item from `DashboardLayout.tsx` and `App.tsx` for focused presentation of core accounting workflows.
+
+
 

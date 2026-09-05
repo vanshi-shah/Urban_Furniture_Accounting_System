@@ -4,7 +4,6 @@ import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { PublicRoute } from "./components/auth/PublicRoute";
 import { DashboardLayout } from "./layouts/DashboardLayout";
 import Dashboard from "./pages/Dashboard";
-import { ComponentGallery } from "./pages/ComponentGallery";
 import Welcome from "./pages/Welcome";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -102,17 +101,6 @@ export function App() {
             <ProtectedRoute>
               <DashboardLayout>
                 <AnalyticAccounts />
-              </DashboardLayout>
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/components"
-          element={
-            <ProtectedRoute>
-              <DashboardLayout>
-                <ComponentGallery />
               </DashboardLayout>
             </ProtectedRoute>
           }

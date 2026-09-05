@@ -45,4 +45,5 @@
 - Click: **"Why is my profit ₹X?"** and show the breakdown.
 
 ### 5:00 — Conclusion
-- "Urban Furniture doesn't just record transactions. Every business action automatically flows through accounting and tells the owner what is happening financially."
+- "Modura doesn't just record transactions. Every bespoke business action automatically flows through double-entry accounting and explains what is happening financially in real time."
+
