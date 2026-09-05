@@ -1,23 +1,24 @@
 # Architecture
 
-# Architecture
+             React + Vite (Modura UI)
+                   ↓
+             REST API
+                   ↓
+             Node.js (Express)
+                   ↓
+                Prisma
+                   ↓
+              PostgreSQL
 
-             React + Vite
-                  ↓
-            REST API
-                  ↓
-            Node.js (Express)
-                  ↓
-               Prisma
-                  ↓
-             PostgreSQL
-
-## Urban Finance
+## Modura (Urban Furniture Accounting System)
 *From transaction → accounting → insight.*
 
-An intelligent accounting workflow for small businesses that doesn't just record financial activity — it explains its impact.
+An intelligent accounting workflow and quiet luxury financial operating system for bespoke furniture ateliers that doesn't just record financial activity — it explains its impact.
 
 ## System Layers
+
+### 0. Entry & Welcome Portal
+- Animated Modura Welcome experience (`/welcome` and default unauthenticated `/`), 1-click Quick Demo logins, and secure JWT authentication.
 
 ### 1. Master Data Layer (CRUD)
 - Contacts, Products, Chart of Accounts, Journals, Budgets.

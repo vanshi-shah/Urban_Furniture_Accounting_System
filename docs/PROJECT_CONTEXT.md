@@ -1,17 +1,17 @@
 # Project Context
 
-## The Project: Urban Finance
-An intelligent accounting workflow for small businesses (specifically tailored to the Urban Furniture use-case).
+## The Project: Modura (Urban Furniture Accounting System)
+An intelligent accounting workflow and quiet luxury financial operating system for bespoke furniture ateliers and urban architecture businesses.
 
 ## The Strategy
 For a 2-member team, we chose the Accounting problem statement over DealFlow360. We will implement the core double-entry accounting engine perfectly, and then layer on **Smart Financial Intelligence** to create a "Wow" factor.
 
 ## Core Features (Must Have)
-1. Authentication
-2. Contacts
-3. Products
-4. Chart of Accounts
-5. Journals
+1. Animated Welcome Experience & Authentication (Modura Portal)
+2. Contacts (Customers & Vendors)
+3. Products & Bill of Materials
+4. Chart of Accounts (COA)
+5. Journals (Bank, Cash, Sales, Purchases, General)
 6. Sales & Purchases
 7. Invoices & Vendor Bills
 8. Payments
@@ -19,24 +19,25 @@ For a 2-member team, we chose the Accounting problem statement over DealFlow360.
 10. P&L, Balance Sheet, Budget
 
 ## Micro-Features (The Differentiators)
-1. *Financial Health Score*: Dashboard metric combining cash, profit, and receivables.
-2. *Smart Financial Alerts*: Rule-based alerts for overdue invoices or budget overruns.
-3. *Budget vs Actual*: Visual trackers for budget utilization.
-4. *Payment Risk*: Contextual risk assessment when viewing invoices.
-5. *"Explain This Number"*: Breakdown of P&L metrics.
-6. *Transaction -> Accounting Impact*: Visually showing the ledger updates after every business action.
+1. *Animated Welcome Portal*: Cinematic Modura entry portal greeting visitors with dynamic "Welcome" / "Welcome Back" greeting, brand aura, and 1-click quick demo access.
+2. *Financial Health Score*: Dashboard metric combining cash, profit, and receivables.
+3. *Smart Financial Alerts*: Rule-based alerts for overdue invoices or budget overruns.
+4. *Budget vs Actual*: Visual trackers for budget utilization.
+5. *Payment Risk*: Contextual risk assessment when viewing invoices.
+6. *"Explain This Number"*: Breakdown of P&L metrics.
+7. *Transaction -> Accounting Impact*: Visually showing the ledger updates after every business action.
 
 
 ## Detailed Phase-by-Phase Development Plan
 
 To ensure we build this effectively, we will construct the core features and the intelligence micro-features simultaneously. Here is the exact breakdown of micro-changes expected in each phase.
 
-### Phase 1: Foundation (DB & Auth)
+### Phase 1: Foundation (DB, Auth & Animated Welcome Portal)
 *   **Database:** Initialize PostgreSQL database. Create Prisma schema for `User` and `Company`.
 *   **Backend:** Set up Express server. Implement JWT-based authentication (Login, Register with token generation and default COA provisioning). Fully tested and verified. *(Completed)*
-*   **Frontend:** Scaffold React app with an Elegant Olive design system (e.g., Tailwind/shadcn), Manrope typography, Login/Register screens, and routing & global state for Auth (`AuthContext`), `ProtectedRoute` / `PublicRoute` guards, plus 1-click demo access. *(Completed)*
+*   **Frontend:** Scaffold React app with Modura Olive & Brass design system (Tailwind/shadcn), Manrope typography, animated **Welcome Portal** (`/welcome` & root `/`), Login/Register screens, and routing & global state for Auth (`AuthContext`), `ProtectedRoute` / `PublicRoute` guards, plus 1-click demo access. *(Completed)*
 *   **Micro-Changes:**
-    *   *Frontend:* Auto-redirect to dashboard on login, sign-out in navigation, and localStorage token persistence. *(Completed)*
+    *   *Frontend:* Dedicated animated Welcome screen greeting users with dynamic "Welcome"/"Welcome Back" states, smooth routing to Login/Register, auto-redirect to dashboard when logged in, and localStorage token persistence. *(Completed)*
     *   *Backend:* Global error handler middleware with Zod/Prisma error mapping, standardized port 5000, and permissive dev CORS. *(Completed)*
 
 ### Phase 2: Master Data Setup

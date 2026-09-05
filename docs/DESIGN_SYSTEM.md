@@ -1,26 +1,26 @@
-# Urban Furniture Accounting System — Design System
+# Modura (Urban Furniture Accounting System) — Design System
 
 ## 1. Design Philosophy & Visual Formula
 
-The Urban Furniture Accounting System merges **Quiet Luxury** with **Financial Precision**. Unlike generic SaaS tools dominated by electric blues or purples, our interface evokes an earthy, architectural aesthetic inspired by high-end furniture showrooms and studio materials, while maintaining uncompromising clarity for enterprise double-entry bookkeeping.
+The Modura Accounting System merges **Quiet Luxury** with **Financial Precision**. Unlike generic SaaS tools dominated by electric blues or purples, our interface evokes an earthy, architectural aesthetic inspired by high-end furniture showrooms and studio materials, while maintaining uncompromising clarity for enterprise double-entry bookkeeping.
 
 ```
-                URBAN FURNITURE
-                       │
-        ┌──────────────┼──────────────┐
-        ↓              ↓              ↓
-      COLOR        TYPOGRAPHY       SPACE
-        │              │              │
-   Deep Olive       Manrope       8px system
-   Warm Ivory       600–700       16px cards
-   Charcoal         400 body      24px padding
-   Brass            Clear data    32px sections
-        │              │              │
-        └──────────────┼──────────────┘
-                       ↓
-                QUIET LUXURY
-                       +
-             FINANCIAL PRECISION
+                  MODURA
+                    │
+      ┌─────────────┼─────────────┐
+      ↓             ↓             ↓
+    COLOR       TYPOGRAPHY      SPACE
+      │             │             │
+ Deep Olive      Manrope      8px system
+ Warm Ivory      600–700      16px cards
+ Charcoal        400 body     24px padding
+ Brass           Clear data   32px sections
+      │             │             │
+      └─────────────┼─────────────┘
+                    ↓
+             QUIET LUXURY
+                    +
+          FINANCIAL PRECISION
 ```
 
 ### Visual Balance
@@ -224,3 +224,14 @@ Interactive drill-down modals on P&L, Balance Sheet, and KPI widgets. Clicking a
 
 ### 5. "What Changed?" / Accounting Impact View
 An interactive post-transaction drawer/modal showing the exact debit/credit journal entries (`Move` & `MoveLine`) created behind the scenes, visually confirming ledger integrity to the user.
+
+---
+
+## 8. Animation & Motion Tokens
+
+To provide a refined, quiet luxury atmosphere, Modura utilizes subtle CSS animations for brand elements and portal interactions:
+* **Float (`animate-float` / `animate-float-delayed`)**: Soft 5s–6s vertical hover movement (`translateY(-8px)`).
+* **Pulse Glow (`animate-pulse-glow`)**: Ambient background radial aura expansion with subtle opacity breathing (0.35 to 0.7).
+* **Slow Rotation (`animate-spin-slow`)**: 24s linear ambient gradient halo rotation behind the brand emblem.
+* **Shimmer Text (`shimmer-text`)**: Fluid gradient text animation transitioning from Charcoal foreground through Brass Beige (`--accent`) with standard `background-clip: text` compatibility.
+

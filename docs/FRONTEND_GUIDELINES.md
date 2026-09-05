@@ -48,7 +48,10 @@
 4. **"Explain This Number" Drill-Down**: Clickable aggregate rows on P&L and Balance Sheet that open a modal detailing the exact journal entries.
 5. **"What Changed?" / Accounting Impact View**: Post-transaction confirmation showing the balanced Debit/Credit journal entry generated.
 
-## 6. Authentication & Security Standards
+## 6. Authentication, Welcome Experience & Security Standards
+- **Welcome Portal (`/` and `/welcome`)**:
+  - Unauthenticated visitors land on the dedicated animated Modura Welcome Page.
+  - Features dynamic greeting ("Welcome to Modura" / "Welcome back to Modura"), animated breathing brand emblem, and direct paths to Sign In, Register, or 1-Click Quick Demo access.
 - **Session Storage**: JWT stored securely in `localStorage` under key `token`, with user object cached under `user`.
 - **Axios Interceptor**: Automatically attaches `Authorization: Bearer <token>` to all requests dispatched via `api.ts`.
 - **Route Guards**:
@@ -58,10 +61,11 @@
   - Registration form strictly contains `name`, `email`, `password`, `confirmPassword`.
   - Never expose role selection on the frontend signup form (role defaults to `employee` on the server).
 - **Hackathon Demo Support**:
-  - Quick demo credentials button on the login screen allows 1-click credential auto-fill for both Admin and Employee profiles.
+  - Quick demo credentials buttons on both the Welcome screen and Login screen allow 1-click credential auto-fill and direct entry for Admin and Employee profiles.
 
-- Use React.
+- Use React + Vite.
 - Build clean, dashboard-centric interfaces.
 - Emphasize readability of financial numbers.
 - Ensure that the "Accounting Impact" of every transaction is clearly communicated to the user.
 - Build interactive reports where aggregate numbers can be clicked to reveal underlying data ("Explain this number").
+

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -75,24 +75,40 @@ export default function Login() {
     setValue("password", "password123");
   };
 
+  useEffect(() => {
+    if (location.state?.prefillRole) {
+      handleQuickDemo(location.state.prefillRole);
+    }
+  }, [location.state]);
+
   return (
     <div className="relative min-h-screen flex flex-col justify-between bg-background text-foreground selection:bg-primary/20">
       {/* Top Navigation Bar */}
       <header className="w-full flex items-center justify-between px-6 py-4 border-b border-border/50 backdrop-blur-sm z-10">
-        <div className="flex items-center gap-3">
-          <img src={logo} alt="Urban Furniture Logo" className="h-9 w-9 object-contain" />
+        <Link to="/welcome" className="flex items-center gap-3 group">
+          <img src={logo} alt="Modura Logo" className="h-9 w-9 object-contain group-hover:scale-105 transition-transform" />
           <div>
-            <span className="font-bold text-sm tracking-wider uppercase text-foreground">
-              Urban Furniture
-            </span>
-            <span className="hidden sm:inline-block ml-2 text-xs text-muted-foreground border-l border-border pl-2">
-              Accounting System
+            <div className="flex items-center gap-2">
+              <span className="font-extrabold text-sm tracking-wider uppercase text-foreground">
+                Modura
+              </span>
+              <span className="text-[10px] uppercase font-semibold text-primary px-1.5 py-0.2 rounded bg-primary/10 border border-primary/20">
+                Ledger
+              </span>
+            </div>
+            <span className="hidden sm:inline-block text-[11px] text-muted-foreground">
+              Urban Furniture Accounting
             </span>
           </div>
-        </div>
+        </Link>
 
         <div className="flex items-center gap-3">
-          <span className="text-xs text-muted-foreground hidden sm:inline-block">Theme:</span>
+          <Link
+            to="/welcome"
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors hidden sm:inline-block mr-2"
+          >
+            ← Back to Welcome
+          </Link>
           <ThemeToggle variant="segmented" />
         </div>
       </header>

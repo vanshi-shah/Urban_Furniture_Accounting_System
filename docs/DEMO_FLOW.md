@@ -1,6 +1,6 @@
 # Demo Flow (5-Minutes)
 
-**Theme: "Every transaction tells a story — our system automatically traces that story from the business action all the way to the financial insight."**
+**Theme: "Every transaction tells a story — Modura automatically traces that story from bespoke craft to real-time financial insight."**
 
 ## 🔐 Demo Login Credentials
 
@@ -9,10 +9,15 @@
 | **Admin** | `admin@urbanfurniture.com` | `password123` |
 | **Employee** | `designer@urbanfurniture.com` | `password123` |
 
-> These users are created via the **Register** page. The Login page has **Quick Demo** buttons that auto-fill these credentials.
+> These users can be logged in instantly via **1-Click Quick Demo Access** directly on the **Welcome Page** (`/welcome`) or the **Login Page** (`/login`).
+
+### -0:30 — Modura Welcome Portal Experience
+- Present the animated **Modura Welcome Page** (`/` or `/welcome`).
+- Show the dynamic "Welcome to Modura" greeting, the breathing luxury brand emblem, and the 1-click Quick Demo login.
+- Click "Admin Account" or "Sign In to Ledger" to enter the system.
 
 ### 0:00 — Dashboard
-- "Urban Furniture currently has ₹X revenue, ₹Y expenses and ₹Z outstanding."
+- "Modura currently has ₹X revenue, ₹Y expenses and ₹Z outstanding."
 - Highlight the **Financial Health Score**.
 
 ### 0:30 — Create Purchase

@@ -5,6 +5,7 @@ import { PublicRoute } from "./components/auth/PublicRoute";
 import { DashboardLayout } from "./layouts/DashboardLayout";
 import Dashboard from "./pages/Dashboard";
 import { ComponentGallery } from "./pages/ComponentGallery";
+import Welcome from "./pages/Welcome";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Contacts from "./pages/Contacts";
@@ -17,6 +18,10 @@ export function App() {
   return (
     <AuthProvider>
       <Routes>
+        {/* Welcome / Entry Experience */}
+        <Route path="/" element={<Welcome />} />
+        <Route path="/welcome" element={<Welcome />} />
+
         {/* Public Authentication Routes */}
         <Route
           path="/login"
