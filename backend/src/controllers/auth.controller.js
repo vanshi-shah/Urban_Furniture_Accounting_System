@@ -6,6 +6,14 @@ exports.register = async (req, res, next) => {
   try {
     const { name, email, password, companyName } = req.body;
     
+    // Password validation
+    if (!password || password.length < 8) {
+      return res.status(400).json({ success: false, error: "Password must be at least 8 characters long." });
+    }
+    if (!/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[^A-Za-z0-9]/.test(password)) {
+      return res.status(400).json({ success: false, error: "Password must contain at least one uppercase letter, one lowercase letter, and one special character." });
+    }
+
     // Hash password
     const passwordHash = await bcrypt.hash(password, 10);
     
