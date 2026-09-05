@@ -305,6 +305,7 @@ export default function JournalEntries() {
                       <TableHead>Account <span className="text-destructive">*</span></TableHead>
                       <TableHead>Partner</TableHead>
                       <TableHead>Analytic Account</TableHead>
+                      <TableHead>Description</TableHead>
                       <TableHead className="text-right">Debit</TableHead>
                       <TableHead className="text-right">Credit</TableHead>
                       <TableHead className="w-[50px]"></TableHead>
@@ -349,6 +350,14 @@ export default function JournalEntries() {
                             ))}
                           </select>
                         </TableCell>
+                        <TableCell>
+                          <Input 
+                            value={line.description || ""}
+                            onChange={(e) => updateLine(index, "description", e.target.value)}
+                            className="w-full bg-transparent border-border/50 h-8 text-sm"
+                            placeholder="Line description"
+                          />
+                        </TableCell>
                         <TableCell className="text-right text-destructive font-medium">
                           <Input 
                             type="number" 
@@ -377,7 +386,7 @@ export default function JournalEntries() {
                       </TableRow>
                     ))}
                     <TableRow className="bg-muted/5 font-semibold">
-                      <TableCell colSpan={3} className="text-right">Total:</TableCell>
+                      <TableCell colSpan={4} className="text-right">Total:</TableCell>
                       <TableCell className={`text-right ${totalDebit !== totalCredit ? "text-amber-600" : ""}`}>
                         {totalDebit.toLocaleString()}
                       </TableCell>

@@ -64,11 +64,22 @@ model Contact {
   payments          Payment[]
 }
 
+enum ProductType {
+  GOODS
+  SERVICE
+  COMBO
+}
+
 model Product {
   id          String      @id @default(cuid())
   name        String
+  type        ProductType @default(GOODS)
+  category    String?
+  salesPrice  Float       @default(0)
+  cost        Float       @default(0)
+  sku         String?
   description String?
-  price       Float       @default(0)
+  imageUrl    String?
   companyId   String
   company     Company     @relation(fields: [companyId], references: [id])
   createdAt   DateTime    @default(now())

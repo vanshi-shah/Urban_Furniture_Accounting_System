@@ -71,18 +71,26 @@ module.exports = {
     list: productCrud.list,
     create: async (req, res, next) => {
       try {
-        const { name, price } = req.body;
+        const { name, type, category, salesPrice, cost, sku, description, imageUrl } = req.body;
         if (!name || (typeof name === 'string' && name.trim() === "")) {
           return res.status(400).json({ error: "Product name is required" });
         }
-        if (price !== undefined && (isNaN(price) || Number(price) < 0)) {
-           return res.status(400).json({ error: "Price must be a valid positive number" });
+        if (salesPrice !== undefined && (isNaN(salesPrice) || Number(salesPrice) < 0)) {
+           return res.status(400).json({ error: "Sales Price must be a valid positive number" });
+        }
+        if (cost !== undefined && (isNaN(cost) || Number(cost) < 0)) {
+           return res.status(400).json({ error: "Cost must be a valid positive number" });
         }
 
         const productData = {
-          name: req.body.name,
-          description: req.body.description,
-          price: req.body.price,
+          name,
+          type,
+          category,
+          salesPrice: salesPrice !== undefined ? Number(salesPrice) : undefined,
+          cost: cost !== undefined ? Number(cost) : undefined,
+          sku,
+          description,
+          imageUrl,
           companyId: req.user.companyId
         };
         const data = await prisma.product.create({
@@ -93,12 +101,15 @@ module.exports = {
     },
     update: async (req, res, next) => {
       try {
-        const { name, price } = req.body;
+        const { name, type, category, salesPrice, cost, sku, description, imageUrl } = req.body;
         if (name !== undefined && (typeof name !== 'string' || name.trim() === "")) {
           return res.status(400).json({ error: "Product name cannot be empty" });
         }
-        if (price !== undefined && (isNaN(price) || Number(price) < 0)) {
-           return res.status(400).json({ error: "Price must be a valid positive number" });
+        if (salesPrice !== undefined && (isNaN(salesPrice) || Number(salesPrice) < 0)) {
+           return res.status(400).json({ error: "Sales Price must be a valid positive number" });
+        }
+        if (cost !== undefined && (isNaN(cost) || Number(cost) < 0)) {
+           return res.status(400).json({ error: "Cost must be a valid positive number" });
         }
 
         const existing = await prisma.product.findFirst({
@@ -110,9 +121,14 @@ module.exports = {
         const data = await prisma.product.update({
           where: { id: req.params.id },
           data: {
-            ...(req.body.name !== undefined && { name: req.body.name }),
-            ...(req.body.description !== undefined && { description: req.body.description }),
-            ...(req.body.price !== undefined && { price: req.body.price })
+            ...(name !== undefined && { name }),
+            ...(type !== undefined && { type }),
+            ...(category !== undefined && { category }),
+            ...(salesPrice !== undefined && { salesPrice: Number(salesPrice) }),
+            ...(cost !== undefined && { cost: Number(cost) }),
+            ...(sku !== undefined && { sku }),
+            ...(description !== undefined && { description }),
+            ...(imageUrl !== undefined && { imageUrl })
           }
         });
         res.json(data);
