@@ -23,6 +23,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { apiFetch } from "@/lib/api";
+import { usePaginatedFetch } from "@/hooks/usePaginatedFetch";
+import { PaginationControls } from "@/components/PaginationControls";
 
 export interface Contact {
   id: string;
@@ -53,19 +55,20 @@ export default function Contacts() {
   const [apiError, setApiError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const [contacts, setContacts] = useState<Contact[]>([]);
+  const {
+    data: contacts,
+    total,
+    page,
+    totalPages,
+    loading: listLoading,
+    setPage,
+    refresh: refreshContacts,
+  } = usePaginatedFetch<Contact>('/master/contacts', 20);
 
-  const fetchContacts = async () => {
-    try {
-      const data = await apiFetch('/master/contacts');
-      setContacts(data || []);
-    } catch (err: any) {
-      console.error(err);
-    }
-  };
+  const fetchContacts = refreshContacts;
 
   useEffect(() => {
-    fetchContacts();
+    // initial load handled by hook
   }, []);
 
   const filteredContacts = contacts.filter((c) => {
@@ -523,13 +526,14 @@ export default function Contacts() {
             </div>
           )}
 
-          <div className="p-4 border-t border-border/80 flex items-center justify-between text-xs text-muted-foreground bg-secondary/20">
-            <span>
-              Showing <strong className="text-foreground">{filteredContacts.length}</strong> contacts
-            </span>
-            <span className="text-[11px] text-muted-foreground">
-              Click on any row or card to open Form View
-            </span>
+          <div className="p-4 border-t border-border/80 bg-secondary/20">
+            <PaginationControls
+              page={page}
+              totalPages={totalPages}
+              total={total}
+              limit={20}
+              onPageChange={setPage}
+            />
           </div>
         </CardContent>
       </Card>

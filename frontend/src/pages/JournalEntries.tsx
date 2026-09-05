@@ -39,6 +39,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { apiFetch } from "@/lib/api";
+import { usePaginatedFetch } from "@/hooks/usePaginatedFetch";
+import { PaginationControls } from "@/components/PaginationControls";
 
 export default function JournalEntries() {
   const navigate = useNavigate();
@@ -49,8 +51,7 @@ export default function JournalEntries() {
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
   
-  // Data State
-  const [entries, setEntries] = useState<any[]>([]);
+  // Data State — entries come from usePaginatedFetch below
   const [journals, setJournals] = useState<any[]>([]);
   const [accounts, setAccounts] = useState<any[]>([]);
   const [contacts, setContacts] = useState<any[]>([]);
@@ -68,21 +69,30 @@ export default function JournalEntries() {
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState("");
 
+  // Paginated entries from server
+  const {
+    data: entries,
+    total: entriesTotal,
+    page: entriesPage,
+    totalPages: entriesTotalPages,
+    loading: entriesLoading,
+    setPage: setEntriesPage,
+    refresh: refreshEntries,
+  } = usePaginatedFetch<any>('/accounting/entries', 20);
+
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [entriesData, journalsData, accountsData, contactsData, analyticData] = await Promise.all([
-        apiFetch('/accounting/entries'),
-        apiFetch('/master/journals'),
-        apiFetch('/master/accounts'),
-        apiFetch('/master/contacts'),
-        apiFetch('/master/analytic-accounts')
+      const [journalsData, accountsData, contactsData, analyticData] = await Promise.all([
+        apiFetch('/master/journals?limit=100'),
+        apiFetch('/master/accounts?limit=100'),
+        apiFetch('/master/contacts?limit=200'),
+        apiFetch('/master/analytic-accounts?limit=100')
       ]);
-      setEntries(entriesData || []);
-      setJournals(journalsData || []);
-      setAccounts(accountsData || []);
-      setContacts(contactsData || []);
-      setAnalyticAccounts(analyticData || []);
+      setJournals(journalsData?.data || journalsData || []);
+      setAccounts(accountsData?.data || accountsData || []);
+      setContacts(contactsData?.data || contactsData || []);
+      setAnalyticAccounts(analyticData?.data || analyticData || []);
     } catch (error: any) {
       console.error("Failed to fetch accounting ledger data:", error);
     } finally {
@@ -1112,6 +1122,15 @@ export default function JournalEntries() {
                 <span>Atelier Dual-Ledger Sync</span>
                 <span className="text-border">•</span>
                 <span className="text-emerald-600 dark:text-emerald-400 font-medium">Auto-Reconciled</span>
+              </div>
+              <div className="p-4 border-t border-border/80">
+                <PaginationControls
+                  page={entriesPage}
+                  totalPages={entriesTotalPages}
+                  total={entriesTotal}
+                  limit={20}
+                  onPageChange={setEntriesPage}
+                />
               </div>
             </div>
           )}

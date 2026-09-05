@@ -99,38 +99,46 @@ exports.getOrderById = async (req, res, next) => {
 exports.listOrders = async (req, res, next) => {
   try {
     const { type } = req.query;
-    const whereClause = { companyId: req.user.companyId };
-    if (type) {
-      whereClause.type = type;
-    }
+    const page  = Math.max(1, parseInt(req.query.page)  || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
+    const skip  = (page - 1) * limit;
 
-    const orders = await prisma.order.findMany({
-      where: whereClause,
-      include: {
-        contact: true,
-        lines: {
-          include: {
-            product: true,
-            account: true,
-            analyticAccount: true
-          }
-        },
-        sourceOrder: true,
-        journalEntry: {
-          include: {
-            lines: {
-              include: {
-                account: true,
-                contact: true
+    const whereClause = { companyId: req.user.companyId };
+    if (type) whereClause.type = type;
+
+    const [orders, total] = await Promise.all([
+      prisma.order.findMany({
+        where: whereClause,
+        skip,
+        take: limit,
+        include: {
+          contact: true,
+          lines: {
+            include: {
+              product: true,
+              account: true,
+              analyticAccount: true
+            }
+          },
+          sourceOrder: true,
+          journalEntry: {
+            include: {
+              lines: {
+                include: {
+                  account: true,
+                  contact: true
+                }
               }
             }
-          }
+          },
+          payments: true
         },
-        payments: true
-      },
-      orderBy: { createdAt: "desc" }
-    });
-    res.json(orders);
+        orderBy: { createdAt: "desc" }
+      }),
+      prisma.order.count({ where: whereClause })
+    ]);
+
+    res.json({ data: orders, total, page, totalPages: Math.ceil(total / limit) });
   } catch (error) {
     next(error);
   }

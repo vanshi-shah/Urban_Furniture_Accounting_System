@@ -32,6 +32,8 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { apiFetch } from "@/lib/api";
+import { usePaginatedFetch } from "@/hooks/usePaginatedFetch";
+import { PaginationControls } from "@/components/PaginationControls";
 
 // Validation Schema
 const journalSchema = z.object({
@@ -53,22 +55,24 @@ export interface Journal {
 export default function Journals() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
-  const [journals, setJournals] = useState<Journal[]>([]);
+  const {
+    data: journals,
+    total,
+    page,
+    totalPages,
+    setPage,
+    refresh: refreshJournals,
+  } = usePaginatedFetch<Journal>('/master/journals', 20);
+
+  const fetchJournals = refreshJournals;
+
+  // Local UI state (not part of pagination hook)
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState("");
 
-  const fetchJournals = async () => {
-    try {
-      const data = await apiFetch('/master/journals');
-      setJournals(data || []);
-    } catch (err: any) {
-      console.error(err);
-    }
-  };
-
   useEffect(() => {
-    fetchJournals();
+    // initial load handled by hook
   }, []);
 
   const {
@@ -231,24 +235,14 @@ export default function Journals() {
             </Table>
           </div>
 
-          {/* Pagination */}
-          <div className="p-4 border-t border-border/80 flex items-center justify-between">
-            <div className="text-sm text-muted-foreground">
-              Showing <span className="font-medium">{filteredJournals.length}</span> journals
-            </div>
-            <Pagination className="justify-end">
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious href="#" />
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationLink href="#" isActive>1</PaginationLink>
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationNext href="#" />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
+          <div className="p-4 border-t border-border/80">
+            <PaginationControls
+              page={page}
+              totalPages={totalPages}
+              total={total}
+              limit={20}
+              onPageChange={setPage}
+            />
           </div>
         </CardContent>
       </Card>

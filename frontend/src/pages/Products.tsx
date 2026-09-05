@@ -30,6 +30,8 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Textarea } from "@/components/ui/textarea";
 import { apiFetch } from "@/lib/api";
+import { usePaginatedFetch } from "@/hooks/usePaginatedFetch";
+import { PaginationControls } from "@/components/PaginationControls";
 
 export type ProductType = "GOODS" | "SERVICE" | "COMBO";
 
@@ -89,28 +91,29 @@ export default function Products() {
   const [isAddingCategory, setIsAddingCategory] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
 
-  const [productsList, setProductsList] = useState<Product[]>([]);
+  // Server-side paginated products
+  const {
+    data: productsList,
+    total: productsTotal,
+    page: productsPage,
+    totalPages: productsTotalPages,
+    setPage: setProductsPage,
+    refresh: refreshProducts,
+    loading: productsLoading,
+  } = usePaginatedFetch<Product>('/master/products', 20);
 
-  const fetchProducts = async () => {
-    try {
-      const data = await apiFetch('/master/products');
-      setProductsList(data || []);
-      // Extract unique categories
-      if (data) {
-        const uniqueCategories = new Set(defaultCategories);
-        data.forEach((p: any) => {
-          if (p.category) uniqueCategories.add(p.category);
-        });
-        setCategories(Array.from(uniqueCategories));
-      }
-    } catch (err: any) {
-      console.error(err);
-    }
-  };
-
+  // Extract unique categories from the current page's data
   useEffect(() => {
-    fetchProducts();
-  }, []);
+    if (productsList.length > 0) {
+      const uniqueCategories = new Set(defaultCategories);
+      productsList.forEach((p: any) => {
+        if (p.category) uniqueCategories.add(p.category);
+      });
+      setCategories(Array.from(uniqueCategories));
+    }
+  }, [productsList]);
+
+  const fetchProducts = refreshProducts;
 
   // Filter products by search and type
   const filteredProducts = useMemo(() => {
@@ -978,13 +981,14 @@ export default function Products() {
             </div>
           )}
 
-          <div className="p-4 border-t border-border/80 flex items-center justify-between text-xs text-muted-foreground bg-secondary/20 rounded-b-xl">
-            <span>
-              Showing <strong className="text-foreground">{filteredProducts.length}</strong> of {productsList.length} products
-            </span>
-            <span className="text-[11px] text-muted-foreground hidden sm:inline">
-              💡 Click any row or kanban card to open <strong>Product Master Form View</strong>
-            </span>
+          <div className="p-4 border-t border-border/80 bg-secondary/20 rounded-b-xl">
+            <PaginationControls
+              page={productsPage}
+              totalPages={productsTotalPages}
+              total={productsTotal}
+              limit={20}
+              onPageChange={setProductsPage}
+            />
           </div>
         </CardContent>
       </Card>

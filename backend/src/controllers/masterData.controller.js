@@ -17,11 +17,22 @@ const handleError = (error, res, next) => {
   next(error);
 };
 
+const paginate = (req) => {
+  const page  = Math.max(1, parseInt(req.query.page)  || 1);
+  const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
+  return { page, limit, skip: (page - 1) * limit };
+};
+
 const makeCrud = (modelName) => ({
   list: async (req, res, next) => {
     try {
-      const data = await prisma[modelName].findMany({ where: { companyId: req.user.companyId } });
-      res.json(data);
+      const { page, limit, skip } = paginate(req);
+      const where = { companyId: req.user.companyId };
+      const [data, total] = await Promise.all([
+        prisma[modelName].findMany({ where, skip, take: limit, orderBy: { createdAt: 'desc' } }),
+        prisma[modelName].count({ where })
+      ]);
+      res.json({ data, total, page, totalPages: Math.ceil(total / limit) });
     } catch (error) { handleError(error, res, next); }
   },
   create: async (req, res, next) => {
@@ -140,11 +151,13 @@ module.exports = {
   journal: {
     list: async (req, res, next) => {
       try {
-        const data = await prisma.journal.findMany({ 
-          where: { companyId: req.user.companyId },
-          include: { defaultAccount: true }
-        });
-        res.json(data);
+        const { page, limit, skip } = paginate(req);
+        const where = { companyId: req.user.companyId };
+        const [data, total] = await Promise.all([
+          prisma.journal.findMany({ where, skip, take: limit, include: { defaultAccount: true }, orderBy: { createdAt: 'desc' } }),
+          prisma.journal.count({ where })
+        ]);
+        res.json({ data, total, page, totalPages: Math.ceil(total / limit) });
       } catch (error) { handleError(error, res, next); }
     },
     create: async (req, res, next) => {
