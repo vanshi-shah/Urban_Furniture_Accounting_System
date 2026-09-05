@@ -1154,7 +1154,7 @@ export default function Dashboard() {
           </div>
 
           <div className="flex items-center gap-2">
-            <Button size="sm" variant="outline" className="text-xs h-8 gap-1.5" onClick={() => navigate("/journals")}>
+            <Button size="sm" variant="outline" className="text-xs h-8 gap-1.5 hover:bg-secondary" onClick={() => navigate("/journal-entries")}>
               <FileSpreadsheet className="h-3.5 w-3.5 text-primary" />
               <span>Full Journal Ledger</span>
             </Button>

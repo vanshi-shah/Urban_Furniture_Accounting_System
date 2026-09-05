@@ -122,8 +122,24 @@ All purchasing transactions adhere strictly to the whiteboard operational diagra
 1. **Safe Data Normalization**:
    - Backend financial responses (`/reports/profit-and-loss`, `/reports/balance-sheet`, `/reports/trial-balance`, `/analytic-accounts`) must be normalized before rendering with defensive array fallbacks (`(items || []).map(...)`).
    - If tenant database is fresh/empty, fallback gracefully to realistic atelier sample figures so judging presentations never show broken or zeroed-out UI cards.
-2. **Application Error Boundaries**:
-   - Wrap application routes in `<ErrorBoundary>` (`src/components/common/ErrorBoundary.tsx`) to catch unhandled rendering exceptions gracefully and provide instant recovery options.
-
-
-
+## 10. Journal Entries Ledger & Double-Entry Cards UI
+1. **Full Ledger Routing**:
+   - The "Full Journal Ledger" button on the Dashboard links to `/journal-entries`.
+2. **Dashboard Match Aesthetics**:
+   - The Journal Entries page uses the Quiet Luxury transaction cards aesthetic introduced on the dashboard:
+     - Domain/Journal icon box (`ShoppingBag`, `Receipt`, `Landmark`, `Banknote`, `Layers`).
+     - Reference badge with font-mono tracking (`BILL/2026/0002`, `INV-2026-089`).
+     - Partner contact tag (`• Mysore Teak & Hardwoods`) with fallback to Journal Name.
+     - Accounting Impact Ribbon: `DR: <Code> <Account>` ⇄ `CR: <Code> <Account>` with distinct semantic color badges.
+     - Formatted bold monospace INR currency and relative timestamp with Clock icon.
+3. **Interactive Detailed Lines Drawer**:
+   - Clicking any card expands an inline drawer revealing the complete multi-line double-entry breakdown:
+     - Accounts, partner contacts, cost centers/analytic accounts, line descriptions, debit & credit amounts.
+     - Balanced entry verification badge (`Balanced Double-Entry • DR = CR`).
+4. **Dual Layout Modes**:
+   - Seamless switch between "Cards" view (dashboard transaction style) and "Table" view (compact traditional ERP grid).
+5. **Multi-Journal & Status Filtering**:
+   - Filter tabs for `All`, `Purchases`, `Sales`, `Cash`, `Bank`, and `General`, plus `Posted`/`Draft` status chips and live multi-field search.
+6. **Standard Button Sizing & Icon-Only Layout Controls**:
+   - Header action buttons adhere strictly to shadcn standard sizing (`size="sm"` default height `h-9` and `rounded-md`), avoiding non-standard pill dimensions or duplicate icons.
+   - The Cards/Table layout switcher uses clean icon-only controls (`<LayoutGrid />` and `<List />` in `size="icon" h-8 w-8 rounded-md` format) without text clutter.

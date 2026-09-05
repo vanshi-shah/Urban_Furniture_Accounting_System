@@ -48,7 +48,9 @@
 
 ### 2:15 — Receive Payment & Accounting Impact
 - Workflow: ₹XX received -> Bank -> Journal Entry.
-- **Signature UX**: Visually show the Accounting Impact (Debit/Credit) of the action just performed, highlighting the new **Journal Entries List View** (`/journal-entries`) and balancing checks.
+- **Signature UX**: From the Dashboard `Recent Atelier Transactions & Accounting Impact` section, click **"Full Journal Ledger"** to transition to `/journal-entries`.
+- Show the Quiet Luxury transaction cards matching the dashboard aesthetic, showcasing live double-entry ribbons (`DR: ... ⇄ CR: ...`).
+- Click any entry to expand the inline ledger lines drawer displaying exact debit and credit breakdowns, partner links, and balanced status confirmation.
 
 ### 3:00 — Reports
 - Open **P&L**: Show how the numbers just increased.

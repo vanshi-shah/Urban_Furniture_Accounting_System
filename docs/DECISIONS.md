@@ -171,3 +171,19 @@ Added frontend and backend validation for Journals using react-hook-form + zod o
     - Outer cards reduced from `p-6 sm:p-7` to `p-4 sm:p-5`, outer headers from `text-2xl` to `text-lg sm:text-xl`, and action buttons to `30px` compact pills.
     - Metric boxes reduced from `p-5` to `p-3 sm:p-3.5`, hero numerals scaled to `text-2xl sm:text-3xl font-mono`, micro-progress bars streamlined to `h-1`, and spacing between sections tightened from `space-y-6` to `space-y-3.5`.
     - Reduced overall card vertical height by ~40% while preserving all interactive hover physics, monetary values, and live pulse indicators.
+
+23. **Full Journal Ledger Navigation & Atelier Transaction Card UI for Journal Entries**:
+    - **Dashboard Navigation**: Linked the "Full Journal Ledger" button in `Dashboard.tsx` (`Recent Atelier Transactions & Accounting Impact` section) to directly route to `/journal-entries` (`navigate("/journal-entries")`).
+    - **Quiet Luxury Journal Entries Interface**: Re-engineered `frontend/src/pages/JournalEntries.tsx` from a rudimentary plain table into a luxury double-entry ledger interface directly matching the dashboard transaction rows (Image 1).
+    - **Double-Entry Impact Ribbon**: Each transaction card renders the balanced double-entry accounting ribbon (`DR: <Code> <Account>` ⇄ `CR: <Code> <Account>`) with color-coded token badges, partner tags, reference badges, formatted INR currency, and relative timestamps.
+    - **Live Ledger Sync & Multi-Journal Filtering**: Integrated filter tabs (`All`, `Purchases`, `Sales`, `Cash`, `Bank`, `General`) and status pills (`All`, `Posted`, `Draft`), combined with full text search across references, accounts, descriptions, and partner contacts.
+    - **Expandable Detailed Lines Drawer**: Users can click any card to smoothly expand a detailed double-entry lines table displaying account codes, partner, analytic project accounts, line descriptions, separate debit/credit columns, and balanced status confirmation badge (`Balanced Double-Entry • DR = CR`).
+    - **View Mode Switcher**: Added a toggle between luxury "Cards" ledger view (dashboard style) and compact "Table" view for rapid scanning.
+    - **Enriched Backend Query**: Updated `backend/src/controllers/accounting.controller.js` to include `contact` and `analyticAccount` on `lines`, ensuring partner names and project codes resolve dynamically for live data.
+    - **Preserved & Elevated Form View**: Maintained full "+ New Entry" modal capabilities with dynamic multi-line debit/credit balancing validation, draft persistence, and immediate posting.
+
+24. **Standard Button Sizing & Icon-Only Layout Toggle Refinement**:
+    - **Header Button Standardization**: Standardized the header action buttons (`New Entry`, `Dashboard`, and form action buttons) in `JournalEntries.tsx` to use standard shadcn/ui button proportions (`size="sm"` with default `h-9` and `rounded-md`), removing custom pill heights (`h-8.5`) and fixing duplicate plus icons (`+ + New Entry` -> single `<Plus /> New Entry`).
+    - **Icon-Only Layout Switcher**: Removed text labels ("Cards", "Table") from the view toggle, converting it into a clean, minimal icon-only segmented control (`<LayoutGrid className="h-4 w-4" />` and `<List className="h-4 w-4" />` in standard `size="icon" h-8 w-8 rounded-md` buttons).
+
+

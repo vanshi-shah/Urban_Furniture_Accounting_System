@@ -46,6 +46,7 @@ An intelligent accounting workflow and quiet luxury financial operating system f
   - **Wireframe Section Cards Architecture**: `Dashboard.tsx` mounts 3 primary operational controllers (`Sales`, `Purchase`, `Budget Reports`), each equipped with a header action pill, dual ambient lighting auras, and 3 tactile status tiles (`All`, `Confirmed`, `Draft` / `Achieved`, `Budget`, `Committed`) that link directly to filtered record views.
   - **Dual-Theme Icon Toggle**: High-performance icon toggle switching between light and dark themes smoothly.
   - **Connected Modules**: Master Data (`/contacts`, `/products`), Purchasing (`/purchase-orders`, `/vendor-bills`), Sales (`/sales-orders`, `/sales-invoices`, `/receipts`), Accounting (`/chart-of-accounts`, `/journals`, `/journal-entries`, `/budgets`, `/analytic-accounts`), and Reports (`/reports/balance-sheet`, `/reports/profit-and-loss`, `/reports/budget-report`, `/reports/trial-balance`).
+  - **Journal Entries & Ledger Architecture**: Direct routing from Dashboard "Full Journal Ledger" to `/journal-entries`. Controller enriches ledger responses with relational lines (`account`, `contact`, `analyticAccount`), allowing frontend to render balanced double-entry ribbons (`DR: ... ⇄ CR: ...`), live multi-journal filter tabs, and expandable detailed lines drawers.
 - Backend routing routes strictly flow: `Router -> Controller -> Service -> DB`
 
 ## Division of Responsibilities (2-Member Team)

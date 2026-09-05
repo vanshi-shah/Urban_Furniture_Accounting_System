@@ -232,6 +232,21 @@ Interactive drill-down modals on P&L, Balance Sheet, and KPI widgets. Clicking a
 ### 5. "What Changed?" / Accounting Impact View
 An interactive post-transaction drawer/modal showing the exact debit/credit journal entries (`Move` & `MoveLine`) created behind the scenes, visually confirming ledger integrity to the user.
 
+### 6. Double-Entry Accounting Impact Ribbon & Transaction Card
+An iconic UI element in the Quiet Luxury design system, representing live ledger postings:
+* **Card Container**: `rounded-xl`, `border border-border/70`, `bg-card/80`, with smooth hover lift (`hover:-translate-y-0.5 hover:shadow-md`).
+* **Domain Icon Box**: `p-2.5 rounded-xl bg-secondary text-secondary-foreground border border-border/40 shadow-2xs` with contextual domain icons (`ShoppingBag`, `Receipt`, `Landmark`, `Banknote`, `Layers`).
+* **Title & Reference**: Bold item/line header, paired with a monospace reference badge (`BILL/...`, `INV-...`, `PAY-...`) and partner tag (`• Aura Architecture Studio`).
+* **Accounting Impact Ribbon**:
+  - Debit badge: `px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/20 text-[11px] font-mono`
+  - Balance indicator: `⇄` in `text-muted-foreground`
+  - Credit badge: `px-2 py-0.5 rounded bg-accent/15 text-accent-foreground border border-accent/30 text-[11px] font-mono`
+* **Expandable Double-Entry Drawer**: Smooth expansion displaying itemized `JournalEntryLine` records, account codes, analytic account cost centers, and a verified `Balanced Double-Entry (DR = CR)` seal.
+
+### 7. Standard Button Proportions & Icon-Only Segmented Controls
+* **Standard Button Sizing**: Header actions utilize canonical `size="sm"` (`h-9 px-3 rounded-md text-sm font-medium`) or `size="default"` (`h-10 px-4 py-2`), preserving typographic balance with icons (`h-4 w-4`).
+* **Icon-Only Segmented Layout Toggle**: View controls (e.g. Cards vs Table) use minimal `size="icon"` (`h-8 w-8 rounded-md`) square buttons with contextual hover and active background highlights (`bg-background shadow-xs`), omitting text labels for optimal scanability.
+
 ---
 
 ## 8. Animation & Motion Tokens
@@ -241,4 +256,5 @@ To provide a refined, quiet luxury atmosphere, Modura utilizes subtle CSS animat
 * **Pulse Glow (`animate-pulse-glow`)**: Ambient background radial aura expansion with subtle opacity breathing (0.35 to 0.7).
 * **Slow Rotation (`animate-spin-slow`)**: 24s linear ambient gradient halo rotation behind the brand emblem.
 * **Shimmer Text (`shimmer-text`)**: Fluid gradient text animation transitioning from Charcoal foreground through Brass Beige (`--accent`) with standard `background-clip: text` compatibility.
+
 

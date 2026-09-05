@@ -22,8 +22,17 @@ exports.getLedger = async (req, res, next) => {
   try {
     const entries = await prisma.journalEntry.findMany({
       where: { companyId: req.user.companyId },
-      include: { lines: { include: { account: true } }, journal: true },
-      orderBy: { date: 'desc' }
+      include: {
+        lines: {
+          include: {
+            account: true,
+            contact: true,
+            analyticAccount: true,
+          },
+        },
+        journal: true,
+      },
+      orderBy: { date: 'desc' },
     });
     res.json(entries);
   } catch (error) { next(error); }

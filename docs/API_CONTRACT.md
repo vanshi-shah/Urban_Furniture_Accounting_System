@@ -38,7 +38,7 @@
 ### Accounting Engine (`/api/accounting`)
 - `POST /api/accounting/entries` (Creates manual draft JournalEntry)
 - `POST /api/accounting/entries/:id/post` (Validates debits == credits, posts entry immutably)
-- `GET /api/accounting/entries` (Retrieves general ledger moves and detailed move lines)
+- `GET /api/accounting/entries` (Retrieves general ledger entries with enriched relations: `journal`, `lines.account`, `lines.contact`, `lines.analyticAccount`, ordered by date descending)
 - `GET /api/accounting/accounts/:id/balance` (Calculates live normal balance based on account type)
 
 ### Reports & Intelligence (`/api/reports`)

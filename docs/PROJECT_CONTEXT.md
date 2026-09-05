@@ -113,3 +113,13 @@ To ensure we build this effectively, we will construct the core features and the
   - Added 3 interactive metric tiles per section (`All`, `Confirmed`, `Draft` / `Achieved`, `Budget`, `Committed`) with hover lift (`-translate-y-1`), sliding bottom indicator lines, secondary monetary valuations, micro-progress ratio bars, and status pulse indicators.
   - Compact sizing optimization: reduced box padding to `p-3 sm:p-3.5`, font sizes to `text-2xl sm:text-3xl font-mono`, and section spacing to `space-y-3.5` for high-density, no-scroll dashboard layout.
   - Connected direct click-through filters to Sales Orders, Purchase Orders, and Budget Reports.
+
+### Phase 10: Full Journal Ledger Routing & Atelier Transaction Card UI
+- **Full Ledger Button Routing**: Connected the "Full Journal Ledger" button on `Dashboard.tsx` (`Recent Atelier Transactions & Accounting Impact` section) to directly route to `/journal-entries`.
+- **Quiet Luxury Journal Entries Page**: Completely transformed `/journal-entries` from a generic plain table into a luxury double-entry ledger interface directly matching the dashboard transaction rows.
+- **Double-Entry Impact Ribbon**: Renders color-coded `DR: ... ⇄ CR: ...` ribbons, partner contact tags, monospace reference codes, bold INR amounts, and formatted timestamps for every real journal entry.
+- **Expandable Detailed Lines Drawer**: Interactive accordion revealing all multi-line splits, account codes, analytic account cost centers, and a verified `Balanced Double-Entry • DR = CR` check.
+- **Layout & Filtering Controls**: Quick filter tabs (`All`, `Purchases`, `Sales`, `Cash`, `Bank`, `General`), status filters (`All`, `Posted`, `Draft`), live search, and a layout switcher between "Cards" view (dashboard style) and "Table" view.
+- **Button Standards & Icon-Only Toggle**: Header buttons standardized to shadcn `size="sm"` (`h-9 rounded-md`) with single icons, and Cards/Table layout switchers transformed into minimal icon-only buttons.
+- **Backend Relation Enrichment**: Updated `accounting.controller.js` to include `contact` and `analyticAccount` relations in `lines`, providing complete partner names and project data.
+

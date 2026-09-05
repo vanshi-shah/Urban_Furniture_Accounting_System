@@ -18,11 +18,11 @@ The database must support a strict double-entry accounting system where business
 - **Payment**: Settlement record with `paymentNumber`, `paymentType` (SEND/RECEIVE), `method` (CASH/BANK), `status` (DRAFT/POSTED/CANCELLED), `amount`, `orderId`, and linked `journalEntryId`.
 
 ### Accounting
-- **JournalEntry (Move)**: The accounting event.
-- **JournalEntryLine (MoveLine)**: The individual debit or credit line.
+- **JournalEntry (Move)**: The accounting event, holding `date`, `reference`, `journalId`, `status` (DRAFT/POSTED), and company reference.
+- **JournalEntryLine (MoveLine)**: The individual debit or credit line, linking to `accountId` (`Account`), `contactId` (`Contact`), and `analyticAccountId` (`AnalyticAccount`). Enforced in queries to drive live double-entry ribbons (`DR: ... ⇄ CR: ...`).
 
 ## Example Flow
-`Purchase Order` -> `Vendor Bill` -> `Vendor Bill` confirmed creates balanced `JournalEntry` (Debit Purchase a/c, Credit Creditor a/c) -> `Bill Payment` creates `Payment` & `JournalEntry` (Debit Creditor a/c, Credit Cash/Bank a/c).
+`Purchase Order` -> `Vendor Bill` -> `Vendor Bill` confirmed creates balanced `JournalEntry` (Debit Purchase a/c, Credit Creditor a/c) -> `Bill Payment` creates `Payment` & `JournalEntry` (Debit Creditor a/c, Credit Cash/Bank a/c). All records surfaced in the Full Journal Ledger (`/journal-entries`).
 
 ---
 
