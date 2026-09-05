@@ -19,25 +19,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Restore authentication on mount
+  // On mount: verify stored token with the backend /auth/me endpoint
   useEffect(() => {
-    try {
-      const storedToken = localStorage.getItem("token");
-      const storedUser = localStorage.getItem("user");
+    const storedToken = localStorage.getItem("token");
 
-      if (storedToken && storedUser) {
-        setToken(storedToken);
-        setUser(JSON.parse(storedUser));
-      } else if (storedToken) {
-        setToken(storedToken);
-      }
-    } catch (err) {
-      console.error("Failed to restore authentication session:", err);
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-    } finally {
+    if (!storedToken) {
       setIsLoading(false);
+      return;
     }
+
+    // Optimistically set from localStorage for snappy UX
+    setToken(storedToken);
+    try {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) setUser(JSON.parse(storedUser));
+    } catch {
+      /* ignore parse errors */
+    }
+
+    // Verify token is still valid on the server
+    api
+      .get<{ success: boolean; user: User }>("/auth/me")
+      .then((res) => {
+        if (res.data.success && res.data.user) {
+          setUser(res.data.user);
+          localStorage.setItem("user", JSON.stringify(res.data.user));
+        }
+      })
+      .catch(() => {
+        // Token is invalid/expired — clear everything
+        setToken(null);
+        setUser(null);
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   }, []);
 
   const login = async (credentials: LoginCredentials): Promise<User> => {

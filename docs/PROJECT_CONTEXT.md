@@ -36,6 +36,12 @@ To ensure we build this effectively, we will construct the core features and the
 *   **Database:** Initialize PostgreSQL database. Create Prisma schema for `User` and `Company`.
 *   **Backend:** Set up Express server. Implement JWT-based authentication (Login, Register with token generation and default COA provisioning). Fully tested and verified. *(Completed)*
 *   **Frontend:** Scaffold React app with Modura Olive & Brass design system (Tailwind/shadcn), Manrope typography, animated **Welcome Portal** (`/welcome` & root `/`), Login/Register screens, and routing & global state for Auth (`AuthContext`), `ProtectedRoute` / `PublicRoute` guards, plus 1-click demo access. *(Completed)*
+*   **Auth Wiring *(Completed)*:**
+    *   **Backend `/api/auth/me`**: Protected GET endpoint — validates Bearer token and returns full user object. Used by the frontend on every mount to verify session integrity server-side.
+    *   **Backend login normalization**: `POST /api/auth/login` now consistently returns `{ success: true, token, user }` (same shape as register).
+    *   **Frontend `AuthContext`**: On mount, verifies the stored token via `/auth/me`. If token is expired or invalid, session is cleared immediately. Optimistic restore from localStorage is used for snappy UX while server verifies.
+    *   **Frontend `api.ts`**: Added a 401 response interceptor — automatically clears localStorage and redirects to `/login` when the backend rejects a token.
+    *   **Seed script** (`prisma/seed.js`): Seeds 2 demo companies with Admin + User accounts each. All credentials use bcrypt-hashed `password123`.
 *   **Micro-Changes:**
     *   *Frontend:* Dedicated animated Welcome screen greeting users with dynamic "Welcome"/"Welcome Back" states, smooth routing to Login/Register, auto-redirect to dashboard when logged in, and localStorage token persistence. *(Completed)*
     *   *Backend:* Global error handler middleware with Zod/Prisma error mapping, standardized port 5000, and permissive dev CORS. *(Completed)*

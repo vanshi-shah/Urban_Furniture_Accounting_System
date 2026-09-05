@@ -7,8 +7,9 @@
 ## Endpoints
 
 ### Authentication & Tenant Setup
-- `POST /api/auth/register` (Creates company, user, seeds standard Chart of Accounts & Journals, returns `{ success: true, token, user }`)
-- `POST /api/auth/login` (Authenticates credentials, returns `{ token, user: { id, name, email, role, companyId } }`)
+- `POST /api/auth/register` — Creates company, user, seeds standard Chart of Accounts & Journals. Returns `{ success: true, token, user }`.
+- `POST /api/auth/login` — Authenticates credentials. Returns `{ success: true, token, user: { id, name, email, role, companyId } }`. Returns `{ success: false, error }` on failure.
+- `GET /api/auth/me` 🔒 — Validates Bearer token and returns current user profile `{ success: true, user }`. Used by the frontend on every page load to verify session integrity.
 
 ### Submissions
 - `GET /api/submissions` (Lists tenant submissions; filters by ownerId unless ADMIN)

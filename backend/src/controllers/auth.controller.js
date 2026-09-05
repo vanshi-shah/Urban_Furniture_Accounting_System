@@ -91,12 +91,15 @@ exports.register = async (req, res, next) => {
 exports.login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ success: false, error: "Email and password are required" });
+    }
+
     const user = await prisma.user.findUnique({ where: { email } });
-    
-    if (!user) return res.status(401).json({ error: "Invalid credentials" });
+    if (!user) return res.status(401).json({ success: false, error: "Invalid email or password" });
     
     const isValid = await bcrypt.compare(password, user.passwordHash);
-    if (!isValid) return res.status(401).json({ error: "Invalid credentials" });
+    if (!isValid) return res.status(401).json({ success: false, error: "Invalid email or password" });
     
     const token = jwt.sign(
       { userId: user.id, id: user.id, companyId: user.companyId, role: user.role },
@@ -105,6 +108,7 @@ exports.login = async (req, res, next) => {
     );
     
     res.json({
+      success: true,
       token,
       user: {
         id: user.id,
@@ -114,6 +118,20 @@ exports.login = async (req, res, next) => {
         companyId: user.companyId
       }
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// GET /api/auth/me — validate token & return user profile
+exports.me = async (req, res, next) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: { id: true, name: true, email: true, role: true, companyId: true }
+    });
+    if (!user) return res.status(404).json({ success: false, error: "User not found" });
+    res.json({ success: true, user });
   } catch (error) {
     next(error);
   }
