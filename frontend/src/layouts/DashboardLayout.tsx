@@ -11,6 +11,11 @@ import {
   User as UserIcon,
   Shield,
   Layers,
+  Users,
+  Box,
+  FileText,
+  BookOpen,
+  PieChart
 } from "lucide-react";
 
 export function DashboardLayout({ children }: { children: ReactNode }) {
@@ -25,6 +30,11 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
 
   const navItems = [
     { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
+    { label: "Contacts", path: "/contacts", icon: Users },
+    { label: "Products", path: "/products", icon: Box },
+    { label: "Chart of Accounts", path: "/chart-of-accounts", icon: FileText },
+    { label: "Journals", path: "/journals", icon: BookOpen },
+    { label: "Budgets", path: "/budgets", icon: PieChart },
     { label: "Components Gallery", path: "/components", icon: Component },
   ];
 

@@ -7,6 +7,11 @@ import Dashboard from "./pages/Dashboard";
 import { ComponentGallery } from "./pages/ComponentGallery";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import Contacts from "./pages/Contacts";
+import Products from "./pages/Products";
+import ChartOfAccounts from "./pages/ChartOfAccounts";
+import Journals from "./pages/Journals";
+import AnalyticAccounts from "./pages/AnalyticAccounts";
 
 export function App() {
   return (
@@ -37,6 +42,61 @@ export function App() {
             <ProtectedRoute>
               <DashboardLayout>
                 <Dashboard />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/contacts"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Contacts />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/products"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Products />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/chart-of-accounts"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <ChartOfAccounts />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/journals"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Journals />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/budgets"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <AnalyticAccounts />
               </DashboardLayout>
             </ProtectedRoute>
           }
