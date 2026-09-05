@@ -11,9 +11,22 @@ const masterDataRoutes = require("./routes/masterData.routes");
 const accountingRoutes = require("./routes/accounting.routes");
 
 const app = express();
-app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow non-browser requests or any localhost/127.0.0.1 dev origin
+    if (!origin || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+      return callback(null, true);
+    }
+    if (process.env.CLIENT_URL && origin === process.env.CLIENT_URL) {
+      return callback(null, true);
+    }
+    callback(null, true);
+  },
+  credentials: true
+}));
 app.use(express.json());
 
+app.get("/", (_req, res) => res.json({ ok: true, message: "Urban Furniture Accounting System API is active" }));
 app.get("/health", (_req, res) => res.json({ ok: true }));
 
 app.use("/api/auth", authRoutes);

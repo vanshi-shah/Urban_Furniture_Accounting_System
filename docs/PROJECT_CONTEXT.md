@@ -33,11 +33,11 @@ To ensure we build this effectively, we will construct the core features and the
 
 ### Phase 1: Foundation (DB & Auth)
 *   **Database:** Initialize PostgreSQL database. Create Prisma schema for `User` and `Company`.
-*   **Backend:** Set up Express server. Implement JWT-based authentication (Login, Register).
+*   **Backend:** Set up Express server. Implement JWT-based authentication (Login, Register with token generation and default COA provisioning). Fully tested and verified. *(Completed)*
 *   **Frontend:** Scaffold React app with an Elegant Olive design system (e.g., Tailwind/shadcn), Manrope typography, Login/Register screens, and routing & global state for Auth (`AuthContext`), `ProtectedRoute` / `PublicRoute` guards, plus 1-click demo access. *(Completed)*
 *   **Micro-Changes:**
     *   *Frontend:* Auto-redirect to dashboard on login, sign-out in navigation, and localStorage token persistence. *(Completed)*
-    *   *Backend:* Global error handler middleware.
+    *   *Backend:* Global error handler middleware with Zod/Prisma error mapping, standardized port 5000, and permissive dev CORS. *(Completed)*
 
 ### Phase 2: Master Data Setup
 *   **Database:** Create models for `Contact` (type: Customer/Vendor), `Product`, `Account` (Chart of Accounts), `Journal`, and `AnalyticAccount` (Budgets).
