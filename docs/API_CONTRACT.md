@@ -13,13 +13,10 @@
 - `POST /api/products`
 - `GET /api/chart-of-accounts`
 
-### Transactions
-- `GET /api/sales`
-- `POST /api/sales` (Triggers invoice & journal entry generation if needed)
-- `GET /api/sales/:id`
-- `GET /api/purchases`
-- `POST /api/purchases`
-- `GET /api/purchases/:id`
+### Transactions (Orders)
+- `GET /api/orders` (Lists all sales and purchases)
+- `POST /api/orders` (Creates a draft order)
+- `POST /api/orders/:id/confirm` (Confirms order, triggers automated Journal Entry generation)
 
 ### Invoices & Payments
 - `GET /api/invoices`
@@ -28,8 +25,9 @@
 - `POST /api/payments` (Triggers journal entry generation)
 
 ### Reports & Intelligence
-- `GET /api/reports/profit-loss`
-- `GET /api/reports/balance-sheet`
+- `GET /api/reports/trial-balance` (Added in Phase 5)
+- `GET /api/reports/profit-and-loss` (Added in Phase 5)
+- `GET /api/reports/balance-sheet` (Added in Phase 5)
 - `GET /api/reports/budget`
 - `GET /api/dashboard` (Returns financial health score)
 - `GET /api/alerts` (Returns smart financial alerts)
