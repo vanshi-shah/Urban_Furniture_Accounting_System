@@ -2,6 +2,15 @@
 
 **Theme: "Every transaction tells a story — our system automatically traces that story from the business action all the way to the financial insight."**
 
+## 🔐 Demo Login Credentials
+
+| Role | Email | Password |
+|---|---|---|
+| **Admin** | `admin@urbanfurniture.com` | `password123` |
+| **Employee** | `designer@urbanfurniture.com` | `password123` |
+
+> These users are created via the **Register** page. The Login page has **Quick Demo** buttons that auto-fill these credentials.
+
 ### 0:00 — Dashboard
 - "Urban Furniture currently has ₹X revenue, ₹Y expenses and ₹Z outstanding."
 - Highlight the **Financial Health Score**.
