@@ -16,9 +16,17 @@
 - Show the dynamic "Welcome to Modura" greeting, the breathing luxury brand emblem, and the 1-click Quick Demo login.
 - Click "Admin Account" or "Sign In to Ledger" to enter the system.
 
-### 0:00 — Dashboard
-- "Modura currently has ₹X revenue, ₹Y expenses and ₹Z outstanding."
-- Highlight the **Financial Health Score**.
+### 0:00 — Dashboard & Top Mega-Menu
+- Note the edge-to-edge layout with **no sidebar** and modern top navbar (`Sales | Purchase | Account | Report`).
+- Click any top category: observe the **expandable 4-column mega-menu** smoothly sliding down with all architecture links.
+- Click the Sun/Moon icon toggle: show instant theme switching between light and dark modes.
+- Highlight the **3 Core Section Cards** matching the whiteboard wireframe with Quiet Luxury craft & compact sizing:
+  - **Sales Card**: `[New]` button, `All (12 · ₹42.85L)`, `Confirmed (10 · ₹36.40L)`, `Draft (2 · ₹6.45L)` status cards with active ratio progress bars.
+  - **Purchase Card**: `[New]` button, `All (5 · ₹18.20L)`, `Confirmed (4 · ₹14.50L)`, `Draft (1 · ₹3.70L)` status cards with goods received trackers.
+  - **Budget Reports Card**: `[Report]` button, `Achieved (3 · ₹24.80L)`, `Budget (2 · ₹35.00L)`, `Committed (4 · ₹8.40L)` status cards with variance health indicators.
+- **Showcase Hover Physics & Compact Layout**: Hover over each card to display the ambient lighting aura, smooth hover lift (`-translate-y-1`), sliding bottom indicator line, and animated corner drill-down arrow in a compact, scannable format.
+- Click on any status card (e.g. `Draft (2)` in Sales or `Confirmed (4)` in Purchase) to demonstrate direct filtered navigation.
+- Highlight the **Financial Health Score** (94/100) and revenue breakdown below the cards.
 
 ### 0:30 — Purchase Order & Vendor Bill Excel Flow
 - Open **Purchase Orders** (`/purchase-orders`):

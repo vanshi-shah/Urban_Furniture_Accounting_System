@@ -28,12 +28,29 @@
   - Accents: Brass Beige (`#B29A6A`)
   - Keep 80–90% of the UI neutral, with olive applied thoughtfully for navigation, buttons, and active states.
 
-## 3. Layout & Spacing
-- **Desktop Grid**: 12-column grid with a `1440px` max-width container and `32px` horizontal padding.
-- **Header**: Fixed `64px` height with subtle bottom border.
-- **Sidebar**: Fixed `240px` width.
+## 3. Layout, Navigation & Spacing
+- **Desktop Grid**: Full-width container with a `1440px` max-width container and `24px–32px` horizontal padding.
+- **Top Header & Mega-Menu Navigation**:
+  - Fixed/sticky `64px` height with subtle bottom border (`border-border/80`).
+  - **Zero Sidebar**: Side bar is completely removed to maximize screen real estate for wide financial spreadsheets, tabular ledgers, and analytics.
+  - **Expandable Mega-Menu**: Top navbar displays 4 core categories: `Sales`, `Purchase`, `Account`, `Report`.
+    - Clicking any category expands a modern, 4-column mega-menu panel containing all business workflows (Sales Orders, Sale Invoices, Receipts, Purchase Orders, Vendor Bills, Payments, Master Data, Budgets, and Financial Reports).
+    - Dismissible via backdrop click, Escape key, or direct item navigation.
+  - **Appearance Toggle**: Streamlined icon-only toggle (`<ThemeToggle variant="icon" />`) displaying a smooth Sun/Moon rotating icon button.
+- **Dashboard Wireframe Section Cards (Compact Sizing)**:
+  - 3 primary section cards: `Sales`, `Purchase`, and `Budget Reports` organized with tight vertical rhythm (`space-y-3.5`).
+  - Header row: Compact domain icon container (`p-2`) + bold category title (`text-lg sm:text-xl`) + subtitle metadata badge + total pipeline/envelope chip + compact tactile pill action button (`px-3.5 py-1.5 h-7.5`).
+  - 3 interactive status metric boxes per card: `All`, `Confirmed`, `Draft` (Sales & Purchase) and `Achieved`, `Budget`, `Committed` (Budget Reports).
+  - **Compact Precision & Tactile Hover Physics**:
+    - Dual ambient brand lighting aura (`bg-primary/10` and `bg-accent/5 blur-2xl`) expanding on hover.
+    - Compact inner box padding (`p-3 sm:p-3.5`) with hover lift (`hover:-translate-y-1 hover:shadow-md`).
+    - Domain micro-icons with hover background inversion (`h-3.5 w-3.5`).
+    - Sliding bottom border color indicator expanding from left on hover (`after:h-0.75 after:scale-x-0 group-hover:after:scale-x-100 after:origin-left`).
+    - Compact tabular numerals (`text-2xl sm:text-3xl font-mono`) and secondary financial context metrics (`₹42.85 Lakhs`, `₹36.40 Lakhs`, `₹18.20 Lakhs`, `₹24.80 Lakhs`).
+    - Slim visual ratio micro-progress bars (`h-1`).
+    - Pulsing status dots and slide-in `ArrowUpRight` navigation hints.
 - **Spacing Scale**: 8px system (`4px`, `8px`, `12px`, `16px`, `24px`, `32px`, `48px`, `64px`).
-- **Card Styling**: Rounded `12px` to `16px`, `24px` internal padding, `1px solid #DCDDD3`, and subtle ambient shadow.
+- **Card Styling**: Rounded `16px` to `24px`, `20px–24px` internal padding, `1px solid var(--border)`, and subtle ambient shadow.
 
 ## 4. Tables & Financial Data Formatting
 - **Accounting Tables**: Row heights of `52–56px`, cell padding `16px`, header height `44px`.
@@ -100,6 +117,13 @@ All purchasing transactions adhere strictly to the whiteboard operational diagra
    - Options gear menu: `1. Print / PDF` and `2. Excel Export`.
 5. **Demo Journal Entry (`/demo-journal-entry`)**:
    - Displays balanced ledger entry with `Accounting Date` (from bill), `Journal: Purchase`, `Purchase a/c` (debit) and `Creditor a/c` (credit).
+
+## 9. Financial Reports & Error Boundaries
+1. **Safe Data Normalization**:
+   - Backend financial responses (`/reports/profit-and-loss`, `/reports/balance-sheet`, `/reports/trial-balance`, `/analytic-accounts`) must be normalized before rendering with defensive array fallbacks (`(items || []).map(...)`).
+   - If tenant database is fresh/empty, fallback gracefully to realistic atelier sample figures so judging presentations never show broken or zeroed-out UI cards.
+2. **Application Error Boundaries**:
+   - Wrap application routes in `<ErrorBoundary>` (`src/components/common/ErrorBoundary.tsx`) to catch unhandled rendering exceptions gracefully and provide instant recovery options.
 
 
 

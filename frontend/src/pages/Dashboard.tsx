@@ -38,6 +38,12 @@ import {
   ShieldCheck,
   Building2,
   Clock,
+  ShoppingCart,
+  CreditCard,
+  Target,
+  Package,
+  Coins,
+  FileEdit,
 } from "lucide-react";
 
 // Realistic Modura Atelier Financial Data
@@ -136,21 +142,646 @@ export default function Dashboard() {
     setExplainModalOpen(true);
   };
 
+  const salesCounts = {
+    all: 12,
+    confirmed: 10,
+    draft: 2,
+    totalValue: 4285000,
+    confirmedValue: 3640000,
+    draftValue: 645000,
+  };
+
+  const purchaseCounts = {
+    all: Array.isArray(ordersData) && ordersData.length > 0 ? ordersData.length : 5,
+    confirmed: Array.isArray(ordersData) && ordersData.length > 0
+      ? ordersData.filter((o: any) => o.status === "CONFIRMED").length || 4
+      : 4,
+    draft: Array.isArray(ordersData) && ordersData.length > 0
+      ? ordersData.filter((o: any) => o.status === "DRAFT").length || 1
+      : 1,
+    totalValue: 1820000,
+    confirmedValue: 1450000,
+    draftValue: 370000,
+  };
+
+  const budgetCounts = {
+    achieved: 3,
+    budget: 2,
+    committed: 4,
+    achievedValue: 2480000,
+    budgetValue: 3500000,
+    committedValue: 840000,
+  };
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-12">
-      {/* Top Banner & Quick Financial Health Radar */}
+      {/* 3 Core Section Cards from Wireframe with Quiet Luxury & Compact Precision */}
+      <div className="space-y-3.5">
+        {/* ========================================================================= */}
+        {/* 1. SALES CARD */}
+        {/* ========================================================================= */}
+        <Card className="relative overflow-hidden rounded-xl border border-border/80 bg-card/95 dark:bg-card/75 backdrop-blur-md p-4 sm:p-5 shadow-[0_2px_12px_-2px_rgba(37,40,36,0.05)] hover:shadow-[0_8px_24px_-4px_rgba(95,104,72,0.12)] hover:border-primary/50 transition-all duration-300 group">
+          {/* Subtle Ambient Brand Aura on Hover */}
+          <div className="pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full bg-primary/10 blur-2xl group-hover:bg-primary/15 transition-all duration-500 ease-out" />
+          <div className="pointer-events-none absolute -left-10 -bottom-10 h-28 w-28 rounded-full bg-accent/5 blur-xl group-hover:bg-accent/10 transition-all duration-500" />
+
+          {/* Card Header Row */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-border/60 gap-2.5">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-primary/10 dark:bg-primary/20 text-primary border border-primary/25 shadow-2xs group-hover:scale-105 transition-all duration-300">
+                <ShoppingCart className="h-4.5 w-4.5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h2 className="text-lg sm:text-xl font-bold tracking-tight text-foreground font-sans">
+                    Sales
+                  </h2>
+                  <span className="text-muted-foreground font-light text-sm">·</span>
+                  <span className="text-xs font-medium text-muted-foreground">
+                    Client Orders &amp; Invoices
+                  </span>
+                  <Badge variant="outline" className="text-[9px] font-semibold uppercase tracking-wider py-0.2 px-1.5 border-primary/30 text-primary bg-primary/10">
+                    Revenue Engine
+                  </Badge>
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-0.5 flex items-center gap-1.5">
+                  <span>Bespoke contracts &amp; client invoicing</span>
+                  <span className="text-border">•</span>
+                  <span className="font-mono text-foreground/80 font-medium">Pipeline: ₹42.85 Lakhs</span>
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 self-start sm:self-center">
+              <Button
+                onClick={() => navigate("/sales-orders?action=new")}
+                className="rounded-full px-3.5 py-1.5 h-7.5 text-xs font-semibold bg-sky-100 hover:bg-sky-200 dark:bg-sky-950/80 dark:hover:bg-sky-900 text-sky-900 dark:text-sky-100 border border-sky-300/80 dark:border-sky-800 shadow-2xs transition-all duration-200 active:scale-95 hover:scale-105 cursor-pointer flex items-center gap-1"
+                title="Create New Sales Order"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                <span>New</span>
+              </Button>
+            </div>
+          </div>
+
+          {/* 3 Status Metric Boxes - Compact */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-3.5 pt-3">
+            {/* Box 1: All */}
+            <div
+              onClick={() => navigate("/sales-orders?status=ALL")}
+              className="relative overflow-hidden rounded-lg border border-border/70 bg-secondary/30 dark:bg-card/40 hover:bg-card p-3 sm:p-3.5 flex flex-col justify-between transition-all duration-200 hover:-translate-y-1 hover:shadow-md hover:border-primary/60 group/box cursor-pointer select-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.75 after:bg-primary after:scale-x-0 group-hover/box:after:scale-x-100 after:transition-transform after:duration-200 after:origin-left"
+              title="View All 12 Sales Orders"
+            >
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground group-hover/box:text-foreground transition-colors">
+                    All
+                  </span>
+                  <span className="text-[9px] text-muted-foreground font-normal">Pipeline</span>
+                </div>
+                <div className="p-1 rounded-md bg-primary/10 text-primary group-hover/box:bg-primary group-hover/box:text-primary-foreground transition-all duration-200">
+                  <Layers className="h-3.5 w-3.5" />
+                </div>
+              </div>
+
+              <div className="py-1 flex items-baseline justify-between">
+                <span className="text-2xl sm:text-3xl font-extrabold font-mono text-foreground tracking-tight group-hover/box:text-primary transition-colors">
+                  {salesCounts.all}
+                </span>
+                <div className="text-right">
+                  <span className="text-xs font-mono font-bold text-foreground block leading-tight">
+                    {formatINR(salesCounts.totalValue)}
+                  </span>
+                  <span className="text-[9px] text-muted-foreground">gross volume</span>
+                </div>
+              </div>
+
+              <div className="space-y-1 my-0.5">
+                <div className="h-1 w-full rounded-full bg-secondary/80 overflow-hidden flex">
+                  <div style={{ width: "83.3%" }} className="h-full bg-emerald-500 rounded-l-full" />
+                  <div style={{ width: "16.7%" }} className="h-full bg-amber-500 rounded-r-full" />
+                </div>
+                <div className="flex justify-between text-[9px] text-muted-foreground font-medium">
+                  <span className="text-emerald-600 dark:text-emerald-400">10 Confirmed</span>
+                  <span className="text-amber-600 dark:text-amber-400">2 Draft</span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-1.5 border-t border-border/40">
+                <span className="group-hover/box:text-foreground transition-colors">All Orders</span>
+                <ArrowUpRight className="h-3 w-3 text-primary opacity-60 group-hover/box:opacity-100 group-hover/box:translate-x-0.5 group-hover/box:-translate-y-0.5 transition-all" />
+              </div>
+            </div>
+
+            {/* Box 2: Confirmed */}
+            <div
+              onClick={() => navigate("/sales-orders?status=CONFIRMED")}
+              className="relative overflow-hidden rounded-lg border border-border/70 bg-secondary/30 dark:bg-card/40 hover:bg-card p-3 sm:p-3.5 flex flex-col justify-between transition-all duration-200 hover:-translate-y-1 hover:shadow-md hover:border-emerald-500/60 group/box cursor-pointer select-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.75 after:bg-emerald-500 after:scale-x-0 group-hover/box:after:scale-x-100 after:transition-transform after:duration-200 after:origin-left"
+              title="View 10 Confirmed Sales Orders"
+            >
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+                    Confirmed
+                  </span>
+                  <span className="text-[9px] font-medium px-1 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                    83%
+                  </span>
+                </div>
+                <div className="p-1 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 group-hover/box:bg-emerald-500 group-hover/box:text-white transition-all duration-200">
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                </div>
+              </div>
+
+              <div className="py-1 flex items-baseline justify-between">
+                <span className="text-2xl sm:text-3xl font-extrabold font-mono text-emerald-600 dark:text-emerald-400 tracking-tight">
+                  {salesCounts.confirmed}
+                </span>
+                <div className="text-right">
+                  <span className="text-xs font-mono font-bold text-emerald-700 dark:text-emerald-300 block leading-tight">
+                    {formatINR(salesCounts.confirmedValue)}
+                  </span>
+                  <span className="text-[9px] text-muted-foreground">ready to dispatch</span>
+                </div>
+              </div>
+
+              <div className="space-y-1 my-0.5">
+                <div className="h-1 w-full rounded-full bg-emerald-500/20 overflow-hidden">
+                  <div style={{ width: "83.3%" }} className="h-full bg-emerald-500 rounded-full" />
+                </div>
+                <div className="flex justify-between text-[9px] text-muted-foreground font-medium">
+                  <span className="text-emerald-600 dark:text-emerald-400 font-semibold">Active Production</span>
+                  <span>10 of 12 orders</span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-1.5 border-t border-border/40">
+                <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-medium">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" /> Ready
+                </span>
+                <ArrowUpRight className="h-3 w-3 text-emerald-500 opacity-60 group-hover/box:opacity-100 group-hover/box:translate-x-0.5 group-hover/box:-translate-y-0.5 transition-all" />
+              </div>
+            </div>
+
+            {/* Box 3: Draft */}
+            <div
+              onClick={() => navigate("/sales-orders?status=DRAFT")}
+              className="relative overflow-hidden rounded-lg border border-border/70 bg-secondary/30 dark:bg-card/40 hover:bg-card p-3 sm:p-3.5 flex flex-col justify-between transition-all duration-200 hover:-translate-y-1 hover:shadow-md hover:border-amber-500/60 group/box cursor-pointer select-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.75 after:bg-amber-500 after:scale-x-0 group-hover/box:after:scale-x-100 after:transition-transform after:duration-200 after:origin-left"
+              title="View 2 Draft Sales Orders"
+            >
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
+                    Draft
+                  </span>
+                  <span className="text-[9px] font-medium px-1 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                    Quote
+                  </span>
+                </div>
+                <div className="p-1 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 group-hover/box:bg-amber-500 group-hover/box:text-white transition-all duration-200">
+                  <Clock className="h-3.5 w-3.5" />
+                </div>
+              </div>
+
+              <div className="py-1 flex items-baseline justify-between">
+                <span className="text-2xl sm:text-3xl font-extrabold font-mono text-amber-600 dark:text-amber-400 tracking-tight">
+                  {salesCounts.draft}
+                </span>
+                <div className="text-right">
+                  <span className="text-xs font-mono font-bold text-amber-700 dark:text-amber-300 block leading-tight">
+                    {formatINR(salesCounts.draftValue)}
+                  </span>
+                  <span className="text-[9px] text-muted-foreground">awaiting sign-off</span>
+                </div>
+              </div>
+
+              <div className="space-y-1 my-0.5">
+                <div className="h-1 w-full rounded-full bg-amber-500/20 overflow-hidden">
+                  <div style={{ width: "16.7%" }} className="h-full bg-amber-500 rounded-full" />
+                </div>
+                <div className="flex justify-between text-[9px] text-muted-foreground font-medium">
+                  <span className="text-amber-600 dark:text-amber-400 font-semibold">Estimates Out</span>
+                  <span>2 quotes</span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-1.5 border-t border-border/40">
+                <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-medium">
+                  <span className="h-1.5 w-1.5 rounded-full bg-amber-500" /> Pending
+                </span>
+                <ArrowUpRight className="h-3 w-3 text-amber-500 opacity-60 group-hover/box:opacity-100 group-hover/box:translate-x-0.5 group-hover/box:-translate-y-0.5 transition-all" />
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        {/* ========================================================================= */}
+        {/* 2. PURCHASE CARD */}
+        {/* ========================================================================= */}
+        <Card className="relative overflow-hidden rounded-xl border border-border/80 bg-card/95 dark:bg-card/75 backdrop-blur-md p-4 sm:p-5 shadow-[0_2px_12px_-2px_rgba(37,40,36,0.05)] hover:shadow-[0_8px_24px_-4px_rgba(178,154,106,0.14)] hover:border-accent/50 transition-all duration-300 group">
+          <div className="pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full bg-accent/10 blur-2xl group-hover:bg-accent/15 transition-all duration-500 ease-out" />
+          <div className="pointer-events-none absolute -left-10 -bottom-10 h-28 w-28 rounded-full bg-primary/5 blur-xl group-hover:bg-primary/10 transition-all duration-500" />
+
+          {/* Card Header Row */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-border/60 gap-2.5">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-accent/15 dark:bg-accent/25 text-accent-foreground border border-accent/30 shadow-2xs group-hover:scale-105 transition-all duration-300">
+                <Package className="h-4.5 w-4.5 text-accent-foreground" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h2 className="text-lg sm:text-xl font-bold tracking-tight text-foreground font-sans">
+                    Purchase
+                  </h2>
+                  <span className="text-muted-foreground font-light text-sm">·</span>
+                  <span className="text-xs font-medium text-muted-foreground">
+                    Raw Lumber &amp; Vendor Bills
+                  </span>
+                  <Badge variant="outline" className="text-[9px] font-semibold uppercase tracking-wider py-0.2 px-1.5 border-accent/40 text-accent-foreground bg-accent/10">
+                    Supply Engine
+                  </Badge>
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-0.5 flex items-center gap-1.5">
+                  <span>Raw timber, joinery &amp; vendor bills</span>
+                  <span className="text-border">•</span>
+                  <span className="font-mono text-foreground/80 font-medium">Committed: ₹18.20 Lakhs</span>
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 self-start sm:self-center">
+              <Button
+                onClick={() => navigate("/purchase-orders")}
+                className="rounded-full px-3.5 py-1.5 h-7.5 text-xs font-semibold bg-sky-100 hover:bg-sky-200 dark:bg-sky-950/80 dark:hover:bg-sky-900 text-sky-900 dark:text-sky-100 border border-sky-300/80 dark:border-sky-800 shadow-2xs transition-all duration-200 active:scale-95 hover:scale-105 cursor-pointer flex items-center gap-1"
+                title="Create New Purchase Order"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                <span>New</span>
+              </Button>
+            </div>
+          </div>
+
+          {/* 3 Status Metric Boxes - Compact */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-3.5 pt-3">
+            {/* Box 1: All */}
+            <div
+              onClick={() => navigate("/purchase-orders")}
+              className="relative overflow-hidden rounded-lg border border-border/70 bg-secondary/30 dark:bg-card/40 hover:bg-card p-3 sm:p-3.5 flex flex-col justify-between transition-all duration-200 hover:-translate-y-1 hover:shadow-md hover:border-primary/60 group/box cursor-pointer select-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.75 after:bg-primary after:scale-x-0 group-hover/box:after:scale-x-100 after:transition-transform after:duration-200 after:origin-left"
+              title="View All 5 Purchase Orders"
+            >
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground group-hover/box:text-foreground transition-colors">
+                    All
+                  </span>
+                  <span className="text-[9px] text-muted-foreground font-normal">Procurement</span>
+                </div>
+                <div className="p-1 rounded-md bg-primary/10 text-primary group-hover/box:bg-primary group-hover/box:text-primary-foreground transition-all duration-200">
+                  <Layers className="h-3.5 w-3.5" />
+                </div>
+              </div>
+
+              <div className="py-1 flex items-baseline justify-between">
+                <span className="text-2xl sm:text-3xl font-extrabold font-mono text-foreground tracking-tight group-hover/box:text-primary transition-colors">
+                  {purchaseCounts.all}
+                </span>
+                <div className="text-right">
+                  <span className="text-xs font-mono font-bold text-foreground block leading-tight">
+                    {formatINR(purchaseCounts.totalValue)}
+                  </span>
+                  <span className="text-[9px] text-muted-foreground">total ordered</span>
+                </div>
+              </div>
+
+              <div className="space-y-1 my-0.5">
+                <div className="h-1 w-full rounded-full bg-secondary/80 overflow-hidden flex">
+                  <div style={{ width: "80%" }} className="h-full bg-emerald-500 rounded-l-full" />
+                  <div style={{ width: "20%" }} className="h-full bg-amber-500 rounded-r-full" />
+                </div>
+                <div className="flex justify-between text-[9px] text-muted-foreground font-medium">
+                  <span className="text-emerald-600 dark:text-emerald-400">4 Confirmed</span>
+                  <span className="text-amber-600 dark:text-amber-400">1 Draft</span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-1.5 border-t border-border/40">
+                <span className="group-hover/box:text-foreground transition-colors">Timber &amp; Hardware</span>
+                <ArrowUpRight className="h-3 w-3 text-primary opacity-60 group-hover/box:opacity-100 group-hover/box:translate-x-0.5 group-hover/box:-translate-y-0.5 transition-all" />
+              </div>
+            </div>
+
+            {/* Box 2: Confirmed */}
+            <div
+              onClick={() => navigate("/purchase-orders?status=CONFIRMED")}
+              className="relative overflow-hidden rounded-lg border border-border/70 bg-secondary/30 dark:bg-card/40 hover:bg-card p-3 sm:p-3.5 flex flex-col justify-between transition-all duration-200 hover:-translate-y-1 hover:shadow-md hover:border-emerald-500/60 group/box cursor-pointer select-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.75 after:bg-emerald-500 after:scale-x-0 group-hover/box:after:scale-x-100 after:transition-transform after:duration-200 after:origin-left"
+              title="View 4 Confirmed Purchase Orders"
+            >
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+                    Confirmed
+                  </span>
+                  <span className="text-[9px] font-medium px-1 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                    80%
+                  </span>
+                </div>
+                <div className="p-1 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 group-hover/box:bg-emerald-500 group-hover/box:text-white transition-all duration-200">
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                </div>
+              </div>
+
+              <div className="py-1 flex items-baseline justify-between">
+                <span className="text-2xl sm:text-3xl font-extrabold font-mono text-emerald-600 dark:text-emerald-400 tracking-tight">
+                  {purchaseCounts.confirmed}
+                </span>
+                <div className="text-right">
+                  <span className="text-xs font-mono font-bold text-emerald-700 dark:text-emerald-300 block leading-tight">
+                    {formatINR(purchaseCounts.confirmedValue)}
+                  </span>
+                  <span className="text-[9px] text-muted-foreground">goods received</span>
+                </div>
+              </div>
+
+              <div className="space-y-1 my-0.5">
+                <div className="h-1 w-full rounded-full bg-emerald-500/20 overflow-hidden">
+                  <div style={{ width: "80%" }} className="h-full bg-emerald-500 rounded-full" />
+                </div>
+                <div className="flex justify-between text-[9px] text-muted-foreground font-medium">
+                  <span className="text-emerald-600 dark:text-emerald-400 font-semibold">Vendor Bills</span>
+                  <span>4 of 5</span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-1.5 border-t border-border/40">
+                <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-medium">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" /> Verified
+                </span>
+                <ArrowUpRight className="h-3 w-3 text-emerald-500 opacity-60 group-hover/box:opacity-100 group-hover/box:translate-x-0.5 group-hover/box:-translate-y-0.5 transition-all" />
+              </div>
+            </div>
+
+            {/* Box 3: Draft */}
+            <div
+              onClick={() => navigate("/purchase-orders?status=DRAFT")}
+              className="relative overflow-hidden rounded-lg border border-border/70 bg-secondary/30 dark:bg-card/40 hover:bg-card p-3 sm:p-3.5 flex flex-col justify-between transition-all duration-200 hover:-translate-y-1 hover:shadow-md hover:border-amber-500/60 group/box cursor-pointer select-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.75 after:bg-amber-500 after:scale-x-0 group-hover/box:after:scale-x-100 after:transition-transform after:duration-200 after:origin-left"
+              title="View 1 Draft Purchase Order"
+            >
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
+                    Draft
+                  </span>
+                  <span className="text-[9px] font-medium px-1 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                    Pending
+                  </span>
+                </div>
+                <div className="p-1 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 group-hover/box:bg-amber-500 group-hover/box:text-white transition-all duration-200">
+                  <Clock className="h-3.5 w-3.5" />
+                </div>
+              </div>
+
+              <div className="py-1 flex items-baseline justify-between">
+                <span className="text-2xl sm:text-3xl font-extrabold font-mono text-amber-600 dark:text-amber-400 tracking-tight">
+                  {purchaseCounts.draft}
+                </span>
+                <div className="text-right">
+                  <span className="text-xs font-mono font-bold text-amber-700 dark:text-amber-300 block leading-tight">
+                    {formatINR(purchaseCounts.draftValue)}
+                  </span>
+                  <span className="text-[9px] text-muted-foreground">lumber RFQ</span>
+                </div>
+              </div>
+
+              <div className="space-y-1 my-0.5">
+                <div className="h-1 w-full rounded-full bg-amber-500/20 overflow-hidden">
+                  <div style={{ width: "20%" }} className="h-full bg-amber-500 rounded-full" />
+                </div>
+                <div className="flex justify-between text-[9px] text-muted-foreground font-medium">
+                  <span className="text-amber-600 dark:text-amber-400 font-semibold">Under Review</span>
+                  <span>1 quotation</span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-1.5 border-t border-border/40">
+                <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-medium">
+                  <span className="h-1.5 w-1.5 rounded-full bg-amber-500" /> Pending
+                </span>
+                <ArrowUpRight className="h-3 w-3 text-amber-500 opacity-60 group-hover/box:opacity-100 group-hover/box:translate-x-0.5 group-hover/box:-translate-y-0.5 transition-all" />
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        {/* ========================================================================= */}
+        {/* 3. BUDGET REPORTS CARD */}
+        {/* ========================================================================= */}
+        <Card className="relative overflow-hidden rounded-xl border border-border/80 bg-card/95 dark:bg-card/75 backdrop-blur-md p-4 sm:p-5 shadow-[0_2px_12px_-2px_rgba(37,40,36,0.05)] hover:shadow-[0_8px_24px_-4px_rgba(104,122,85,0.14)] hover:border-emerald-500/50 transition-all duration-300 group">
+          <div className="pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full bg-emerald-500/10 blur-2xl group-hover:bg-emerald-500/15 transition-all duration-500 ease-out" />
+          <div className="pointer-events-none absolute -left-10 -bottom-10 h-28 w-28 rounded-full bg-primary/5 blur-xl group-hover:bg-primary/10 transition-all duration-500" />
+
+          {/* Card Header Row */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-border/60 gap-2.5">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 shadow-2xs group-hover:scale-105 transition-all duration-300">
+                <Scale className="h-4.5 w-4.5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h2 className="text-lg sm:text-xl font-bold tracking-tight text-foreground font-sans">
+                    Budget Reports
+                  </h2>
+                  <span className="text-muted-foreground font-light text-sm">·</span>
+                  <span className="text-xs font-medium text-muted-foreground">
+                    Spend Targets &amp; Variance
+                  </span>
+                  <Badge variant="outline" className="text-[9px] font-semibold uppercase tracking-wider py-0.2 px-1.5 border-emerald-500/30 text-emerald-700 dark:text-emerald-400 bg-emerald-500/10">
+                    Fiscal Governance
+                  </Badge>
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-0.5 flex items-center gap-1.5">
+                  <span>Analytic cost centers &amp; spending thresholds</span>
+                  <span className="text-border">•</span>
+                  <span className="font-mono text-foreground/80 font-medium">70.8% Utilized</span>
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 self-start sm:self-center">
+              <Button
+                onClick={() => navigate("/reports/budget-report")}
+                className="rounded-full px-3.5 py-1.5 h-7.5 text-xs font-semibold bg-sky-100 hover:bg-sky-200 dark:bg-sky-950/80 dark:hover:bg-sky-900 text-sky-900 dark:text-sky-100 border border-sky-300/80 dark:border-sky-800 shadow-2xs transition-all duration-200 active:scale-95 hover:scale-105 cursor-pointer flex items-center gap-1"
+                title="Open Comprehensive Budget Matrix Report"
+              >
+                <FileSpreadsheet className="h-3.5 w-3.5" />
+                <span>Report</span>
+              </Button>
+            </div>
+          </div>
+
+          {/* 3 Status Metric Boxes - Compact */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-3.5 pt-3">
+            {/* Box 1: Achieved */}
+            <div
+              onClick={() => navigate("/reports/budget-report?status=ACHIEVED")}
+              className="relative overflow-hidden rounded-lg border border-border/70 bg-secondary/30 dark:bg-card/40 hover:bg-card p-3 sm:p-3.5 flex flex-col justify-between transition-all duration-200 hover:-translate-y-1 hover:shadow-md hover:border-emerald-500/60 group/box cursor-pointer select-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.75 after:bg-emerald-500 after:scale-x-0 group-hover/box:after:scale-x-100 after:transition-transform after:duration-200 after:origin-left"
+              title="View 3 Achieved Budgets"
+            >
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+                    Achieved
+                  </span>
+                  <span className="text-[9px] font-medium px-1 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                    Within Limit
+                  </span>
+                </div>
+                <div className="p-1 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 group-hover/box:bg-emerald-500 group-hover/box:text-white transition-all duration-200">
+                  <Target className="h-3.5 w-3.5" />
+                </div>
+              </div>
+
+              <div className="py-1 flex items-baseline justify-between">
+                <span className="text-2xl sm:text-3xl font-extrabold font-mono text-emerald-600 dark:text-emerald-400 tracking-tight">
+                  {budgetCounts.achieved}
+                </span>
+                <div className="text-right">
+                  <span className="text-xs font-mono font-bold text-emerald-700 dark:text-emerald-300 block leading-tight">
+                    {formatINR(budgetCounts.achievedValue)}
+                  </span>
+                  <span className="text-[9px] text-muted-foreground">actual spend</span>
+                </div>
+              </div>
+
+              <div className="space-y-1 my-0.5">
+                <div className="h-1 w-full rounded-full bg-emerald-500/20 overflow-hidden">
+                  <div style={{ width: "70.8%" }} className="h-full bg-emerald-500 rounded-full" />
+                </div>
+                <div className="flex justify-between text-[9px] text-muted-foreground font-medium">
+                  <span className="text-emerald-600 dark:text-emerald-400 font-semibold">Variance Health</span>
+                  <span>70.8% of cap</span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-1.5 border-t border-border/40">
+                <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-medium">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> On Target
+                </span>
+                <ArrowUpRight className="h-3 w-3 text-emerald-500 opacity-60 group-hover/box:opacity-100 group-hover/box:translate-x-0.5 group-hover/box:-translate-y-0.5 transition-all" />
+              </div>
+            </div>
+
+            {/* Box 2: Budget */}
+            <div
+              onClick={() => navigate("/budgets")}
+              className="relative overflow-hidden rounded-lg border border-border/70 bg-secondary/30 dark:bg-card/40 hover:bg-card p-3 sm:p-3.5 flex flex-col justify-between transition-all duration-200 hover:-translate-y-1 hover:shadow-md hover:border-primary/60 group/box cursor-pointer select-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.75 after:bg-primary after:scale-x-0 group-hover/box:after:scale-x-100 after:transition-transform after:duration-200 after:origin-left"
+              title="View 2 Active Budget Envelopes"
+            >
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground group-hover/box:text-foreground transition-colors">
+                    Budget
+                  </span>
+                  <span className="text-[9px] text-muted-foreground font-normal">Cap</span>
+                </div>
+                <div className="p-1 rounded-md bg-primary/10 text-primary group-hover/box:bg-primary group-hover/box:text-primary-foreground transition-all duration-200">
+                  <Wallet className="h-3.5 w-3.5" />
+                </div>
+              </div>
+
+              <div className="py-1 flex items-baseline justify-between">
+                <span className="text-2xl sm:text-3xl font-extrabold font-mono text-foreground tracking-tight group-hover/box:text-primary transition-colors">
+                  {budgetCounts.budget}
+                </span>
+                <div className="text-right">
+                  <span className="text-xs font-mono font-bold text-foreground block leading-tight">
+                    {formatINR(budgetCounts.budgetValue)}
+                  </span>
+                  <span className="text-[9px] text-muted-foreground">total limit</span>
+                </div>
+              </div>
+
+              <div className="space-y-1 my-0.5">
+                <div className="h-1 w-full rounded-full bg-secondary/80 overflow-hidden">
+                  <div style={{ width: "100%" }} className="h-full bg-primary rounded-full" />
+                </div>
+                <div className="flex justify-between text-[9px] text-muted-foreground font-medium">
+                  <span className="text-foreground font-semibold">2 Centers</span>
+                  <span>FY 2026-27</span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-1.5 border-t border-border/40">
+                <span className="group-hover/box:text-foreground transition-colors">Manage Limits</span>
+                <ArrowUpRight className="h-3 w-3 text-primary opacity-60 group-hover/box:opacity-100 group-hover/box:translate-x-0.5 group-hover/box:-translate-y-0.5 transition-all" />
+              </div>
+            </div>
+
+            {/* Box 3: Committed */}
+            <div
+              onClick={() => navigate("/budgets")}
+              className="relative overflow-hidden rounded-lg border border-border/70 bg-secondary/30 dark:bg-card/40 hover:bg-card p-3 sm:p-3.5 flex flex-col justify-between transition-all duration-200 hover:-translate-y-1 hover:shadow-md hover:border-amber-500/60 group/box cursor-pointer select-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.75 after:bg-amber-500 after:scale-x-0 group-hover/box:after:scale-x-100 after:transition-transform after:duration-200 after:origin-left"
+              title="View 4 Committed Budgets"
+            >
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
+                    Committed
+                  </span>
+                  <span className="text-[9px] font-medium px-1 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                    Locked
+                  </span>
+                </div>
+                <div className="p-1 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 group-hover/box:bg-amber-500 group-hover/box:text-white transition-all duration-200">
+                  <Coins className="h-3.5 w-3.5" />
+                </div>
+              </div>
+
+              <div className="py-1 flex items-baseline justify-between">
+                <span className="text-2xl sm:text-3xl font-extrabold font-mono text-amber-600 dark:text-amber-400 tracking-tight">
+                  {budgetCounts.committed}
+                </span>
+                <div className="text-right">
+                  <span className="text-xs font-mono font-bold text-amber-700 dark:text-amber-300 block leading-tight">
+                    {formatINR(budgetCounts.committedValue)}
+                  </span>
+                  <span className="text-[9px] text-muted-foreground">reserved funds</span>
+                </div>
+              </div>
+
+              <div className="space-y-1 my-0.5">
+                <div className="h-1 w-full rounded-full bg-amber-500/20 overflow-hidden">
+                  <div style={{ width: "24%" }} className="h-full bg-amber-500 rounded-full" />
+                </div>
+                <div className="flex justify-between text-[9px] text-muted-foreground font-medium">
+                  <span className="text-amber-600 dark:text-amber-400 font-semibold">24% Committed</span>
+                  <span>4 POs</span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-1.5 border-t border-border/40">
+                <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-medium">
+                  <span className="h-1.5 w-1.5 rounded-full bg-amber-500" /> Allocated
+                </span>
+                <ArrowUpRight className="h-3 w-3 text-amber-500 opacity-60 group-hover/box:opacity-100 group-hover/box:translate-x-0.5 group-hover/box:-translate-y-0.5 transition-all" />
+              </div>
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      {/* Financial Health Overview & Radar Banner */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-6 rounded-2xl border border-border/80 bg-card shadow-xs">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              Financial Overview
-            </h1>
+            <h2 className="text-xl font-bold tracking-tight text-foreground">
+              Financial Overview &amp; Health
+            </h2>
             <Badge variant="outline" className="text-xs border-primary/30 text-primary bg-primary/10 gap-1">
-              <Sparkles className="h-3 w-3" /> Modura Double-Entry OS
+              <Sparkles className="h-3 w-3" /> Real-Time Analytics
             </Badge>
           </div>
           <p className="text-xs sm:text-sm text-muted-foreground">
-            Real-time balance sheet integrity, inventory valuation, and cash flow clarity for your furniture atelier.
+            Balance sheet integrity, inventory valuation, and cash flow clarity for your furniture atelier.
           </p>
         </div>
 

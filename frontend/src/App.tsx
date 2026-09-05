@@ -3,6 +3,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { PublicRoute } from "./components/auth/PublicRoute";
 import { DashboardLayout } from "./layouts/DashboardLayout";
+import { ErrorBoundary } from "./components/common/ErrorBoundary";
 import Dashboard from "./pages/Dashboard";
 import Welcome from "./pages/Welcome";
 import Login from "./pages/Login";
@@ -19,13 +20,16 @@ import Budgets from "./pages/Budgets";
 import PurchaseOrders from "./pages/PurchaseOrders";
 import VendorBills from "./pages/VendorBills";
 import DemoJournalEntry from "./pages/DemoJournalEntry";
+import Sales from "./pages/Sales";
+import Reports from "./pages/Reports";
 
 export function App() {
   return (
-    <AuthProvider>
-      <Routes>
-        {/* Welcome / Entry Experience */}
-        <Route path="/" element={<Welcome />} />
+    <ErrorBoundary>
+      <AuthProvider>
+        <Routes>
+          {/* Welcome / Entry Experience */}
+          <Route path="/" element={<Welcome />} />
         <Route path="/welcome" element={<Welcome />} />
 
         {/* Public Authentication Routes */}
@@ -194,11 +198,96 @@ export function App() {
           }
         />
 
+        {/* Sales Routes */}
+        <Route
+          path="/sales-orders"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Sales />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/sales-invoices"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Sales />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/receipts"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Sales />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Financial Report Routes */}
+        <Route
+          path="/reports"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Reports />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/reports/balance-sheet"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Reports />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/reports/profit-and-loss"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Reports />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/reports/budget-report"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Reports />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/reports/trial-balance"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Reports />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
         {/* Fallbacks */}
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </AuthProvider>
+    </ErrorBoundary>
   );
 }
 

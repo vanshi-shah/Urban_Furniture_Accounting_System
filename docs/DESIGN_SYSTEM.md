@@ -56,8 +56,15 @@ The palette is anchored in earthy olive tones, charcoal text, warm linen surface
 | **Error** | Muted Brick | `#A65D52` | Unbalanced entries, critical budget breaches, rejected transfers. |
 
 ### UI Color Distribution
-* **Sidebar**: `#454D35` (Forest Olive) or neutral linen with `#5F6848` active states.
+* **Top Header**: High-clarity `#FCFBF7` linen or dark card with `#5F6848` active category highlights and expandable 4-column mega-menu. Zero sidebar layout.
 * **Primary Buttons**: `#5F6848` (Olive) with `#FCFBF7` text.
+* **Wireframe Pill Action Buttons**: Soft sky-blue (`bg-sky-100 dark:bg-sky-950/80 text-sky-900 dark:text-sky-100 border-sky-300`) with scale micro-animations (`active:scale-95 hover:scale-105`) for creation (`[New]`) and reporting (`[Report]`), rendered at compact `30px` height.
+* **Elevated Metric Status Cards (Compact Sizing)**:
+  - Soft linen background (`bg-card/95 backdrop-blur-md`) with compact padding (`p-4 sm:p-5`) and dual ambient brand lighting aura (`bg-primary/10` and `bg-accent/5 blur-2xl`) on hover.
+  - Domain icon container with double ring / border (`ShoppingCart` for Sales, `Package` for Purchase, `Scale` for Budget Reports) at `p-2` with `18px` icon.
+  - Interactive metric boxes featuring compact padding (`p-3 sm:p-3.5`), domain micro-icons (`Layers`, `CheckCircle2`, `Clock`, `Target`, `Wallet`, `Coins`), hover lift (`hover:-translate-y-1 hover:shadow-md`), bottom expanding color indicator line on hover (`after:h-0.75 after:scale-x-0 group-hover/box:after:scale-x-100 after:origin-left`), live status pulse dot, compact secondary monetary context chip (`₹42.85L`, `₹36.40L`, etc.), and slide-in `ArrowUpRight` indicator.
+  - Slim visual ratio micro-progress bars (`h-1` rounded-full, e.g. 83.3% Confirmed vs 16.7% Draft, 80% Billed, 70.8% Variance Health) providing high information density without vertical sprawl.
+* **Appearance Switcher**: Minimalist Sun/Moon icon toggle with rotating transition.
 * **Page Background**: `#F7F5EF` (Warm Ivory).
 * **Cards & Panels**: `#FCFBF7` (Soft Linen) with `#DCDDD3` border.
 * **Headings & Financial Values**: `#252824` (Charcoal).

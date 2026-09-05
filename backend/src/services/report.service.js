@@ -47,6 +47,7 @@ class ReportService {
       totalCredit += credit;
 
       const account = accountMap[line.accountId];
+      if (!account) return null;
       let balance = 0;
       
       // Calculate normal balance based on account type
@@ -65,7 +66,7 @@ class ReportService {
         credit,
         balance
       };
-    }).filter(b => b.debit > 0 || b.credit > 0);
+    }).filter(b => b && (b.debit > 0 || b.credit > 0));
 
     return {
       asOfDate: asOfDate || new Date(),
@@ -114,6 +115,7 @@ class ReportService {
       const debit = line._sum.debit || 0;
       const credit = line._sum.credit || 0;
       const account = accountMap[line.accountId];
+      if (!account) return null;
       
       let balance = 0;
       if (account.type === 'INCOME') {
@@ -130,7 +132,7 @@ class ReportService {
         type: account.type,
         balance
       };
-    });
+    }).filter(Boolean);
 
     const netProfit = totalIncome - totalExpense;
 
