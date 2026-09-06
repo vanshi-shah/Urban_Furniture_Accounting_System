@@ -207,6 +207,28 @@ Added frontend and backend validation for Journals using react-hook-form + zod o
       - 15 Budgets each (30 total) with line items and simulated ledger expense movements
     - **Service Restored**: Restarted the backend Express dev server on `http://localhost:5000` with hot reloading active.
 
+27. **Execution of `seed.js` Script**:
+    - Executed `npm run seed` (`node prisma/seed.js`) directly in the backend directory.
+    - Successfully cleared all existing records and re-populated the PostgreSQL database with full multi-tenant demo data for **Urban Furniture Co.** and **Modern Teak Ltd.**:
+      - 2 Companies
+      - 6 User accounts (`ADMIN`, `ACCOUNTANT`, `USER` per company)
+      - 28 Accounts across default Chart of Accounts
+      - 10 Journals
+      - 252 Contacts (Customers & Vendors)
+      - 252 Products (Goods, Services, Combos)
+      - 50 Analytic Accounts
+      - 252 Submissions
+      - 252 Orders (PO, Invoice, Bill) & associated Posted Payments
+      - 252 Balanced Double-Entry Journal Entries
+      - 30 Budgets with line items & simulated ledger postings
+
+28. **Re-execution of Database Seed Script (`seed.js`)**:
+    - Ran `npm run seed` (`node prisma/seed.js`) directly via file command execution.
+    - Verified complete table cleanup and successfully populated fresh seed data across both demo companies (**Urban Furniture Co.** & **Modern Teak Ltd.**).
+    - Database is fully synchronized with default accounts, journals, multi-role credentials, orders, payments, balanced journal entries, and budget lines.
+
+
+
 
 
 

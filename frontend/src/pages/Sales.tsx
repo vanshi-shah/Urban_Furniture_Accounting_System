@@ -352,25 +352,22 @@ export default function Sales() {
             <div className="flex items-center gap-1.5 bg-muted/40 p-1 rounded-xl border border-border/60">
               <button
                 onClick={() => setStatusFilter("ALL")}
-                className={`text-xs px-3 py-1 rounded-lg font-semibold transition-colors ${
-                  statusFilter === "ALL" ? "bg-card shadow-xs text-foreground" : "text-muted-foreground hover:text-foreground"
-                }`}
+                className={`text-xs px-3 py-1 rounded-lg font-semibold transition-colors ${statusFilter === "ALL" ? "bg-card shadow-xs text-foreground" : "text-muted-foreground hover:text-foreground"
+                  }`}
               >
                 All (12)
               </button>
               <button
                 onClick={() => setStatusFilter("CONFIRMED")}
-                className={`text-xs px-3 py-1 rounded-lg font-semibold transition-colors ${
-                  statusFilter === "CONFIRMED" ? "bg-card shadow-xs text-foreground" : "text-muted-foreground hover:text-foreground"
-                }`}
+                className={`text-xs px-3 py-1 rounded-lg font-semibold transition-colors ${statusFilter === "CONFIRMED" ? "bg-card shadow-xs text-foreground" : "text-muted-foreground hover:text-foreground"
+                  }`}
               >
                 Confirmed (10)
               </button>
               <button
                 onClick={() => setStatusFilter("DRAFT")}
-                className={`text-xs px-3 py-1 rounded-lg font-semibold transition-colors ${
-                  statusFilter === "DRAFT" ? "bg-card shadow-xs text-foreground" : "text-muted-foreground hover:text-foreground"
-                }`}
+                className={`text-xs px-3 py-1 rounded-lg font-semibold transition-colors ${statusFilter === "DRAFT" ? "bg-card shadow-xs text-foreground" : "text-muted-foreground hover:text-foreground"
+                  }`}
               >
                 Draft (2)
               </button>
@@ -409,11 +406,10 @@ export default function Sales() {
                         </span>
                         <Badge
                           variant={order.status === "CONFIRMED" ? "default" : "outline"}
-                          className={`text-[10px] ${
-                            order.status === "CONFIRMED"
+                          className={`text-[10px] ${order.status === "CONFIRMED"
                               ? "bg-emerald-600 text-white"
                               : "text-muted-foreground"
-                          }`}
+                            }`}
                         >
                           {order.status}
                         </Badge>
