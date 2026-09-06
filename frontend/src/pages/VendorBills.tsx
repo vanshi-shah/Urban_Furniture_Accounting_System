@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { 
-  Plus, 
-  FileText, 
-  ArrowLeft, 
-  AlertTriangle, 
+import {
+  Plus,
+  FileText,
+  ArrowLeft,
+  AlertTriangle,
   Search,
   Receipt,
   CreditCard,
@@ -473,11 +473,10 @@ export default function VendorBills() {
                   size="sm"
                   onClick={handleConfirmBill}
                   disabled={loading || orderStatus === "CONFIRMED"}
-                  className={`rounded-md px-4 font-semibold text-xs transition-all ${
-                    orderStatus === "CONFIRMED"
+                  className={`rounded-md px-4 font-semibold text-xs transition-all ${orderStatus === "CONFIRMED"
                       ? "bg-emerald-600 text-white cursor-default"
                       : "bg-foreground text-background hover:bg-foreground/90"
-                  }`}
+                    }`}
                 >
                   {orderStatus === "CONFIRMED" ? "Confirmed" : "Confirm"}
                 </Button>

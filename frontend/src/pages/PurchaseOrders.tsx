@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { 
-  Plus, 
-  Check, 
-  FileText, 
-  X, 
-  ArrowLeft, 
-  AlertTriangle, 
+import {
+  Plus,
+  Check,
+  FileText,
+  X,
+  ArrowLeft,
+  AlertTriangle,
   Search,
   ShoppingCart,
   Receipt,
@@ -379,11 +379,10 @@ export default function PurchaseOrders() {
                   size="sm"
                   onClick={handleConfirmPO}
                   disabled={loading || status === "CONFIRMED"}
-                  className={`rounded-md px-4 font-semibold text-xs transition-all ${
-                    status === "CONFIRMED"
+                  className={`rounded-md px-4 font-semibold text-xs transition-all ${status === "CONFIRMED"
                       ? "bg-emerald-600 text-white cursor-default"
                       : "bg-foreground text-background hover:bg-foreground/90"
-                  }`}
+                    }`}
                 >
                   {status === "CONFIRMED" ? "Confirmed" : "Confirm"}
                 </Button>
@@ -486,13 +485,12 @@ export default function PurchaseOrders() {
                   <div>
                     <Badge
                       variant="outline"
-                      className={`text-[11px] font-semibold uppercase tracking-wider px-2.5 py-0.5 ${
-                        status === "CONFIRMED"
+                      className={`text-[11px] font-semibold uppercase tracking-wider px-2.5 py-0.5 ${status === "CONFIRMED"
                           ? "bg-emerald-500/15 text-emerald-600 border-emerald-300"
                           : status === "CANCELLED"
-                          ? "bg-destructive/15 text-destructive border-destructive/30"
-                          : "bg-blue-500/15 text-blue-600 border-blue-300"
-                      }`}
+                            ? "bg-destructive/15 text-destructive border-destructive/30"
+                            : "bg-blue-500/15 text-blue-600 border-blue-300"
+                        }`}
                     >
                       {status}
                     </Badge>
@@ -591,11 +589,10 @@ export default function PurchaseOrders() {
                         <td className="px-4 py-3 text-center">
                           <Badge
                             variant="outline"
-                            className={`text-[10px] uppercase font-semibold ${
-                              o.status === "CONFIRMED"
+                            className={`text-[10px] uppercase font-semibold ${o.status === "CONFIRMED"
                                 ? "bg-emerald-500/15 text-emerald-600 border-emerald-300"
                                 : "bg-blue-500/15 text-blue-600 border-blue-300"
-                            }`}
+                              }`}
                           >
                             {o.status}
                           </Badge>

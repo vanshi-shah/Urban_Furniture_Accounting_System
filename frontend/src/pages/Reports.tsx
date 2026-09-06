@@ -106,20 +106,20 @@ export default function Reports() {
       const revenueBreakdown = Array.isArray(pnlData.revenueBreakdown)
         ? pnlData.revenueBreakdown
         : Array.isArray(pnlData.details?.income) && pnlData.details.income.length > 0
-        ? pnlData.details.income.map((i: any) => ({
+          ? pnlData.details.income.map((i: any) => ({
             item: i.name ? `${i.name}${i.code ? ` (${i.code})` : ""}` : `Account ${i.code || ""}`,
             amount: Number(i.balance ?? i.amount) || 0,
           }))
-        : [{ item: "Operating Sales & Custom Furniture", amount: revenue }];
+          : [{ item: "Operating Sales & Custom Furniture", amount: revenue }];
 
       const expenseBreakdown = Array.isArray(pnlData.expenseBreakdown)
         ? pnlData.expenseBreakdown
         : Array.isArray(pnlData.details?.expenses) && pnlData.details.expenses.length > 0
-        ? pnlData.details.expenses.map((e: any) => ({
+          ? pnlData.details.expenses.map((e: any) => ({
             category: e.name ? `${e.name}${e.code ? ` (${e.code})` : ""}` : `Account ${e.code || ""}`,
             amount: Number(e.balance ?? e.amount) || 0,
           }))
-        : [{ category: "Timber & Artisan Workshop Expenses", amount: operatingExpenses }];
+          : [{ category: "Timber & Artisan Workshop Expenses", amount: operatingExpenses }];
 
       return {
         revenue,
@@ -165,32 +165,32 @@ export default function Reports() {
       const currentAssets = Array.isArray(balanceSheetData.currentAssets)
         ? balanceSheetData.currentAssets
         : Array.isArray(balanceSheetData.details?.assets)
-        ? balanceSheetData.details.assets.map((a: any) => ({
+          ? balanceSheetData.details.assets.map((a: any) => ({
             name: a.name || `Asset ${a.code || ""}`,
             code: a.code || "",
             amount: Number(a.balance ?? a.amount) || 0,
           }))
-        : [];
+          : [];
 
       const currentLiabilities = Array.isArray(balanceSheetData.currentLiabilities)
         ? balanceSheetData.currentLiabilities
         : Array.isArray(balanceSheetData.details?.liabilities)
-        ? balanceSheetData.details.liabilities.map((l: any) => ({
+          ? balanceSheetData.details.liabilities.map((l: any) => ({
             name: l.name || `Liability ${l.code || ""}`,
             code: l.code || "",
             amount: Number(l.balance ?? l.amount) || 0,
           }))
-        : [];
+          : [];
 
       const equity = Array.isArray(balanceSheetData.equity)
         ? balanceSheetData.equity
         : Array.isArray(balanceSheetData.details?.equity)
-        ? balanceSheetData.details.equity.map((e: any) => ({
+          ? balanceSheetData.details.equity.map((e: any) => ({
             name: e.name || `Equity ${e.code || ""}`,
             code: e.code || "",
             amount: Number(e.balance ?? e.amount) || 0,
           }))
-        : [];
+          : [];
 
       const totalAssets =
         Number(balanceSheetData.totalAssets) ||
@@ -245,19 +245,19 @@ export default function Reports() {
   const displayedBudgets =
     analyticAccounts && analyticAccounts.length > 0
       ? analyticAccounts.map((a: any) => {
-          const allocated = Number(a.budgetLimit) || 0;
-          const spent = Number(a.spent) || 0;
-          const remaining = Math.max(0, allocated - spent);
-          const pct = allocated > 0 ? Math.round((spent / allocated) * 100) : 0;
-          const status = pct > 90 ? "Warning" : "Normal";
-          return {
-            name: a.name || "Analytic Account",
-            allocated,
-            spent,
-            remaining,
-            status,
-          };
-        })
+        const allocated = Number(a.budgetLimit) || 0;
+        const spent = Number(a.spent) || 0;
+        const remaining = Math.max(0, allocated - spent);
+        const pct = allocated > 0 ? Math.round((spent / allocated) * 100) : 0;
+        const status = pct > 90 ? "Warning" : "Normal";
+        return {
+          name: a.name || "Analytic Account",
+          allocated,
+          spent,
+          remaining,
+          status,
+        };
+      })
       : defaultBudgets;
 
   const handlePrint = () => {
