@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import {
   ShoppingCart,
@@ -15,6 +15,7 @@ import {
   TrendingUp,
   Download,
   Trash2,
+  Loader2,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -53,6 +54,8 @@ export default function Sales() {
   const [products, setProducts] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   // New Order Form state
   const [customerName, setCustomerName] = useState("");
@@ -72,8 +75,9 @@ export default function Sales() {
     const newLines = [...orderLines];
     if (field === 'productId') {
       const product = products.find(p => p.id === value);
+      const price = product ? (product.salesPrice ?? product.salePrice ?? product.price ?? 0) : 0;
       newLines[idx].productId = value;
-      newLines[idx].unitPrice = product ? product.salePrice || 0 : 0;
+      newLines[idx].unitPrice = price;
     } else if (field === 'qty') {
       newLines[idx].qty = Number(value);
     }
@@ -108,19 +112,27 @@ export default function Sales() {
     try {
       setLoading(true);
       const [orderRes, contactRes, productRes] = await Promise.allSettled([
-        apiFetch("/orders?type=CUSTOMER_INVOICE"),
-        apiFetch("/master/contacts"),
-        apiFetch("/master/products"),
+        apiFetch("/orders?type=CUSTOMER_INVOICE&limit=100"),
+        apiFetch("/master/contacts?limit=200"),
+        apiFetch("/master/products?limit=200"),
       ]);
 
-      if (contactRes.status === "fulfilled" && Array.isArray(contactRes.value)) {
-        setContacts(contactRes.value);
+      if (contactRes.status === "fulfilled" && contactRes.value) {
+        const contactList = contactRes.value?.data ?? (Array.isArray(contactRes.value) ? contactRes.value : []);
+        // Prefer CUSTOMER type, but fallback to full list if none explicitly typed
+        const customers = contactList.filter((c: any) => c.type === "CUSTOMER");
+        setContacts(customers.length > 0 ? customers : contactList);
       }
-      if (productRes.status === "fulfilled" && Array.isArray(productRes.value)) {
-        setProducts(productRes.value);
+      if (productRes.status === "fulfilled" && productRes.value) {
+        const productList = productRes.value?.data ?? (Array.isArray(productRes.value) ? productRes.value : []);
+        setProducts(productList);
+      }
+      if (orderRes.status === "fulfilled" && orderRes.value) {
+        const orderList = orderRes.value?.data ?? (Array.isArray(orderRes.value) ? orderRes.value : []);
+        setOrders(orderList);
       }
     } catch (err) {
-      console.error(err);
+      console.error("Failed to fetch sales master data:", err);
     } finally {
       setLoading(false);
     }
@@ -302,6 +314,52 @@ export default function Sales() {
     },
   ];
 
+  const displayOrders = useMemo(() => {
+    if (orders && orders.length > 0) {
+      return orders.map((o: any) => ({
+        id: o.id,
+        orderNumber: o.orderNumber || `SO-${o.id.slice(-4)}`,
+        customer: o.contact?.name || "Bespoke Client",
+        date: o.date ? new Date(o.date).toISOString().split("T")[0] : "2026-09-04",
+        items: o.lines && o.lines.length > 0
+          ? o.lines.map((l: any) => `${l.product?.name || l.description || "Custom Item"} (x${l.quantity})`).join(", ")
+          : "Bespoke Furniture Contract",
+        total: o.totalAmount || 0,
+        status: o.status || "CONFIRMED",
+        paymentStatus: (o.amountDue === 0 || (o.payments && o.payments.length > 0 && o.amountDue <= 0))
+          ? "PAID"
+          : (o.amountDue < o.totalAmount ? "PARTIAL" : "UNPAID"),
+        risk: o.status === "CONFIRMED" ? "LOW" : "MEDIUM",
+      }));
+    }
+    return sampleSalesOrders;
+  }, [orders]);
+
+  const displayReceipts = useMemo(() => {
+    if (orders && orders.length > 0) {
+      const allPayments: any[] = [];
+      orders.forEach((o: any) => {
+        if (o.payments && Array.isArray(o.payments)) {
+          o.payments.forEach((p: any) => {
+            allPayments.push({
+              id: p.paymentNumber || `REC-${p.id.slice(-4)}`,
+              customer: o.contact?.name || "Bespoke Client",
+              method: p.method === "BANK" ? "Bank Settlement" : "Cash Settlement",
+              date: p.date ? new Date(p.date).toLocaleDateString("en-IN", { day: 'numeric', month: 'short', year: 'numeric' }) : "Recent",
+              invoiceRef: o.orderNumber,
+              amount: p.amount,
+              status: p.status || "SETTLED",
+              dr: p.method === "BANK" ? "1010 Bank Account" : "1000 Petty Cash",
+              cr: "1200 Accounts Receivable",
+            });
+          });
+        }
+      });
+      if (allPayments.length > 0) return allPayments;
+    }
+    return sampleReceipts;
+  }, [orders]);
+
   const formatINR = (val: number) => {
     return new Intl.NumberFormat("en-IN", {
       style: "currency",
@@ -310,7 +368,7 @@ export default function Sales() {
     }).format(val || 0);
   };
 
-  const filteredOrders = sampleSalesOrders.filter((order) => {
+  const filteredOrders = displayOrders.filter((order) => {
     const matchesStatus =
       statusFilter === "ALL" ? true : order.status.toUpperCase() === statusFilter.toUpperCase();
     const matchesSearch =
@@ -320,9 +378,47 @@ export default function Sales() {
     return matchesStatus && matchesSearch;
   });
 
-  const handleCreateOrder = () => {
-    setNewOrderModalOpen(false);
-    // Success notice / clean state
+  const handleCreateOrder = async () => {
+    if (!customerName) {
+      setSubmitError("Please select a customer from the dropdown.");
+      return;
+    }
+    const validLines = orderLines.filter(l => l.productId && l.qty > 0);
+    if (validLines.length === 0) {
+      setSubmitError("Please select at least one product with quantity greater than zero.");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      setSubmitError("");
+      await apiFetch("/orders", {
+        method: "POST",
+        body: JSON.stringify({
+          type: "CUSTOMER_INVOICE",
+          contactId: customerName,
+          date: new Date().toISOString(),
+          lines: validLines.map(line => {
+            const prod = products.find(p => p.id === line.productId);
+            return {
+              productId: line.productId,
+              quantity: line.qty,
+              unitPrice: line.unitPrice,
+              description: prod?.name || "Bespoke Furniture Line",
+            };
+          }),
+        }),
+      });
+
+      setNewOrderModalOpen(false);
+      setCustomerName("");
+      setOrderLines([{ productId: "", qty: 1, unitPrice: 0, total: 0 }]);
+      await fetchData();
+    } catch (err: any) {
+      setSubmitError(err.message || "Failed to create sales order");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -345,7 +441,10 @@ export default function Sales() {
 
         <div className="flex items-center gap-2">
           <Button
-            onClick={() => setNewOrderModalOpen(true)}
+            onClick={() => {
+              setSubmitError("");
+              setNewOrderModalOpen(true);
+            }}
             className="gap-2 bg-sky-600 hover:bg-sky-700 text-white rounded-full px-5 shadow-xs"
           >
             <Plus className="h-4 w-4" />
@@ -360,15 +459,15 @@ export default function Sales() {
           <TabsList className="bg-muted/50 border border-border/60 p-1 rounded-xl">
             <TabsTrigger value="orders" className="text-xs md:text-sm font-semibold rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-xs">
               <ShoppingCart className="h-4 w-4 mr-2 text-primary" />
-              Sales Orders (12)
+              Sales Orders ({displayOrders.length})
             </TabsTrigger>
             <TabsTrigger value="invoices" className="text-xs md:text-sm font-semibold rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-xs">
               <Receipt className="h-4 w-4 mr-2 text-accent" />
-              Sale Invoices (10)
+              Sale Invoices ({displayOrders.filter(o => o.status === "CONFIRMED").length})
             </TabsTrigger>
             <TabsTrigger value="receipts" className="text-xs md:text-sm font-semibold rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-xs">
               <CreditCard className="h-4 w-4 mr-2 text-emerald-600" />
-              Customer Receipts (3)
+              Customer Receipts ({displayReceipts.length})
             </TabsTrigger>
           </TabsList>
 
@@ -380,21 +479,21 @@ export default function Sales() {
                 className={`text-xs px-3 py-1 rounded-lg font-semibold transition-colors ${statusFilter === "ALL" ? "bg-card shadow-xs text-foreground" : "text-muted-foreground hover:text-foreground"
                   }`}
               >
-                All (12)
+                All ({displayOrders.length})
               </button>
               <button
                 onClick={() => setStatusFilter("CONFIRMED")}
                 className={`text-xs px-3 py-1 rounded-lg font-semibold transition-colors ${statusFilter === "CONFIRMED" ? "bg-card shadow-xs text-foreground" : "text-muted-foreground hover:text-foreground"
                   }`}
               >
-                Confirmed (10)
+                Confirmed ({displayOrders.filter(o => o.status === "CONFIRMED").length})
               </button>
               <button
                 onClick={() => setStatusFilter("DRAFT")}
                 className={`text-xs px-3 py-1 rounded-lg font-semibold transition-colors ${statusFilter === "DRAFT" ? "bg-card shadow-xs text-foreground" : "text-muted-foreground hover:text-foreground"
                   }`}
               >
-                Draft (2)
+                Draft ({displayOrders.filter(o => o.status === "DRAFT").length})
               </button>
             </div>
           )}
@@ -467,14 +566,14 @@ export default function Sales() {
                 <CardTitle className="text-base font-semibold">Customer Invoices &amp; Receivables</CardTitle>
                 <CardDescription className="text-xs">Generated invoices synced with Account 1200 (Accounts Receivable)</CardDescription>
               </div>
-              <Badge variant="outline" className="text-xs">10 Active Invoices</Badge>
+              <Badge variant="outline" className="text-xs">{displayOrders.filter(o => o.status === "CONFIRMED").length} Active Invoices</Badge>
             </CardHeader>
             <CardContent className="p-0 divide-y divide-border/60">
-              {sampleSalesOrders.filter(o => o.status === "CONFIRMED").map((inv) => (
+              {displayOrders.filter(o => o.status === "CONFIRMED").map((inv) => (
                 <div key={inv.id} className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 hover:bg-muted/10">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="font-mono font-bold text-sm text-foreground">INV-2026-{inv.orderNumber.replace("SO", "")}</span>
+                      <span className="font-mono font-bold text-sm text-foreground">INV-2026-{inv.orderNumber.replace(/[^0-9]/g, "") || inv.id.slice(-4)}</span>
                       <Badge
                         variant={inv.paymentStatus === "PAID" ? "default" : "destructive"}
                         className="text-[10px]"
@@ -503,10 +602,10 @@ export default function Sales() {
                 <CardTitle className="text-base font-semibold">Customer Payment Settlements</CardTitle>
                 <CardDescription className="text-xs">Bank and Cash deposits reducing Accounts Receivable</CardDescription>
               </div>
-              <Badge variant="outline" className="text-xs font-mono">3 Verified Receipts</Badge>
+              <Badge variant="outline" className="text-xs font-mono">{displayReceipts.length} Verified Receipts</Badge>
             </CardHeader>
             <CardContent className="p-0 divide-y divide-border/60">
-              {sampleReceipts.map((rec) => (
+              {displayReceipts.map((rec) => (
                 <div key={rec.id} className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 hover:bg-muted/10">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
@@ -549,11 +648,18 @@ export default function Sales() {
             </DialogDescription>
           </DialogHeader>
 
+          {submitError && (
+            <div className="p-2.5 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive text-xs flex items-center gap-2">
+              <AlertCircle className="h-4 w-4 shrink-0" />
+              <span>{submitError}</span>
+            </div>
+          )}
+
           <div className="space-y-4 pt-2 text-xs">
             <div className="space-y-1.5">
               <label className="font-semibold text-foreground">Customer (Client / Architecture Studio)</label>
               <select 
-                className="w-full h-9 px-3 py-1 text-sm bg-background border border-input rounded-md focus:outline-none focus:ring-1 focus:ring-ring"
+                className="w-full h-9 px-3 py-1 text-sm bg-background border border-input rounded-md focus:outline-none focus:ring-1 focus:ring-ring text-foreground"
                 value={customerName}
                 onChange={(e) => setCustomerName(e.target.value)}
               >
@@ -585,7 +691,7 @@ export default function Sales() {
                       <div className="col-span-12 sm:col-span-6 space-y-1">
                         <span className="text-muted-foreground text-xs">Product</span>
                         <select
-                          className="w-full h-8 text-xs bg-background border border-input rounded-md px-2 focus:outline-none focus:ring-1 focus:ring-ring"
+                          className="w-full h-8 text-xs bg-background border border-input rounded-md px-2 focus:outline-none focus:ring-1 focus:ring-ring text-foreground"
                           value={line.productId}
                           onChange={(e) => handleLineChange(idx, "productId", e.target.value)}
                         >
@@ -627,8 +733,20 @@ export default function Sales() {
             <Button variant="outline" size="sm" onClick={() => setNewOrderModalOpen(false)}>
               Cancel
             </Button>
-            <Button size="sm" onClick={handleCreateOrder} className="bg-sky-600 hover:bg-sky-700 text-white">
-              Confirm Sales Order
+            <Button 
+              size="sm" 
+              onClick={handleCreateOrder} 
+              disabled={submitting}
+              className="bg-sky-600 hover:bg-sky-700 text-white"
+            >
+              {submitting ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  Creating...
+                </span>
+              ) : (
+                "Confirm Sales Order"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

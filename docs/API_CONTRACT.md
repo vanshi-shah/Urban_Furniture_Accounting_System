@@ -34,16 +34,18 @@
 - `PATCH /api/submissions/:id/status` — **ADMIN only**: update approval status.
 
 ### Master Data (`/api/master`) 🔒 ADMIN + ACCOUNTANT
-- `GET /api/master/contacts` & `POST /api/master/contacts`
+> **Note on List Format**: All `GET /api/master/*` endpoints return a paginated envelope: `{ data: T[], total: number, page: number, totalPages: number }`. Clients must access `res.data` for the records array.
+- `GET /api/master/contacts?page=1&limit=20` & `POST /api/master/contacts`
 - `PUT /api/master/contacts/:id` & `DELETE /api/master/contacts/:id`
-- `GET /api/master/products` & `POST /api/master/products`
+- `GET /api/master/products?page=1&limit=20` & `POST /api/master/products`
 - `PUT /api/master/products/:id` & `DELETE /api/master/products/:id`
-- `GET /api/master/accounts` & `POST /api/master/accounts`
-- `GET /api/master/journals` & `POST /api/master/journals`
-- `GET /api/master/analytic-accounts` & `POST /api/master/analytic-accounts`
+- `GET /api/master/accounts?page=1&limit=20` & `POST /api/master/accounts`
+- `GET /api/master/journals?page=1&limit=20` & `POST /api/master/journals`
+- `GET /api/master/analytic-accounts?page=1&limit=20` & `POST /api/master/analytic-accounts`
 
 ### Transactions, Invoicing & Payments (`/api/orders`) 🔒
-- `GET /api/orders` 🔒 All roles — ADMIN/ACCOUNTANT see all; USER sees only `CUSTOMER_INVOICE` orders.
+> **Note on List Format**: `GET /api/orders` returns a paginated envelope: `{ data: Order[], total: number, page: number, totalPages: number }`.
+- `GET /api/orders` 🔒 All roles — ADMIN/ACCOUNTANT see all; USER sees only `CUSTOMER_INVOICE` orders. Supports `?type=CUSTOMER_INVOICE|VENDOR_BILL|PURCHASE_ORDER` and `&limit=...`.
 - `GET /api/orders/next-sequence?type=...` 🔒 ADMIN + ACCOUNTANT
 - `GET /api/orders/:id` 🔒 All roles — USER restricted to their invoices only.
 - `POST /api/orders` 🔒 **ADMIN + ACCOUNTANT** — Creates draft order/bill with line items, accounts, analytics.

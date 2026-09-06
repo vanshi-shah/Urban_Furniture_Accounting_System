@@ -81,10 +81,9 @@ export default function Budgets() {
 
   const loadAnalyticAccounts = async () => {
     try {
-      const res = await apiFetch('/master/analytic-accounts');
-      if (res && res.data) {
-        setAnalyticAccounts(res.data);
-      }
+      const res = await apiFetch('/master/analytic-accounts?limit=100');
+      const list = res?.data ?? (Array.isArray(res) ? res : []);
+      setAnalyticAccounts(list);
     } catch (e) {
       console.error(e);
     }

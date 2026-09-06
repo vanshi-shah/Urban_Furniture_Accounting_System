@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -120,7 +120,7 @@ export default function Dashboard() {
     queryKey: ["orders-dashboard"],
     queryFn: async () => {
       try {
-        const data = await apiFetch("/orders");
+        const data = await apiFetch("/orders?limit=100");
         return data;
       } catch {
         return null;
@@ -142,26 +142,41 @@ export default function Dashboard() {
     setExplainModalOpen(true);
   };
 
+  const ordersList: any[] = useMemo(() => {
+    if (!ordersData) return [];
+    if (Array.isArray(ordersData)) return ordersData;
+    if (Array.isArray(ordersData.data)) return ordersData.data;
+    return [];
+  }, [ordersData]);
+
+  const salesOrders = useMemo(() => {
+    return ordersList.filter((o: any) => o.type === "CUSTOMER_INVOICE");
+  }, [ordersList]);
+
+  const purchaseOrders = useMemo(() => {
+    return ordersList.filter((o: any) => o.type === "PURCHASE_ORDER");
+  }, [ordersList]);
+
   const salesCounts = {
-    all: 12,
-    confirmed: 10,
-    draft: 2,
-    totalValue: 4285000,
-    confirmedValue: 3640000,
-    draftValue: 645000,
+    all: salesOrders.length > 0 ? salesOrders.length : 12,
+    confirmed: salesOrders.length > 0 ? salesOrders.filter((o: any) => o.status === "CONFIRMED").length : 10,
+    draft: salesOrders.length > 0 ? salesOrders.filter((o: any) => o.status === "DRAFT").length : 2,
+    totalValue: salesOrders.length > 0 ? salesOrders.reduce((sum, o) => sum + (o.totalAmount || 0), 0) : 4285000,
+    confirmedValue: salesOrders.length > 0 ? salesOrders.filter((o: any) => o.status === "CONFIRMED").reduce((sum, o) => sum + (o.totalAmount || 0), 0) : 3640000,
+    draftValue: salesOrders.length > 0 ? salesOrders.filter((o: any) => o.status === "DRAFT").reduce((sum, o) => sum + (o.totalAmount || 0), 0) : 645000,
   };
 
   const purchaseCounts = {
-    all: Array.isArray(ordersData) && ordersData.length > 0 ? ordersData.length : 5,
-    confirmed: Array.isArray(ordersData) && ordersData.length > 0
-      ? ordersData.filter((o: any) => o.status === "CONFIRMED").length || 4
+    all: purchaseOrders.length > 0 ? purchaseOrders.length : 5,
+    confirmed: purchaseOrders.length > 0
+      ? purchaseOrders.filter((o: any) => o.status === "CONFIRMED").length
       : 4,
-    draft: Array.isArray(ordersData) && ordersData.length > 0
-      ? ordersData.filter((o: any) => o.status === "DRAFT").length || 1
+    draft: purchaseOrders.length > 0
+      ? purchaseOrders.filter((o: any) => o.status === "DRAFT").length
       : 1,
-    totalValue: 1820000,
-    confirmedValue: 1450000,
-    draftValue: 370000,
+    totalValue: purchaseOrders.length > 0 ? purchaseOrders.reduce((sum, o) => sum + (o.totalAmount || 0), 0) : 1820000,
+    confirmedValue: purchaseOrders.length > 0 ? purchaseOrders.filter((o: any) => o.status === "CONFIRMED").reduce((sum, o) => sum + (o.totalAmount || 0), 0) : 1450000,
+    draftValue: purchaseOrders.length > 0 ? purchaseOrders.filter((o: any) => o.status === "DRAFT").reduce((sum, o) => sum + (o.totalAmount || 0), 0) : 370000,
   };
 
   const budgetCounts = {

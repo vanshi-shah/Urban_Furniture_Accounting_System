@@ -58,14 +58,15 @@ export default function Reports() {
         apiFetch("/reports/profit-and-loss"),
         apiFetch("/reports/balance-sheet"),
         apiFetch("/reports/trial-balance"),
-        apiFetch("/master/analytic-accounts"),
+        apiFetch("/master/analytic-accounts?limit=100"),
       ]);
 
       if (pnlRes.status === "fulfilled" && pnlRes.value) setPnlData(pnlRes.value);
       if (bsRes.status === "fulfilled" && bsRes.value) setBalanceSheetData(bsRes.value);
       if (tbRes.status === "fulfilled" && tbRes.value) setTrialBalanceData(tbRes.value);
-      if (analyticRes.status === "fulfilled" && Array.isArray(analyticRes.value)) {
-        setAnalyticAccounts(analyticRes.value);
+      if (analyticRes.status === "fulfilled" && analyticRes.value) {
+        const list = analyticRes.value?.data ?? (Array.isArray(analyticRes.value) ? analyticRes.value : []);
+        setAnalyticAccounts(list);
       }
     } catch (err) {
       console.error("Error fetching reports:", err);

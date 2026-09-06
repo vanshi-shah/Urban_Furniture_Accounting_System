@@ -227,6 +227,16 @@ Added frontend and backend validation for Journals using react-hook-form + zod o
     - Verified complete table cleanup and successfully populated fresh seed data across both demo companies (**Urban Furniture Co.** & **Modern Teak Ltd.**).
     - Database is fully synchronized with default accounts, journals, multi-role credentials, orders, payments, balanced journal entries, and budget lines.
 
+29. **Resolution of Unpopulated Seed Data in Frontend Modals, Tables, and Dropdowns**:
+    - **Root Cause Analysis**: While the PostgreSQL database had 252 orders, 252 contacts, and 252 products seeded correctly, the frontend endpoints (`/master/contacts`, `/master/products`, `/orders`) returned paginated response envelopes formatted as `{ data: [...], total, page, totalPages }`. Multiple frontend views (`Sales.tsx`, `Dashboard.tsx`, `Reports.tsx`, `Budgets.tsx`) performed rigid checks such as `Array.isArray(contactRes.value)` or `Array.isArray(ordersData)`, which always evaluated to `false` for response objects. Consequently, `contacts` and `products` state arrays were never set, rendering `<select>` dropdowns in "Create Bespoke Sales Order" empty ("Select Customer...", "Select Product..."). Furthermore, product pricing was attempting to access `product.salePrice` instead of Prisma's `product.salesPrice`, causing unit prices and line totals to read ₹0.
+    - **Resolution Implemented**:
+      - **Envelope Unwrapping**: Updated `Sales.tsx`, `Dashboard.tsx`, `Reports.tsx`, and `Budgets.tsx` to safely extract `.data` with array fallbacks (`res?.data ?? (Array.isArray(res) ? res : [])`).
+      - **Field Normalization**: Corrected product price extraction in `Sales.tsx` to resolve `product.salesPrice ?? product.salePrice ?? product.price ?? 0`.
+      - **Dynamic Sales Orders & Receipts**: Transformed `Sales.tsx` to map live backend customer invoices and payment settlements into `displayOrders` and `displayReceipts` with real counts on tabs and filter pills, while preserving graceful mock fallbacks.
+      - **Live Order Creation**: Connected the "Confirm Sales Order" modal directly to `POST /api/orders` (`type: "CUSTOMER_INVOICE"`) with line item validation, loading state spinner, and automated list refreshing upon creation.
+      - **Dashboard & Reports Sync**: Ensured real seeded order counts and analytic accounts flow seamlessly into the Dashboard status cards and Financial Reports.
+
+
 
 
 
