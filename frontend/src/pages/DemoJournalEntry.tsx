@@ -15,10 +15,13 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { apiFetch } from "@/lib/api";
+import { useAuth } from "@/context/AuthContext";
 
 export default function DemoJournalEntry() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isAccountant = user?.role === "ACCOUNTANT";
 
   const state = location.state as any;
 
@@ -153,30 +156,34 @@ export default function DemoJournalEntry() {
           {/* Action Bar matching wireframe: Post, Reset to Draft, Back */}
           <div className="p-4 bg-muted/20 border-b border-border/80 flex flex-wrap items-center justify-between gap-3 print:hidden">
             <div className="flex items-center gap-2">
-              <Button
-                size="sm"
-                onClick={handlePost}
-                disabled={status === "POSTED"}
-                className={`rounded-md px-4 font-semibold text-xs transition-all ${
-                  status === "POSTED"
-                    ? "bg-emerald-600 text-white cursor-default"
-                    : "bg-foreground text-background hover:bg-foreground/90"
-                }`}
-              >
-                <Send className="h-3.5 w-3.5 mr-1" />
-                Post
-              </Button>
+              {!isAccountant && (
+                <>
+                  <Button
+                    size="sm"
+                    onClick={handlePost}
+                    disabled={status === "POSTED"}
+                    className={`rounded-md px-4 font-semibold text-xs transition-all ${
+                      status === "POSTED"
+                        ? "bg-emerald-600 text-white cursor-default"
+                        : "bg-foreground text-background hover:bg-foreground/90"
+                    }`}
+                  >
+                    <Send className="h-3.5 w-3.5 mr-1" />
+                    Post
+                  </Button>
 
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleResetToDraft}
-                disabled={status === "DRAFT"}
-                className="rounded-md px-3 font-semibold text-xs border-border text-foreground hover:bg-muted"
-              >
-                <RotateCcw className="h-3.5 w-3.5 mr-1" />
-                Reset to Draft
-              </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleResetToDraft}
+                    disabled={status === "DRAFT"}
+                    className="rounded-md px-3 font-semibold text-xs border-border text-foreground hover:bg-muted"
+                  >
+                    <RotateCcw className="h-3.5 w-3.5 mr-1" />
+                    Reset to Draft
+                  </Button>
+                </>
+              )}
             </div>
 
             <div className="flex items-center gap-2">

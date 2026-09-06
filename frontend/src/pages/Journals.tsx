@@ -34,6 +34,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { apiFetch } from "@/lib/api";
 import { usePaginatedFetch } from "@/hooks/usePaginatedFetch";
 import { PaginationControls } from "@/components/PaginationControls";
+import { useAuth } from "@/context/AuthContext";
 
 // Validation Schema
 const journalSchema = z.object({
@@ -53,6 +54,8 @@ export interface Journal {
 }
 
 export default function Journals() {
+  const { user } = useAuth();
+  const isAccountant = user?.role === "ACCOUNTANT";
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const {
@@ -133,6 +136,7 @@ export default function Journals() {
               </Button>
               <div className="w-px h-6 bg-border mx-1" />
 
+              {!isAccountant && (
               <Dialog open={isDialogOpen} onOpenChange={(open) => { setIsDialogOpen(open); if (!open) reset(); }}>
                 <DialogTrigger asChild>
                   <Button size="sm" className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground">
@@ -178,6 +182,7 @@ export default function Journals() {
                   </form>
                 </DialogContent>
               </Dialog>
+              )}
             </div>
             <div className="relative max-w-sm w-full md:w-auto">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />

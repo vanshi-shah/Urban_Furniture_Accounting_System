@@ -32,11 +32,14 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { useAuth } from "@/context/AuthContext";
 
 const standardStages = ["DRAFT", "CONFIRMED", "CANCELLED", "DONE"];
 const revisedStages = ["DRAFT", "REVISED", "CANCELLED", "DONE"];
 
 export default function Budgets() {
+  const { user } = useAuth();
+  const isAccountant = user?.role === "ACCOUNTANT";
   const [searchTerm, setSearchTerm] = useState("");
   const [isFormView, setIsFormView] = useState(false);
   const [reportViewMode, setReportViewMode] = useState<"list" | "kanban">("list");
@@ -181,7 +184,7 @@ export default function Budgets() {
 
   const currentStage = selectedBudget ? selectedBudget.status : "DRAFT";
   const stagesToUse = (selectedBudget?.status === 'REVISED' || selectedBudget?.revisedWith) ? revisedStages : standardStages;
-  const isEditable = !selectedBudget || selectedBudget.status === 'DRAFT' || selectedBudget.status === 'REVISED';
+  const isEditable = (!selectedBudget || selectedBudget.status === 'DRAFT' || selectedBudget.status === 'REVISED') && !isAccountant;
 
   if (isFormView) {
     return (
@@ -205,7 +208,7 @@ export default function Budgets() {
                     Save
                   </Button>
                 )}
-                {selectedBudget && selectedBudget.status === 'DRAFT' && (
+                {!isAccountant && selectedBudget && selectedBudget.status === 'DRAFT' && (
                   <Button 
                     size="sm" 
                     className="bg-[#5F6848] hover:bg-[#454D35] text-white font-medium shadow-sm"
@@ -214,7 +217,7 @@ export default function Budgets() {
                     Confirm
                   </Button>
                 )}
-                {selectedBudget && selectedBudget.status === 'CONFIRMED' && (
+                {!isAccountant && selectedBudget && selectedBudget.status === 'CONFIRMED' && (
                   <Button 
                     size="sm" 
                     variant="outline" 
@@ -224,7 +227,7 @@ export default function Budgets() {
                     Revise
                   </Button>
                 )}
-                {selectedBudget && ['DRAFT', 'CONFIRMED', 'REVISED'].includes(selectedBudget.status) && (
+                {!isAccountant && selectedBudget && ['DRAFT', 'CONFIRMED', 'REVISED'].includes(selectedBudget.status) && (
                   <Button size="sm" variant="outline" className="font-medium bg-background" onClick={handleCancel}>
                     Cancel
                   </Button>
@@ -437,10 +440,12 @@ export default function Budgets() {
                 <TabsTrigger value="reports" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold">Budget Reports</TabsTrigger>
               </TabsList>
               <div className="h-6 w-px bg-border/80 hidden sm:block"></div>
+              {!isAccountant && (
               <Button size="sm" onClick={handleCreateNew} className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground">
                 <Plus className="h-4 w-4" />
                 New Budget
               </Button>
+              )}
             </div>
             <div className="relative max-w-sm w-full md:w-auto flex items-center gap-4">
               <div className="relative w-full md:w-[250px]">
@@ -513,7 +518,7 @@ export default function Budgets() {
                             </Badge>
                           </TableCell>
                           <TableCell className="text-right">
-                            {isExpired && (
+                            {!isAccountant && isExpired && (
                               <Button 
                                 size="sm" 
                                 variant="outline" 
