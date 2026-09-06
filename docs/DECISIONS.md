@@ -191,5 +191,22 @@ Added frontend and backend validation for Journals using react-hook-form + zod o
     - Executed `node prisma/seed.js`, generating all master records: 2 companies, 6 users (ADMIN, ACCOUNTANT, USER), default Chart of Accounts, Journals, and 126 interrelated records per company (Contacts, Products, Analytic Accounts, Submissions, Orders, and balanced Journal Entries).
     - Synchronized demo credentials across documentation (`admin@urbanfurniture.com` / `Password@123`).
 
+26. **Database Schema Sync (Budget & BudgetLine) & Full Multi-Tenant Seeding Execution**:
+    - **Issue Identified**: Running `seed.js` failed initially on `clearAllData` with `TypeError: Cannot read properties of undefined (reading 'deleteMany')` on `prisma.budgetLine`, caused by ungenerated client types due to a background process locking `query_engine-windows.dll.node`. Subsequent run identified missing `BudgetLine` table in PostgreSQL (`P2021`).
+    - **Process & Engine Resolution**: Gracefully halted background dev server processes locking the binary DLL, regenerated Prisma Client via `npx prisma generate`, and pushed the schema containing `Budget` and `BudgetLine` models via `npx prisma db push`.
+    - **Seeding Execution**: Successfully executed `npm run seed` (`node prisma/seed.js`). Cleaned existing tables and seeded both companies (**Urban Furniture Co.** and **Modern Teak Ltd.**) with:
+      - Chart of Accounts (14 accounts per company)
+      - Default Journals (5 journals per company)
+      - 3 Users per company (`ADMIN`, `ACCOUNTANT`, `USER`)
+      - 126 Contacts each (252 total, Customers & Vendors)
+      - 126 Products each (252 total, Goods, Services, Combos)
+      - 25 Analytic Accounts each (50 total)
+      - 126 Submissions each (252 total)
+      - 126 Orders each (252 total, POs, Invoices, Bills) with payments
+      - 126 Balanced Journal Entries each (252 total)
+      - 15 Budgets each (30 total) with line items and simulated ledger expense movements
+    - **Service Restored**: Restarted the backend Express dev server on `http://localhost:5000` with hot reloading active.
+
+
 
 

@@ -38,7 +38,8 @@ The system uses a three-tier role model enforced at both the backend API and fro
 - **Product**: Items being sold/purchased.
 - **Account**: Chart of Accounts (Assets, Liabilities, Equity, Income, Expenses).
 - **Journal**: Categories for journal entries (Bank, Sales, Purchases).
-- **AnalyticAccount/Budget**: For budget tracking.
+- **AnalyticAccount**: For project, departmental, and cost-center budget tracking.
+- **Budget & BudgetLine**: Period-based financial budgets (`DRAFT`, `CONFIRMED`, `REVISED`, `CANCELLED`, `DONE`) linked to `AnalyticAccount` with `committedAmount`, start/end dates, responsible person, and revision tracking.
 
 ### Transactions
 - **Order**: Handles Purchase Orders (`PURCHASE_ORDER`), Vendor Bills (`VENDOR_BILL`), and Sales Invoices (`CUSTOMER_INVOICE`). Includes `reference`, `dueDate`, `paidCash`, `paidBank`, `amountDue`, and `sourceOrderId` (linking bills to originating purchase orders).
@@ -59,11 +60,21 @@ The system uses a three-tier role model enforced at both the backend API and fro
 To provision the database:
 ```bash
 cd backend
-npx prisma migrate dev
+npx prisma db push
+npx prisma generate
 node prisma/seed.js
 ```
 
-This seeds 2 companies × 3 users × ~126 records per entity type.
+### Database Seeding Status (Verified Active)
+- **Companies**: 2 (Urban Furniture Co., Modern Teak Ltd.)
+- **Users**: 6 total (ADMIN, ACCOUNTANT, USER per tenant)
+- **Contacts**: 252 (126 per company, CUSTOMER & VENDOR)
+- **Products**: 252 (126 per company, GOODS, SERVICE, COMBO)
+- **Analytic Accounts**: 50 (25 per company)
+- **Submissions**: 252 (126 per company, round-robin across all 3 roles)
+- **Orders**: 252 (126 per company, PURCHASE_ORDER, VENDOR_BILL, CUSTOMER_INVOICE)
+- **Journal Entries**: 252 (126 per company, balanced double-entry lines)
+- **Budgets & Lines**: 30 budgets (15 per company with linked analytic lines & expense entries)
 
 ### Seeded Credentials (Password: `Password@123`):
 - `admin@urbanfurniture.com` → ADMIN (Urban Furniture Co.)

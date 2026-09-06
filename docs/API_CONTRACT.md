@@ -58,7 +58,17 @@
 - `GET /api/accounting/entries` — Retrieves general ledger entries with enriched relations: `journal`, `lines.account`, `lines.contact`, `lines.analyticAccount`, ordered by date descending.
 - `GET /api/accounting/accounts/:id/balance` — Calculates live normal balance based on account type.
 
+### Budgets & Budget Lines (`/api/budgets`) 🔒 ADMIN + ACCOUNTANT
+- `GET /api/budgets` — Retrieves all budgets for company, including lines, analytic accounts, achieved vs committed amounts.
+- `POST /api/budgets` — Creates a new budget with period dates and budget line items.
+- `PUT /api/budgets/:id/confirm` — Transitions budget to `CONFIRMED`.
+- `PUT /api/budgets/:id/revise` — Revises budget with optional reason/version.
+- `PUT /api/budgets/:id/cancel` — Transitions budget to `CANCELLED`.
+- `PUT /api/budgets/:id/complete` — Transitions budget to `DONE`.
+
 ### Reports & Intelligence (`/api/reports`) 🔒 ADMIN + ACCOUNTANT
 - `GET /api/reports/trial-balance` — Aggregates debits & credits across all accounts.
 - `GET /api/reports/profit-and-loss` — Aggregates income vs expenses, returns gross & net profit.
 - `GET /api/reports/balance-sheet` — Aggregates Assets, Liabilities, and calculated Retained Earnings equity.
+- `GET /api/reports/budget` — Aggregates budget performance vs actual ledger transactions.
+
