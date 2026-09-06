@@ -14,6 +14,7 @@ import {
   AlertCircle,
   TrendingUp,
   Download,
+  Trash2,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -54,10 +55,34 @@ export default function Sales() {
   const [loading, setLoading] = useState(false);
 
   // New Order Form state
-  const [customerName, setCustomerName] = useState("Aura Architecture Studio");
+  const [customerName, setCustomerName] = useState("");
   const [orderLines, setOrderLines] = useState([
-    { product: "Bespoke Teak Executive Desk", qty: 2, unitPrice: 120000, total: 240000 },
+    { productId: "", qty: 1, unitPrice: 0, total: 0 },
   ]);
+
+  const handleAddLine = () => {
+    setOrderLines([...orderLines, { productId: "", qty: 1, unitPrice: 0, total: 0 }]);
+  };
+
+  const handleRemoveLine = (idx: number) => {
+    setOrderLines(orderLines.filter((_, i) => i !== idx));
+  };
+
+  const handleLineChange = (idx: number, field: string, value: any) => {
+    const newLines = [...orderLines];
+    if (field === 'productId') {
+      const product = products.find(p => p.id === value);
+      newLines[idx].productId = value;
+      newLines[idx].unitPrice = product ? product.salePrice || 0 : 0;
+    } else if (field === 'qty') {
+      newLines[idx].qty = Number(value);
+    }
+    
+    newLines[idx].total = newLines[idx].qty * newLines[idx].unitPrice;
+    setOrderLines(newLines);
+  };
+
+  const grandTotal = orderLines.reduce((acc, line) => acc + line.total, 0);
 
   useEffect(() => {
     setActiveTab(getTabFromPath());
@@ -527,28 +552,73 @@ export default function Sales() {
           <div className="space-y-4 pt-2 text-xs">
             <div className="space-y-1.5">
               <label className="font-semibold text-foreground">Customer (Client / Architecture Studio)</label>
-              <Input
+              <select 
+                className="w-full h-9 px-3 py-1 text-sm bg-background border border-input rounded-md focus:outline-none focus:ring-1 focus:ring-ring"
                 value={customerName}
                 onChange={(e) => setCustomerName(e.target.value)}
-                placeholder="e.g. Aura Architecture Studio"
-              />
+              >
+                <option value="">Select Customer...</option>
+                {contacts.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
             </div>
 
-            <div className="p-3 rounded-xl bg-secondary/30 border border-border/70 space-y-2">
-              <div className="font-semibold text-foreground">Order Line Item</div>
-              <div className="grid grid-cols-3 gap-2">
-                <div className="col-span-2 space-y-1">
-                  <span className="text-muted-foreground">Product</span>
-                  <Input value={orderLines[0].product} readOnly className="h-8 text-xs font-medium" />
-                </div>
-                <div className="space-y-1">
-                  <span className="text-muted-foreground">Qty</span>
-                  <Input value={orderLines[0].qty} readOnly className="h-8 text-xs font-mono" />
-                </div>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="font-semibold text-foreground">Order Line Items</div>
+                <Button variant="outline" size="sm" onClick={handleAddLine} className="h-7 text-xs">
+                  <Plus className="h-3 w-3 mr-1" /> Add Line
+                </Button>
               </div>
-              <div className="flex justify-between pt-1 font-mono font-bold text-sm">
+              
+              <div className="max-h-60 overflow-y-auto space-y-2 pr-1">
+                {orderLines.map((line, idx) => (
+                  <div key={idx} className="p-3 rounded-xl bg-secondary/30 border border-border/70 space-y-2 relative group">
+                    {orderLines.length > 1 && (
+                      <button 
+                        onClick={() => handleRemoveLine(idx)}
+                        className="absolute right-2 top-2 p-1 text-muted-foreground hover:text-red-500 rounded-full hover:bg-background transition-colors"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    )}
+                    <div className="grid grid-cols-12 gap-2 pt-2">
+                      <div className="col-span-12 sm:col-span-6 space-y-1">
+                        <span className="text-muted-foreground text-xs">Product</span>
+                        <select
+                          className="w-full h-8 text-xs bg-background border border-input rounded-md px-2 focus:outline-none focus:ring-1 focus:ring-ring"
+                          value={line.productId}
+                          onChange={(e) => handleLineChange(idx, "productId", e.target.value)}
+                        >
+                          <option value="">Select Product...</option>
+                          {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                        </select>
+                      </div>
+                      <div className="col-span-4 sm:col-span-2 space-y-1">
+                        <span className="text-muted-foreground text-xs">Qty</span>
+                        <Input 
+                          type="number"
+                          value={line.qty} 
+                          onChange={(e) => handleLineChange(idx, "qty", e.target.value)}
+                          className="h-8 text-xs font-mono" 
+                          min="1"
+                        />
+                      </div>
+                      <div className="col-span-8 sm:col-span-4 space-y-1">
+                        <span className="text-muted-foreground text-xs">Total</span>
+                        <Input 
+                          value={formatINR(line.total)} 
+                          readOnly 
+                          className="h-8 text-xs font-mono bg-muted/50" 
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              <div className="flex justify-between pt-3 font-mono font-bold text-base border-t border-border/80">
                 <span>Grand Total:</span>
-                <span>{formatINR(240000)}</span>
+                <span>{formatINR(grandTotal)}</span>
               </div>
             </div>
           </div>
