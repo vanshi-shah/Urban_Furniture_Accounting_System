@@ -37,7 +37,8 @@ export function usePaginatedFetch<T = any>(
     setError("");
     try {
       const params = new URLSearchParams({ page: String(page), limit: String(limit), ...extraParams });
-      const res = await apiFetch(`${endpoint}?${params.toString()}`);
+      const separator = endpoint.includes('?') ? '&' : '?';
+      const res = await apiFetch(`${endpoint}${separator}${params.toString()}`);
       // Support both paginated envelope and plain array (fallback safety)
       if (Array.isArray(res)) {
         setData(res);
