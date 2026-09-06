@@ -40,6 +40,7 @@ export default function Budgets() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isFormView, setIsFormView] = useState(false);
   const [reportViewMode, setReportViewMode] = useState<"list" | "kanban">("list");
+  const [activeTab, setActiveTab] = useState("budgets");
   
   const [budgets, setBudgets] = useState<any[]>([]);
   const [analyticAccounts, setAnalyticAccounts] = useState<any[]>([]);
@@ -424,7 +425,7 @@ export default function Budgets() {
       </div>
 
       <Card className="border-border/80 shadow-sm bg-card h-full">
-        <Tabs defaultValue="budgets" className="flex flex-col h-full w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col h-full w-full">
           <div className="p-4 border-b border-border/80 flex flex-wrap items-center justify-between gap-4 bg-muted/20">
             <div className="flex items-center gap-4">
               <TabsList className="bg-muted/50 border border-border/50">
@@ -448,24 +449,26 @@ export default function Budgets() {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              <div className="flex items-center gap-1 bg-background border border-border rounded-md p-0.5">
-                <Button 
-                  variant={reportViewMode === "list" ? "secondary" : "ghost"} 
-                  size="icon" 
-                  className="h-8 w-8" 
-                  onClick={() => setReportViewMode("list")}
-                >
-                  <List className="h-4 w-4" />
-                </Button>
-                <Button 
-                  variant={reportViewMode === "kanban" ? "secondary" : "ghost"} 
-                  size="icon" 
-                  className="h-8 w-8"
-                  onClick={() => setReportViewMode("kanban")}
-                >
-                  <LayoutGrid className="h-4 w-4" />
-                </Button>
-              </div>
+              {activeTab === "reports" && (
+                <div className="flex items-center gap-1 bg-background border border-border rounded-md p-0.5">
+                  <Button 
+                    variant={reportViewMode === "list" ? "secondary" : "ghost"} 
+                    size="icon" 
+                    className="h-8 w-8" 
+                    onClick={() => setReportViewMode("list")}
+                  >
+                    <List className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant={reportViewMode === "kanban" ? "secondary" : "ghost"} 
+                    size="icon" 
+                    className="h-8 w-8"
+                    onClick={() => setReportViewMode("kanban")}
+                  >
+                    <LayoutGrid className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
 

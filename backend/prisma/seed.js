@@ -61,6 +61,8 @@ async function clearAllData() {
   await prisma.submission.deleteMany();
   await prisma.product.deleteMany();
   await prisma.contact.deleteMany();
+  await prisma.budgetLine.deleteMany();
+  await prisma.budget.deleteMany();
   await prisma.analyticAccount.deleteMany();
   await prisma.journal.deleteMany();
   await prisma.account.deleteMany();
@@ -235,35 +237,86 @@ async function generateData(company, users, accounts, journals) {
   }
 
   // ── 7. Budgets ────────────────────────────────────────────────────
-  console.log(`      - Budgets (3)...`);
+  console.log(`      - Budgets (15)...`);
   const allAnalyticAccounts = await prisma.analyticAccount.findMany({ where: { companyId: company.id } });
   if (allAnalyticAccounts.length > 0) {
     const statuses = ["DRAFT", "CONFIRMED", "DONE"];
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 15; i++) {
       const budgetLines = [];
       const numLines = faker.number.int({ min: 1, max: Math.min(3, allAnalyticAccounts.length) });
       const shuffledAAs = faker.helpers.shuffle(allAnalyticAccounts).slice(0, numLines);
 
+      const startMonth = i % 12;
+      const endMonth = (i % 12) + 2;
+      const budgetStartDate = new Date(2026, startMonth, 1);
+      const budgetEndDate = new Date(2026, endMonth, 0);
+
+      const createdAAs = [];
+
       for (const aa of shuffledAAs) {
+        const isOverdue = Math.random() > 0.5;
+        const committedAmount = faker.number.float({ min: 1000, max: 200000, multipleOf: 1000 });
+        const achievedAmount = isOverdue 
+          ? committedAmount + faker.number.float({ min: 500, max: 10000 }) 
+          : faker.number.float({ min: 0, max: committedAmount });
+
         budgetLines.push({
           analyticAccountId: aa.id,
-          committedAmount: faker.number.float({ min: 1000, max: 200000, multipleOf: 1000 })
+          committedAmount
         });
+
+        createdAAs.push({ aa, achievedAmount });
       }
 
       await prisma.budget.create({
         data: {
-          name: `Budget 2026 Q${i + 1}`,
-          startDate: new Date(`2026-0${(i * 3) + 1}-01`),
-          endDate: new Date(`2026-0${(i * 3) + 3}-28`),
+          name: `Budget 2026 Q${(i % 4) + 1} - ${i + 1}`,
+          startDate: budgetStartDate,
+          endDate: budgetEndDate,
           responsible: faker.person.fullName(),
-          status: statuses[i],
+          status: statuses[i % 3],
           companyId: company.id,
           lines: {
             create: budgetLines
           }
         }
       });
+
+      // Create journal entries for the achieved amounts
+      if (journals.length > 0 && accounts.length > 1) {
+        for (const item of createdAAs) {
+          if (item.achievedAmount > 0) {
+            await prisma.journalEntry.create({
+              data: {
+                date: new Date(budgetStartDate.getTime() + (86400000 * 2)), // 2 days after start
+                reference: 'Budget Expense',
+                status: 'POSTED',
+                journalId: journals[0].id,
+                companyId: company.id,
+                lines: {
+                  create: [
+                    {
+                      description: 'Budget Expense',
+                      debit: item.achievedAmount,
+                      credit: 0,
+                      accountId: accounts[0].id,
+                      analyticAccountId: item.aa.id,
+                      companyId: company.id,
+                    },
+                    {
+                      description: 'Budget Expense Offset',
+                      debit: 0,
+                      credit: item.achievedAmount,
+                      accountId: accounts[1].id,
+                      companyId: company.id,
+                    },
+                  ],
+                },
+              },
+            });
+          }
+        }
+      }
     }
   }
 }
