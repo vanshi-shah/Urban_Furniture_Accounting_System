@@ -41,6 +41,10 @@ export default function Budgets() {
   const [isFormView, setIsFormView] = useState(false);
   const [reportViewMode, setReportViewMode] = useState<"list" | "kanban">("list");
   const [activeTab, setActiveTab] = useState("budgets");
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+  };
   
   const [budgets, setBudgets] = useState<any[]>([]);
   const [analyticAccounts, setAnalyticAccounts] = useState<any[]>([]);
@@ -387,12 +391,12 @@ export default function Budgets() {
                                       }}
                                     />
                                   ) : (
-                                    <span className="text-muted-foreground">{line.committedAmount}</span>
+                                    <span className="text-muted-foreground">{formatCurrency(line.committedAmount)}</span>
                                   )}
                                 </TableCell>
-                                <TableCell className="text-right text-muted-foreground">{line.achievedAmount || 0}</TableCell>
+                                <TableCell className="text-right text-muted-foreground">{formatCurrency(line.achievedAmount || 0)}</TableCell>
                                 <TableCell className="text-right text-muted-foreground">
-                                  <span className={toAchieve < 0 ? "text-red-500 font-semibold" : ""}>{toAchieve}</span>
+                                  <span className={toAchieve < 0 ? "text-red-500 font-semibold" : ""}>{formatCurrency(toAchieve)}</span>
                                 </TableCell>
                               </TableRow>
                             );
@@ -577,18 +581,24 @@ export default function Budgets() {
                           <TableCell className="text-right">
                              {overAmt > 0 ? (
                                <span className="text-red-500 font-semibold flex items-center justify-end gap-1">
-                                 <AlertCircle className="h-4 w-4" /> {overAmt}
+                                 <AlertCircle className="h-4 w-4" /> {formatCurrency(overAmt)}
                                </span>
-                             ) : <span className="text-muted-foreground">0</span>}
+                             ) : <span className="text-muted-foreground">{formatCurrency(0)}</span>}
                           </TableCell>
                           <TableCell className="flex justify-end pr-8">
                             <div className="w-8 h-8 rounded-full shadow-sm border border-border bg-white p-0.5">
                               <PieChart width={26} height={26}>
                                 <Pie
-                                  data={[
-                                    { name: "Achieved", value: totalAchieved, fill: "#5F6848" },
-                                    { name: "Balance", value: Math.max(0, totalCommitted - totalAchieved), fill: "#B58A4A" }
-                                  ]}
+                                  data={overAmt > 0
+                                    ? [
+                                        { name: "Budgeted", value: totalCommitted, fill: "#5F6848" },
+                                        { name: "Over Budget", value: overAmt, fill: "#ef4444" }
+                                      ]
+                                    : [
+                                        { name: "Achieved", value: totalAchieved, fill: "#5F6848" },
+                                        { name: "Balance", value: Math.max(0, totalCommitted - totalAchieved), fill: "#B58A4A" }
+                                      ]
+                                  }
                                   cx="50%" cy="50%" innerRadius={0} outerRadius={13} dataKey="value" stroke="none"
                                 />
                               </PieChart>
@@ -630,7 +640,7 @@ export default function Budgets() {
                              <div className="text-muted-foreground">End Date</div>
                              <div className="text-right font-medium text-foreground">{budget.endDate.split('T')[0]}</div>
                              <div className="text-muted-foreground">Over Budget</div>
-                             <div className={`text-right font-medium ${overAmt > 0 ? 'text-red-500' : 'text-foreground'}`}>{overAmt}</div>
+                             <div className={`text-right font-medium ${overAmt > 0 ? 'text-red-500' : 'text-foreground'}`}>{formatCurrency(overAmt)}</div>
                           </div>
                         </CardContent>
                       </Card>
@@ -660,11 +670,11 @@ export default function Budgets() {
             <div className="space-y-4 py-4">
               <div className="flex justify-between border-b pb-2">
                 <span className="text-muted-foreground">Total Committed</span>
-                <span className="font-medium">{summaryData.totalCommitted}</span>
+                <span className="font-medium">{formatCurrency(summaryData.totalCommitted)}</span>
               </div>
               <div className="flex justify-between border-b pb-2">
                 <span className="text-muted-foreground">Total Achieved</span>
-                <span className="font-medium">{summaryData.totalAchieved}</span>
+                <span className="font-medium">{formatCurrency(summaryData.totalAchieved)}</span>
               </div>
               <div className="flex justify-between items-center pt-2">
                 <span className="text-muted-foreground">Status</span>
@@ -674,7 +684,7 @@ export default function Budgets() {
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Difference</span>
-                <span className="font-semibold">{summaryData.difference}</span>
+                <span className="font-semibold">{formatCurrency(summaryData.difference)}</span>
               </div>
             </div>
           )}
