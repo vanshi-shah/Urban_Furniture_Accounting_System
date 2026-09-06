@@ -30,6 +30,7 @@ model Company {
   orders            Order[]
   orderLines        OrderLine[]
   payments          Payment[]
+  budgets           Budget[]
 }
 
 model User {
@@ -146,6 +147,7 @@ model AnalyticAccount {
   updatedAt         DateTime           @updatedAt
   journalEntryLines JournalEntryLine[]
   orderLines        OrderLine[]
+  budgetLines       BudgetLine[]
 }
 
 enum EntryStatus {
@@ -333,3 +335,42 @@ model Payment {
   updatedAt DateTime @updatedAt
 }
 
+enum BudgetStatus {
+  DRAFT
+  CONFIRMED
+  REVISED
+  CANCELLED
+  DONE
+}
+
+model Budget {
+  id           String       @id @default(cuid())
+  name         String
+  startDate    DateTime
+  endDate      DateTime
+  responsible  String?
+  revisedWith  String?
+  status       BudgetStatus @default(DRAFT)
+  
+  companyId    String
+  company      Company      @relation(fields: [companyId], references: [id])
+  
+  lines        BudgetLine[]
+  
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
+model BudgetLine {
+  id                String          @id @default(cuid())
+  committedAmount   Float           @default(0)
+  
+  budgetId          String
+  budget            Budget          @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+  
+  analyticAccountId String
+  analyticAccount   AnalyticAccount @relation(fields: [analyticAccountId], references: [id])
+  
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+}

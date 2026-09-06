@@ -233,6 +233,39 @@ async function generateData(company, users, accounts, journals) {
       },
     });
   }
+
+  // ── 7. Budgets ────────────────────────────────────────────────────
+  console.log(`      - Budgets (3)...`);
+  const allAnalyticAccounts = await prisma.analyticAccount.findMany({ where: { companyId: company.id } });
+  if (allAnalyticAccounts.length > 0) {
+    const statuses = ["DRAFT", "CONFIRMED", "DONE"];
+    for (let i = 0; i < 3; i++) {
+      const budgetLines = [];
+      const numLines = faker.number.int({ min: 1, max: Math.min(3, allAnalyticAccounts.length) });
+      const shuffledAAs = faker.helpers.shuffle(allAnalyticAccounts).slice(0, numLines);
+
+      for (const aa of shuffledAAs) {
+        budgetLines.push({
+          analyticAccountId: aa.id,
+          committedAmount: faker.number.float({ min: 1000, max: 200000, multipleOf: 1000 })
+        });
+      }
+
+      await prisma.budget.create({
+        data: {
+          name: `Budget 2026 Q${i + 1}`,
+          startDate: new Date(`2026-0${(i * 3) + 1}-01`),
+          endDate: new Date(`2026-0${(i * 3) + 3}-28`),
+          responsible: faker.person.fullName(),
+          status: statuses[i],
+          companyId: company.id,
+          lines: {
+            create: budgetLines
+          }
+        }
+      });
+    }
+  }
 }
 
 async function seedCompany(companyName, companyId, rawUsers) {

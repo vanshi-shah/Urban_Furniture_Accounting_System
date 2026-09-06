@@ -45,6 +45,42 @@ class AccountingService {
     if (entry.status === "POSTED") throw new Error("Entry is already posted");
     if (!this.isBalanced(entry.lines)) throw new Error("Cannot post entry: Debits and Credits do not balance");
 
+    // Over-Budget Check
+    const expenseLines = entry.lines.filter(l => l.analyticAccountId && l.debit > 0);
+    for (const line of expenseLines) {
+      const activeBudgets = await prisma.budget.findMany({
+        where: {
+          companyId,
+          status: { in: ['CONFIRMED', 'REVISED'] },
+          startDate: { lte: entry.date },
+          endDate: { gte: entry.date },
+          lines: { some: { analyticAccountId: line.analyticAccountId } }
+        },
+        include: { lines: true }
+      });
+
+      for (const budget of activeBudgets) {
+        const bLine = budget.lines.find(l => l.analyticAccountId === line.analyticAccountId);
+        if (bLine) {
+          // Calculate current achieved
+          const pastLines = await prisma.journalEntryLine.aggregate({
+            where: {
+              analyticAccountId: line.analyticAccountId,
+              journalEntry: {
+                status: 'POSTED',
+                date: { gte: budget.startDate, lte: budget.endDate }
+              }
+            },
+            _sum: { debit: true }
+          });
+          const achieved = pastLines._sum.debit || 0;
+          if (achieved + line.debit > bLine.committedAmount) {
+            throw new Error(`Over-Budget Warning: Posting this entry exceeds the budget limit for Analytic Account in budget "${budget.name}".`);
+          }
+        }
+      }
+    }
+
     return prisma.journalEntry.update({
       where: { id: entryId },
       data: { status: "POSTED" },

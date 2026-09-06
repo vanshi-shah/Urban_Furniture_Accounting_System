@@ -44,3 +44,12 @@ export const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
     throw error;
   }
 };
+
+export const budgetApi = {
+  getBudgets: () => apiFetch('/budgets'),
+  createBudget: (data: any) => apiFetch('/budgets', { method: 'POST', body: JSON.stringify(data) }),
+  confirmBudget: (id: string) => apiFetch(`/budgets/${id}/confirm`, { method: 'PUT' }),
+  reviseBudget: (id: string, data: any) => apiFetch(`/budgets/${id}/revise`, { method: 'PUT', body: JSON.stringify(data) }),
+  cancelBudget: (id: string) => apiFetch(`/budgets/${id}/cancel`, { method: 'PUT' }),
+  completeBudget: (id: string) => apiFetch(`/budgets/${id}/complete`, { method: 'PUT' })
+};

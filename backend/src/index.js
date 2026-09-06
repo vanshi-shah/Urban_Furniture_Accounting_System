@@ -35,6 +35,7 @@ app.use("/api/master", masterDataRoutes);
 app.use("/api/accounting", accountingRoutes);
 app.use("/api/orders", require("./routes/order.routes"));
 app.use("/api/reports", require("./routes/report.routes"));
+app.use("/api/budgets", require("./routes/budget.routes"));
 
 // Global centralized error handling middleware
 app.use(errorHandler);
