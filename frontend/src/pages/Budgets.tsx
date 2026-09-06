@@ -11,7 +11,8 @@ import {
   Save,
   Trash2,
   LayoutGrid,
-  List
+  List,
+  Calendar
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -188,17 +189,21 @@ export default function Budgets() {
                       <div className="flex items-center gap-4">
                         <label className="text-[15px] font-medium text-[#A65D52] w-32 shrink-0">Budget Period</label>
                         <div className="flex items-center gap-3 flex-1">
-                          <Input 
-                            type="text" 
-                            defaultValue="Start Date" 
-                            className="bg-transparent border-b-2 border-t-0 border-x-0 border-muted-foreground/30 rounded-none h-8 p-0 text-center text-muted-foreground focus-visible:ring-0 shadow-none flex-1" 
-                          />
+                          <div className="relative flex-1 flex items-center">
+                            <Input 
+                              type="date" 
+                              defaultValue="2026-01-01" 
+                              className="bg-transparent border-b-2 border-t-0 border-x-0 border-muted-foreground/30 rounded-none h-8 p-0 text-left text-muted-foreground focus-visible:ring-0 shadow-none w-full" 
+                            />
+                          </div>
                           <span className="text-[15px] font-medium text-[#A65D52]">To</span>
-                          <Input 
-                            type="text" 
-                            defaultValue="End Date" 
-                            className="bg-transparent border-b-2 border-t-0 border-x-0 border-muted-foreground/30 rounded-none h-8 p-0 text-center text-muted-foreground focus-visible:ring-0 shadow-none flex-1" 
-                          />
+                          <div className="relative flex-1 flex items-center">
+                            <Input 
+                              type="date" 
+                              defaultValue="2026-01-31" 
+                              className="bg-transparent border-b-2 border-t-0 border-x-0 border-muted-foreground/30 rounded-none h-8 p-0 text-left text-muted-foreground focus-visible:ring-0 shadow-none w-full" 
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>

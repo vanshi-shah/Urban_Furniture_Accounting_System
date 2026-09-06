@@ -70,7 +70,7 @@ const NAV_CATEGORIES: NavCategory[] = [
       { label: "Contact", path: "/contacts", icon: Users, description: "Clients, architects & suppliers" },
       { label: "Product", path: "/products", icon: Box, description: "Master inventory & specifications" },
       { label: "Analyticals", path: "/analytic-accounts", icon: Layers, description: "Project & atelier cost centers" },
-      { label: "Analytical Budget", path: "/budgets", icon: PieChart, description: "Spending limits & stage workflows" },
+      { label: "Budget", path: "/budgets", icon: PieChart, description: "Spending limits & stage workflows" },
       { label: "Chart of Account", path: "/chart-of-accounts", icon: FileText, description: "Double-entry general ledger" },
       { label: "Journals", path: "/journals", icon: BookOpen, description: "Cash, Bank, Sales & Purchase journals" },
       { label: "Journal Entries", path: "/journal-entries", icon: FileText, description: "Balanced debit & credit journal lines" },
@@ -220,11 +220,10 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
             <nav className="hidden md:flex items-center space-x-1 pl-4 border-l border-border/70">
               <Link
                 to={dashboardLink}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                  location.pathname === "/dashboard" || location.pathname === "/my-invoices"
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${location.pathname === "/dashboard" || location.pathname === "/my-invoices"
                     ? "bg-secondary text-foreground shadow-xs"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
-                }`}
+                  }`}
               >
                 <LayoutDashboard className="h-3.5 w-3.5" />
                 Dashboard
@@ -237,19 +236,17 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
                     key={cat.key}
                     type="button"
                     onClick={() => toggleCategory(cat.key)}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                      isOpenCategory
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${isOpenCategory
                         ? "bg-primary text-primary-foreground shadow-xs"
                         : isSelectedCategory
-                        ? "bg-secondary/80 text-foreground"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
-                    }`}
+                          ? "bg-secondary/80 text-foreground"
+                          : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
+                      }`}
                   >
                     <span>{cat.title}</span>
                     <ChevronDown
-                      className={`h-3 w-3 transition-transform duration-200 ${
-                        isOpenCategory ? "rotate-180" : ""
-                      }`}
+                      className={`h-3 w-3 transition-transform duration-200 ${isOpenCategory ? "rotate-180" : ""
+                        }`}
                     />
                   </button>
                 );
@@ -315,17 +312,15 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
                   return (
                     <div
                       key={cat.key}
-                      className={`p-3 rounded-xl transition-colors ${
-                        isHighlightedCategory
+                      className={`p-3 rounded-xl transition-colors ${isHighlightedCategory
                           ? "bg-primary/5 border border-primary/20 shadow-xs"
                           : "border border-border/40 hover:border-border/80"
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center justify-between pb-2 mb-2 border-b border-border/60">
                         <span
-                          className={`text-sm font-bold tracking-tight ${
-                            isHighlightedCategory ? "text-primary" : "text-foreground"
-                          }`}
+                          className={`text-sm font-bold tracking-tight ${isHighlightedCategory ? "text-primary" : "text-foreground"
+                            }`}
                         >
                           {cat.title}
                         </span>
@@ -343,18 +338,16 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
                               key={link.path}
                               to={link.path}
                               onClick={() => setMegaMenuOpen(false)}
-                              className={`flex items-start gap-2.5 p-2 rounded-lg text-xs transition-all group ${
-                                isActive
+                              className={`flex items-start gap-2.5 p-2 rounded-lg text-xs transition-all group ${isActive
                                   ? "bg-primary text-primary-foreground font-semibold shadow-xs"
                                   : "text-foreground hover:bg-muted/60 hover:text-foreground"
-                              }`}
+                                }`}
                             >
                               <div
-                                className={`p-1 rounded-md shrink-0 mt-0.5 ${
-                                  isActive
+                                className={`p-1 rounded-md shrink-0 mt-0.5 ${isActive
                                     ? "bg-primary-foreground/20 text-primary-foreground"
                                     : "bg-secondary text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
-                                }`}
+                                  }`}
                               >
                                 <Icon className="h-3.5 w-3.5" />
                               </div>
@@ -362,11 +355,10 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
                                 <p className="font-semibold truncate">{link.label}</p>
                                 {link.description && (
                                   <p
-                                    className={`text-[10px] truncate ${
-                                      isActive
+                                    className={`text-[10px] truncate ${isActive
                                         ? "text-primary-foreground/80"
                                         : "text-muted-foreground group-hover:text-foreground/70"
-                                    }`}
+                                      }`}
                                   >
                                     {link.description}
                                   </p>
@@ -409,9 +401,8 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
                         key={link.path}
                         to={link.path}
                         onClick={() => setMobileMenuOpen(false)}
-                        className={`flex items-center gap-2.5 p-2 rounded-lg text-xs ${
-                          isActive ? "bg-primary text-white font-semibold" : "text-foreground hover:bg-muted"
-                        }`}
+                        className={`flex items-center gap-2.5 p-2 rounded-lg text-xs ${isActive ? "bg-primary text-white font-semibold" : "text-foreground hover:bg-muted"
+                          }`}
                       >
                         <Icon className="h-4 w-4 text-primary" />
                         <span>{link.label}</span>
