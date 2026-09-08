@@ -31,6 +31,7 @@ model Company {
   orderLines        OrderLine[]
   payments          Payment[]
   budgets           Budget[]
+  productCategories ProductCategory[]
 }
 
 model User {
@@ -87,6 +88,17 @@ model Product {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   orderLines  OrderLine[]
+}
+
+model ProductCategory {
+  id        String   @id @default(cuid())
+  name      String
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([name, companyId])
 }
 
 enum AccountType {
