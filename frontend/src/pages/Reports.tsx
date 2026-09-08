@@ -133,23 +133,14 @@ export default function Reports() {
       };
     }
 
-    // Realistic Demo Fallback
     return {
-      revenue: 4285000,
-      cogs: 1840000,
-      grossProfit: 2445000,
-      operatingExpenses: 1000000,
-      netProfit: 1445000,
-      expenseBreakdown: [
-        { category: "Raw Teak, Oak & Lumber (Account 5000)", amount: 1840000 },
-        { category: "Artisan Woodworking Wages (Account 5100)", amount: 680000 },
-        { category: "Showroom & Atelier Facility Rent (Account 5200)", amount: 320000 },
-      ],
-      revenueBreakdown: [
-        { item: "Bespoke Teak Executive Desks", amount: 2150000 },
-        { item: "Living Credenzas & Cabinets", amount: 1245000 },
-        { item: "Custom Architectural Millwork", amount: 890000 },
-      ],
+      revenue: 0,
+      cogs: 0,
+      grossProfit: 0,
+      operatingExpenses: 0,
+      netProfit: 0,
+      expenseBreakdown: [],
+      revenueBreakdown: [],
     };
   })();
 
@@ -213,35 +204,17 @@ export default function Reports() {
       };
     }
 
-    // Realistic Demo Fallback
     return {
-      totalAssets: 7845000,
-      totalLiabilities: 3220000,
-      totalEquity: 4625000,
-      currentAssets: [
-        { name: "Bank Balance (HDFC Atelier Operating)", code: "1010", amount: 1440000 },
-        { name: "Petty Cash in Vault", code: "1000", amount: 420000 },
-        { name: "Accounts Receivable (Debtors)", code: "1200", amount: 2650000 },
-        { name: "Raw Lumber & Material Inventory", code: "1500", amount: 3335000 },
-      ],
-      currentLiabilities: [
-        { name: "Accounts Payable (Timber Suppliers)", code: "2100", amount: 2420000 },
-        { name: "Short-term Operating Credit", code: "2200", amount: 800000 },
-      ],
-      equity: [
-        { name: "Founders Atelier Capital", code: "3000", amount: 3180000 },
-        { name: "Retained Earnings (Current Year)", code: "3900", amount: 1445000 },
-      ],
+      totalAssets: 0,
+      totalLiabilities: 0,
+      totalEquity: 0,
+      currentAssets: [],
+      currentLiabilities: [],
+      equity: [],
     };
   })();
 
-  // Safe Budgets Normalization
-  const defaultBudgets = [
-    { name: "Teak & Timber Procurement Q3", allocated: 500000, spent: 420000, remaining: 80000, status: "Normal" },
-    { name: "Brass Hardware & Joinery Fixtures", allocated: 250000, spent: 185000, remaining: 65000, status: "Normal" },
-    { name: "Showroom Exhibition & Marketing", allocated: 150000, spent: 145000, remaining: 5000, status: "Warning" },
-    { name: "Artisan Tooling & Blades Maintenance", allocated: 100000, spent: 68000, remaining: 32000, status: "Normal" },
-  ];
+  const defaultBudgets: any[] = [];
 
   const displayedBudgets =
     analyticAccounts && analyticAccounts.length > 0

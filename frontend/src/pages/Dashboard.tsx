@@ -46,74 +46,43 @@ import {
   FileEdit,
 } from "lucide-react";
 
-// Realistic Modura Atelier Financial Data
-const monthlyFinancials = [
-  { month: "Apr", revenue: 2800000, cogs: 1850000, profit: 950000 },
-  { month: "May", revenue: 3200000, cogs: 2100000, profit: 1100000 },
-  { month: "Jun", revenue: 2950000, cogs: 1900000, profit: 1050000 },
-  { month: "Jul", revenue: 3600000, cogs: 2350000, profit: 1250000 },
-  { month: "Aug", revenue: 3900000, cogs: 2500000, profit: 1400000 },
-  { month: "Sep", revenue: 4285000, cogs: 2840000, profit: 1445000 },
+// Dynamic data will be fetched from the backend.
+const fallbackMonthlyFinancials = [
+  { month: "Apr", revenue: 0, cogs: 0, profit: 0 }
 ];
-
-const categoryDistribution = [
-  { name: "Executive Desks", value: 1650000, color: "hsl(var(--primary))" },
-  { name: "Living Credenzas", value: 1120000, color: "hsl(var(--accent))" },
-  { name: "Dining Sets", value: 940000, color: "hsl(77 22% 48%)" },
-  { name: "Custom Millwork", value: 575000, color: "hsl(105 7% 35%)" },
+const fallbackCategoryDistribution = [
+  { name: "Uncategorized", value: 100 }
 ];
-
-const recentTransactions = [
-  {
-    id: "INV-2026-089",
-    contact: "Aura Architecture Studio",
-    type: "CUSTOMER_INVOICE",
-    item: "Teak Bespoke Executive Desk (x2)",
-    amount: 240000,
-    status: "POSTED",
-    date: "Today, 2:15 PM",
-    debit: "1200 Accounts Receivable",
-    credit: "4000 Sales Revenue",
-  },
-  {
-    id: "BILL-2026-042",
-    contact: "Mysore Teak & Hardwoods",
-    type: "VENDOR_BILL",
-    item: "Kiln-Dried Teak Timber Planks (400 sq.ft)",
-    amount: 145000,
-    status: "POSTED",
-    date: "Today, 11:30 AM",
-    debit: "1500 Inventory / Raw Lumber",
-    credit: "2100 Accounts Payable",
-  },
-  {
-    id: "PAY-2026-031",
-    contact: "Vayu Penthouse Project",
-    type: "PAYMENT",
-    item: "Brass Inlay Credenza Settlement",
-    amount: 185000,
-    status: "RECONCILED",
-    date: "Yesterday",
-    debit: "1010 Bank Account",
-    credit: "1200 Accounts Receivable",
-  },
-  {
-    id: "INV-2026-088",
-    contact: "Oberoi Luxury Residences",
-    type: "CUSTOMER_INVOICE",
-    item: "Solid Oak Dining Suite & 8 Chairs",
-    amount: 320000,
-    status: "POSTED",
-    date: "2 days ago",
-    debit: "1200 Accounts Receivable",
-    credit: "4000 Sales Revenue",
-  },
-];
+const fallbackRecentTransactions: any[] = [];
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const [explainModalOpen, setExplainModalOpen] = useState(false);
   const [explainTopic, setExplainTopic] = useState<"profit" | "health" | "receivables" | "cogs">("profit");
+
+  // Fetch dashboard stats from backend
+  const { data: statsData, isLoading: isLoadingStats } = useQuery({
+    queryKey: ["dashboard-stats"],
+    queryFn: async () => {
+      try {
+        return await apiFetch("/dashboard/stats");
+      } catch {
+        return null;
+      }
+    },
+    refetchOnWindowFocus: false,
+  });
+
+  const monthlyFinancials = statsData?.monthlyFinancials || fallbackMonthlyFinancials;
+  
+  // Assign colors to categories dynamically
+  const categoryColors = ["hsl(var(--primary))", "hsl(var(--accent))", "hsl(77 22% 48%)", "hsl(105 7% 35%)", "hsl(215 25% 27%)"];
+  const categoryDistribution = (statsData?.categoryDistribution || fallbackCategoryDistribution).map((cat: any, idx: number) => ({
+    ...cat,
+    color: categoryColors[idx % categoryColors.length]
+  }));
+  
+  const recentTransactions = statsData?.recentTransactions || fallbackRecentTransactions;
 
   // Fetch real master data / order counts if connected to live backend
   const { data: ordersData } = useQuery({
@@ -1123,7 +1092,7 @@ export default function Dashboard() {
                     paddingAngle={4}
                     dataKey="value"
                   >
-                    {categoryDistribution.map((entry, index) => (
+                    {categoryDistribution.map((entry: any, index: number) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
@@ -1140,7 +1109,7 @@ export default function Dashboard() {
               </ResponsiveContainer>
             </div>
             <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border/60">
-              {categoryDistribution.map((c) => (
+              {categoryDistribution.map((c: any) => (
                 <div key={c.name} className="flex items-center gap-1.5 text-xs">
                   <span className="h-2 w-2 rounded-full shrink-0" style={{ backgroundColor: c.color }} />
                   <span className="truncate text-muted-foreground">{c.name}</span>
@@ -1177,7 +1146,7 @@ export default function Dashboard() {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {recentTransactions.map((tx) => (
+            {recentTransactions.map((tx: any) => (
               <div
                 key={tx.id}
                 className="flex flex-col md:flex-row md:items-center justify-between p-3.5 rounded-xl border border-border/70 bg-card/60 hover:bg-secondary/30 transition-colors gap-3"

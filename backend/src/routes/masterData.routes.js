@@ -1,6 +1,6 @@
 const { Router } = require("express");
 const { requireAuth, requireRoles } = require("../middleware/auth");
-const { contact, product, account, journal, analyticAccount } = require("../controllers/masterData.controller");
+const { contact, product, account, journal, analyticAccount, productCategory } = require("../controllers/masterData.controller");
 
 const router = Router();
 router.use(requireAuth);
@@ -32,5 +32,10 @@ router.get("/analytic-accounts", accountingAccess, analyticAccount.list);
 router.post("/analytic-accounts", accountingAccess, analyticAccount.create);
 router.put("/analytic-accounts/:id", accountingAccess, analyticAccount.update);
 router.delete("/analytic-accounts/:id", accountingAccess, analyticAccount.remove);
+
+router.get("/product-categories", accountingAccess, productCategory.list);
+router.post("/product-categories", accountingAccess, productCategory.create);
+router.put("/product-categories/:id", accountingAccess, productCategory.update);
+router.delete("/product-categories/:id", accountingAccess, productCategory.remove);
 
 module.exports = router;

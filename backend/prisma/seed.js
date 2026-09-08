@@ -42,6 +42,17 @@ const DEFAULT_ACCOUNTS = [
   { code: "5300", name: "Utilities Expense",    type: "EXPENSE" },
 ];
 
+const DEFAULT_CATEGORIES = [
+  "Electronics",
+  "Living Room Furniture",
+  "Dining Furniture",
+  "Office Fixtures",
+  "Architectural Services",
+  "Combos & Sets",
+  "Lighting & Decor",
+  "Raw Materials"
+];
+
 const DEFAULT_JOURNALS = [
   { code: "CSH", name: "Cash Journal",        type: "CASH" },
   { code: "BNK", name: "Bank Journal",        type: "BANK" },
@@ -67,11 +78,12 @@ async function clearAllData() {
   await prisma.journal.deleteMany();
   await prisma.account.deleteMany();
   await prisma.user.deleteMany();
+  await prisma.productCategory.deleteMany();
   await prisma.company.deleteMany();
   console.log("✅ All data cleared.");
 }
 
-async function generateData(company, users, accounts, journals) {
+async function generateData(company, users, accounts, journals, categories) {
   console.log(`\n   Generating data for ${company.name}...`);
 
   // Split users into roles for equal submission ownership
@@ -98,7 +110,7 @@ async function generateData(company, users, accounts, journals) {
   const productsData = Array.from({ length: NUM * 3 }).map(() => ({
     name:        faker.commerce.productName(),
     type:        faker.helpers.arrayElement(["GOODS", "SERVICE", "COMBO"]),
-    category:    faker.commerce.department(),
+    category:    faker.helpers.arrayElement(categories).name,
     salesPrice:  parseFloat(faker.commerce.price({ min: 10, max: 1000 })),
     cost:        parseFloat(faker.commerce.price({ min: 1, max: 500 })),
     sku:         faker.string.alphanumeric(8).toUpperCase(),
@@ -351,10 +363,17 @@ async function seedCompany(companyName, companyId, rawUsers) {
     console.log(`   👤 ${u.role.padEnd(11)} — ${u.email}  [password: ${u.password}]`);
   }
 
+  // Categories
+  for (const catName of DEFAULT_CATEGORIES) {
+    await prisma.productCategory.create({ data: { name: catName, companyId: company.id } });
+  }
+  console.log(`   ✅ Categories (${DEFAULT_CATEGORIES.length} categories)`);
+
   const accounts = await prisma.account.findMany({ where: { companyId: company.id } });
   const journals = await prisma.journal.findMany({ where: { companyId: company.id } });
+  const categories = await prisma.productCategory.findMany({ where: { companyId: company.id } });
 
-  await generateData(company, users, accounts, journals);
+  await generateData(company, users, accounts, journals, categories);
 
   return company;
 }

@@ -213,5 +213,6 @@ module.exports = {
     },
     remove: makeCrud("journal").remove
   },
-  analyticAccount: makeCrud("analyticAccount")
+  analyticAccount: makeCrud("analyticAccount"),
+  productCategory: makeCrud("productCategory")
 };

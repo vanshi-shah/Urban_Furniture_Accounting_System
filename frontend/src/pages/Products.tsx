@@ -59,16 +59,7 @@ const emptyProduct: Product = {
   imageUrl: ""
 };
 
-const defaultCategories = [
-  "Electronics",
-  "Living Room Furniture",
-  "Dining Furniture",
-  "Office Fixtures",
-  "Architectural Services",
-  "Combos & Sets",
-  "Lighting & Decor",
-  "Raw Materials"
-];
+
 
 export default function Products() {
   const navigate = useNavigate();
@@ -87,7 +78,7 @@ export default function Products() {
   const [loading, setLoading] = useState(false);
 
   // Category selection with "Create on the Fly" state
-  const [categories, setCategories] = useState<string[]>(defaultCategories);
+  const [categories, setCategories] = useState<string[]>([]);
   const [isAddingCategory, setIsAddingCategory] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
 
@@ -102,16 +93,20 @@ export default function Products() {
     loading: productsLoading,
   } = usePaginatedFetch<Product>('/master/products', 20);
 
-  // Extract unique categories from the current page's data
   useEffect(() => {
-    if (productsList.length > 0) {
-      const uniqueCategories = new Set(defaultCategories);
-      productsList.forEach((p: any) => {
-        if (p.category) uniqueCategories.add(p.category);
-      });
-      setCategories(Array.from(uniqueCategories));
-    }
-  }, [productsList]);
+    const fetchCategories = async () => {
+      try {
+        const res = await apiFetch("/master/product-categories?limit=100");
+        if (res && Array.isArray(res.data)) {
+          const fetchedCategories = res.data.map((c: any) => c.name);
+          setCategories(fetchedCategories);
+        }
+      } catch (err) {
+        console.error("Failed to fetch categories", err);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   const fetchProducts = refreshProducts;
 
