@@ -1092,7 +1092,7 @@ export default function Dashboard() {
                     paddingAngle={4}
                     dataKey="value"
                   >
-                    {categoryDistribution.map((entry, index) => (
+                    {categoryDistribution.map((entry: any, index: number) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
@@ -1109,7 +1109,7 @@ export default function Dashboard() {
               </ResponsiveContainer>
             </div>
             <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border/60">
-              {categoryDistribution.map((c) => (
+              {categoryDistribution.map((c: any) => (
                 <div key={c.name} className="flex items-center gap-1.5 text-xs">
                   <span className="h-2 w-2 rounded-full shrink-0" style={{ backgroundColor: c.color }} />
                   <span className="truncate text-muted-foreground">{c.name}</span>
@@ -1146,7 +1146,7 @@ export default function Dashboard() {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {recentTransactions.map((tx) => (
+            {recentTransactions.map((tx: any) => (
               <div
                 key={tx.id}
                 className="flex flex-col md:flex-row md:items-center justify-between p-3.5 rounded-xl border border-border/70 bg-card/60 hover:bg-secondary/30 transition-colors gap-3"
